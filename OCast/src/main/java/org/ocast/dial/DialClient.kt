@@ -26,6 +26,7 @@ import org.ocast.common.item
 import org.ocast.core.utils.OCastLog
 import org.xml.sax.InputSource
 import java.io.StringReader
+import java.net.URI
 import java.net.URL
 import javax.xml.parsers.DocumentBuilderFactory
 
@@ -101,10 +102,7 @@ internal class DialClient(private val baseURL: URL) {
                 .url("$baseURL/$name")
                 .build()
             client.newCall(request).enqueue { result ->
-                onComplete(result.mapCatching { response ->
-                    val application = parseApplicationInformationResponse(response)
-                    return@mapCatching application ?: throw DialError("Could not parse application information response")
-                })
+                onComplete(result.mapCatching { parseApplicationInformationResponse(it) })
             }
         } catch (exception: Exception) {
             onComplete(Result.failure(exception))
@@ -130,13 +128,16 @@ internal class DialClient(private val baseURL: URL) {
      *
      * @param response The OkHttp response.
      * @return The application described by the [response], or null if the response could not be parsed properly.
+     * @throws DialError If there was an error while parsing the response.
      */
-    private fun parseApplicationInformationResponse(response: Response): DialApplication<OCastAdditionalData>? {
+    @Throws(DialError::class)
+    private fun parseApplicationInformationResponse(response: Response): DialApplication<OCastAdditionalData> {
         var name: String? = null
         var isStopAllowed: Boolean? = null
         var state: DialApplication.State? = null
         var instanceURL: URL? = null
-        var webSocketURL: URL? = null
+        var hasAdditionalData = false
+        var webSocketURL: URI? = null
         var version: String? = null
 
         try {
@@ -150,19 +151,26 @@ internal class DialClient(private val baseURL: URL) {
                     val serviceChildNodes = serviceNode?.childNodes?.asList().orEmpty()
                     for (node in serviceChildNodes) {
                         when (node.nodeName) {
-                            "name" -> {
-                                name = node.textContent
-                                isStopAllowed = node.attributes.getNamedItem("allowStop").textContent == "true"
+                            "name" -> name = node.textContent
+                            "options" -> {
+                                when (node.attributes.getNamedItem("allowStop").textContent) {
+                                    "true" -> isStopAllowed = true
+                                    "false" -> isStopAllowed = false
+                                }
                             }
                             "state" -> state = parseApplicationState(node.textContent.orEmpty())
-                            "link" -> instanceURL =
-                                runCatching { URL(node.attributes.getNamedItem("href").textContent) }.getOrNull()
+                            "link" -> {
+                                val href = node.attributes.getNamedItem("href").textContent
+                                instanceURL = runCatching { URL(href) }
+                                    .recover { URL("$baseURL/${href ?: "run"}") }
+                                    .getOrNull()
+                            }
                             "additionalData" -> {
+                                hasAdditionalData = true
                                 val additionalDataChildNodes = node.childNodes.asList()
                                 for (otherNode in additionalDataChildNodes) {
                                     when (otherNode.nodeName) {
-                                        "ocast:X_OCAST_App2AppURL" -> webSocketURL =
-                                            runCatching { URL(otherNode.textContent) }.getOrNull()
+                                        "ocast:X_OCAST_App2AppURL" -> webSocketURL = runCatching { URI(otherNode.textContent) }.getOrNull()
                                         "ocast:X_OCAST_Version" -> version = otherNode.textContent
                                     }
                                 }
@@ -175,36 +183,29 @@ internal class DialClient(private val baseURL: URL) {
             OCastLog.error("Parse application information response failed", exception)
         }
 
-        return if (name != null && isStopAllowed != null && webSocketURL != null && version != null) {
-            DialApplication(name, isStopAllowed, state, instanceURL, OCastAdditionalData(webSocketURL, version))
-        } else {
-            null
+        if (name == null || isStopAllowed == null || !hasAdditionalData) {
+            throw DialError("Parse application information response failed")
         }
+
+        return DialApplication(name, isStopAllowed, state, instanceURL, OCastAdditionalData(webSocketURL, version))
     }
 
     /**
-     * Parses the application state.
+     * Parses a string to retrieve the application state.
      *
      * @param string The string to parse the state from.
      * @return The state, or null if the state could not be parsed properly.
+     * @throws Exception If there was an error while parsing the string.
      */
-    private fun parseApplicationState(string: String): DialApplication.State? {
+    @Throws(Exception::class)
+    private fun parseApplicationState(string: String): DialApplication.State {
         return when (string) {
             "running" -> DialApplication.State.Running
             "stopped" -> DialApplication.State.Stopped
             "hidden" -> DialApplication.State.Hidden
             else -> {
-                string
-                    .split("installable=")
-                    .takeIf { it.size > 1 }
-                    ?.elementAtOrNull(1)
-                    ?.let {
-                        try {
-                            DialApplication.State.Installable(URL(it))
-                        } catch (exception: java.lang.Exception) {
-                            null
-                        }
-                    }
+                val installationUrlString = string.split("installable=").elementAt(1)
+                DialApplication.State.Installable(URL(installationUrlString))
             }
         }
     }

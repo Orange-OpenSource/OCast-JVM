@@ -16,6 +16,7 @@
 
 package org.ocast.dial
 
+import java.net.URI
 import java.net.URL
 
 /**
@@ -30,8 +31,8 @@ import java.net.URL
 internal data class DialApplication<T>(
     val name: String,
     val isStopAllowed: Boolean,
-    val state: State?,
-    val instanceURL: URL?,
+    val state: State? = null,
+    val instanceURL: URL? = null,
     val additionalData: T
 ) where T : DialAdditionalData {
 
@@ -55,7 +56,7 @@ internal data class DialApplication<T>(
          *
          * @param url The URL that can be used to install the application.
          */
-        class Installable(val url: URL) : State()
+        data class Installable(val url: URL) : State()
 
         /**
          * ​Indicates​ ​that​ ​the​ ​application​ ​is​ ​running​ ​but​ ​is​ ​not currently​ ​visible​ ​to​ ​the​ ​user.​
@@ -65,9 +66,9 @@ internal data class DialApplication<T>(
 }
 
 /**
- * A class that represents additional data in a DIAL application information response.
+ * An abstract class that represents additional data in a DIAL application information response.
  */
-internal open class DialAdditionalData
+internal abstract class DialAdditionalData
 
 /**
  * This class represents the additional data related to OCast when receiving DIAL application information response.
@@ -75,7 +76,7 @@ internal open class DialAdditionalData
  * @param webSocketURL The OCast web socket URL.
  * @param version The OCast version.
  */
-internal class OCastAdditionalData(
-    val webSocketURL: URL,
-    val version: String
+internal data class OCastAdditionalData(
+    val webSocketURL: URI? = null,
+    val version: String? = null
 ) : DialAdditionalData()

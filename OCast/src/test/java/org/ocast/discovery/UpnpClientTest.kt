@@ -23,15 +23,14 @@ import com.nhaarman.mockitokotlin2.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.SocketPolicy
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.ocast.common.SynchronizedFunction1
 import org.ocast.discovery.models.UpnpDevice
+import org.ocast.common.removeXMLElement
+import org.ocast.common.HttpClientTest
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PowerMockIgnore
 import org.powermock.core.classloader.annotations.PrepareForTest
@@ -45,27 +44,10 @@ import java.util.concurrent.TimeUnit
 @RunWith(PowerMockRunner::class)
 @PowerMockIgnore("javax.net.ssl.*") // This fixes a java.lang.AssertionError with OkHttp and PowerMock
 @PrepareForTest(UpnpClient::class)
-class UpnpClientTest {
-
-    /** The mocked web server. */
-    private val server = MockWebServer()
+internal class UpnpClientTest : HttpClientTest(){
 
     /** The UpnpClient to test. */
     private val upnpClient = UpnpClient()
-
-    @Before
-    fun setUp() {
-        server.start()
-    }
-
-    @After
-    fun tearDown() {
-        // Sometimes an exception is thrown when shutting down the server although everything seems to be OK
-        try {
-            server.shutdown()
-        } catch (exception: Exception) {
-        }
-    }
 
     @Test
     fun getDeviceRequestContainsDateHeader() {
@@ -112,7 +94,7 @@ class UpnpClientTest {
         upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
         // Then
-        synchronizedCallback.waitUntilInvoked(5, TimeUnit.SECONDS)
+        synchronizedCallback.await(5, TimeUnit.SECONDS)
         val deviceCaptor = argumentCaptor<UpnpDevice>()
         verify(callback, times(1)).invoke(deviceCaptor.capture())
         val device = deviceCaptor.firstValue
@@ -134,7 +116,7 @@ class UpnpClientTest {
         upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
         // Then
-        synchronizedCallback.waitUntilInvoked(5, TimeUnit.SECONDS)
+        synchronizedCallback.await(5, TimeUnit.SECONDS)
         val deviceCaptor = argumentCaptor<UpnpDevice>()
         verify(callback, times(1)).invoke(deviceCaptor.capture())
         assertNull(deviceCaptor.firstValue)
@@ -171,7 +153,7 @@ class UpnpClientTest {
         upnpClient.getDevice(":(", synchronizedCallback) // Malformed location
 
         // Then
-        synchronizedCallback.waitUntilInvoked(5, TimeUnit.SECONDS)
+        synchronizedCallback.await(5, TimeUnit.SECONDS)
         val deviceCaptor = argumentCaptor<UpnpDevice>()
         verify(callback, times(1)).invoke(deviceCaptor.capture())
         assertNull(deviceCaptor.firstValue)
@@ -204,14 +186,14 @@ class UpnpClientTest {
         upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
         // Then
-        synchronizedCallback.waitUntilInvoked(5, TimeUnit.SECONDS)
+        synchronizedCallback.await(5, TimeUnit.SECONDS)
         val deviceCaptor = argumentCaptor<UpnpDevice>()
         verify(callback, times(1)).invoke(deviceCaptor.capture())
         assertNull(deviceCaptor.firstValue)
     }
 
     @Test
-    fun getDeviceWithReadResponseHeaderTimeoutFails() {
+    fun getDeviceWithTimeoutFails() {
         // Given
         val response = """
                 <root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:r="urn:restful-tv-org:schemas:upnp-dd">
@@ -235,38 +217,6 @@ class UpnpClientTest {
                 .setBody(response)
                 .setSocketPolicy(SocketPolicy.NO_RESPONSE) // Read response header timeout
         )
-        val callback = mock<(UpnpDevice?) -> Unit>()
-        val synchronizedCallback = SynchronizedFunction1(callback)
-
-        // When
-        upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
-
-        // Then
-        synchronizedCallback.waitUntilInvoked(2, TimeUnit.MINUTES)
-        val deviceCaptor = argumentCaptor<UpnpDevice>()
-        verify(callback, times(1)).invoke(deviceCaptor.capture())
-        assertNull(deviceCaptor.firstValue)
-    }
-
-    @Test
-    fun getDeviceWithReadResponseBodyTimeoutFails() {
-        // Given
-        val response = """
-                <root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:r="urn:restful-tv-org:schemas:upnp-dd">
-                  <specVersion>
-                    <major>1</major>
-                    <minor>0</minor>
-                    </specVersion>
-                  <device>
-                    <deviceType>urn:schemas-upnp-org:device:tvdevice:1</deviceType>
-                    <friendlyName>LaCléTV-32F7</friendlyName>
-                    <manufacturer>Innopia</manufacturer>
-                    <modelName>cléTV</modelName>
-                    <UDN>uuid:b042f955-9ae7-44a8-ba6c-0009743932f7</UDN>
-                  </device>
-                </root>
-            """.trimIndent()
-
         server.enqueue(
             MockResponse()
                 .setHeader("Application-DIAL-URL", "http://127.0.0.1:8008/apps")
@@ -274,23 +224,22 @@ class UpnpClientTest {
                 .setBodyDelay(1, TimeUnit.DAYS) // Read response body timeout
         )
         val callback = mock<(UpnpDevice?) -> Unit>()
-        val synchronizedCallback = SynchronizedFunction1(callback)
+        val synchronizedCallback = SynchronizedFunction1(callback, 2)
 
         // When
         upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
+        upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
         // Then
-        synchronizedCallback.waitUntilInvoked(2, TimeUnit.MINUTES)
+        synchronizedCallback.await(2, TimeUnit.MINUTES)
         val deviceCaptor = argumentCaptor<UpnpDevice>()
         verify(callback, times(1)).invoke(deviceCaptor.capture())
         assertNull(deviceCaptor.firstValue)
+        assertNull(deviceCaptor.secondValue)
     }
 
     @RunWith(Parameterized::class)
-    class WithParameterizedMissingElements(private val element: String) {
-
-        /** The mocked web server. */
-        private val server = MockWebServer()
+    class WithParameterizedMissingElements(private val element: String) : HttpClientTest() {
 
         /** The UpnpClient to test. */
         private val upnpClient = UpnpClient()
@@ -303,7 +252,7 @@ class UpnpClientTest {
         }
 
         @Test
-        fun getDeviceWithMissingElementFails() {
+        fun getDeviceWithParameterizedMissingElementFails() {
             // Given
             val response = """
                 <root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:r="urn:restful-tv-org:schemas:upnp-dd">
@@ -319,7 +268,7 @@ class UpnpClientTest {
                     <UDN>uuid:b042f955-9ae7-44a8-ba6c-0009743932f7</UDN>
                   </device>
                 </root>
-            """.trimIndent().removeElement(element) // Missing element
+            """.trimIndent().removeXMLElement(element) // Missing element
 
             server.enqueue(
                 MockResponse()
@@ -333,23 +282,10 @@ class UpnpClientTest {
             upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
             // Then
-            synchronizedCallback.waitUntilInvoked(5, TimeUnit.SECONDS)
+            synchronizedCallback.await(5, TimeUnit.SECONDS)
             val deviceCaptor = argumentCaptor<UpnpDevice>()
             verify(callback, times(1)).invoke(deviceCaptor.capture())
             assertNull(deviceCaptor.firstValue)
-        }
-
-        /**
-         * Removes an element from an XML response.
-         *
-         * @param element The element to remove.
-         * @return The modified XML response.
-         */
-        private fun String.removeElement(element: String): String {
-            return split("\\R+".toRegex())
-                .toMutableList()
-                .apply { removeIf { it.matches("^\\s*<$element>.*</$element>\\s*$".toRegex()) } }
-                .joinToString("\r\n")
         }
     }
 }
