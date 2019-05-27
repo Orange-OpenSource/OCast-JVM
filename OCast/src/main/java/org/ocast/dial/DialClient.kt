@@ -69,16 +69,20 @@ internal class DialClient(private val baseURL: URL) {
         getApplication(name) { getApplicationResult ->
             getApplicationResult.onFailure { onComplete(getApplicationResult.map {}) }
             getApplicationResult.onSuccess { application ->
-                try {
-                    val request = Request.Builder()
-                        .url(application.runURL)
-                        .delete()
-                        .build()
-                    client.newCall(request).enqueue { stopApplicationResult ->
-                        onComplete(stopApplicationResult.map {})
+                if (application.isStopAllowed && application.instanceURL != null) {
+                    try {
+                        val request = Request.Builder()
+                            .url(application.instanceURL)
+                            .delete()
+                            .build()
+                        client.newCall(request).enqueue { stopApplicationResult ->
+                            onComplete(stopApplicationResult.map {})
+                        }
+                    } catch (exception: Exception) {
+                        onComplete(Result.failure(exception))
                     }
-                } catch (exception: Exception) {
-                    onComplete(Result.failure(exception))
+                } else {
+                    onComplete(Result.failure(DialError("Could not stop application $name")))
                 }
             }
         }
@@ -91,7 +95,7 @@ internal class DialClient(private val baseURL: URL) {
      * @param name The name of the application to retrieve information from.
      * @param onComplete The lambda that will be called when the request is completed.
      */
-    fun getApplication(name: String, onComplete: (Result<DialApplication>) -> Unit) {
+    fun getApplication(name: String, onComplete: (Result<DialApplication<OCastAdditionalData>>) -> Unit) {
         try {
             val request = Request.Builder()
                 .url("$baseURL/$name")
@@ -99,8 +103,7 @@ internal class DialClient(private val baseURL: URL) {
             client.newCall(request).enqueue { result ->
                 onComplete(result.mapCatching { response ->
                     val application = parseApplicationInformationResponse(response)
-                    return@mapCatching application
-                        ?: throw DialError("Could not parse application information response")
+                    return@mapCatching application ?: throw DialError("Could not parse application information response")
                 })
             }
         } catch (exception: Exception) {
@@ -128,12 +131,13 @@ internal class DialClient(private val baseURL: URL) {
      * @param response The OkHttp response.
      * @return The application described by the [response], or null if the response could not be parsed properly.
      */
-    private fun parseApplicationInformationResponse(response: Response): DialApplication? {
-        var app2appURL: String? = null
-        var version: String? = null
-        var runURL: String? = null
+    private fun parseApplicationInformationResponse(response: Response): DialApplication<OCastAdditionalData>? {
         var name: String? = null
-        var state: String? = null
+        var isStopAllowed: Boolean? = null
+        var state: DialApplication.State? = null
+        var instanceURL: URL? = null
+        var webSocketURL: URL? = null
+        var version: String? = null
 
         try {
             if (response.isSuccessful) {
@@ -146,14 +150,19 @@ internal class DialClient(private val baseURL: URL) {
                     val serviceChildNodes = serviceNode?.childNodes?.asList().orEmpty()
                     for (node in serviceChildNodes) {
                         when (node.nodeName) {
-                            "name" -> name = node.textContent
-                            "state" -> state = node.textContent
-                            "link" -> runURL = node.attributes.getNamedItem("href").textContent
+                            "name" -> {
+                                name = node.textContent
+                                isStopAllowed = node.attributes.getNamedItem("allowStop").textContent == "true"
+                            }
+                            "state" -> state = parseApplicationState(node.textContent.orEmpty())
+                            "link" -> instanceURL =
+                                runCatching { URL(node.attributes.getNamedItem("href").textContent) }.getOrNull()
                             "additionalData" -> {
                                 val additionalDataChildNodes = node.childNodes.asList()
                                 for (otherNode in additionalDataChildNodes) {
                                     when (otherNode.nodeName) {
-                                        "ocast:X_OCAST_App2AppURL" -> app2appURL = otherNode.textContent
+                                        "ocast:X_OCAST_App2AppURL" -> webSocketURL =
+                                            runCatching { URL(otherNode.textContent) }.getOrNull()
                                         "ocast:X_OCAST_Version" -> version = otherNode.textContent
                                     }
                                 }
@@ -166,10 +175,37 @@ internal class DialClient(private val baseURL: URL) {
             OCastLog.error("Parse application information response failed", exception)
         }
 
-        return if (name != null && state != null && runURL != null && app2appURL != null && version != null) {
-            DialApplication(name, state, runURL, app2appURL, version)
+        return if (name != null && isStopAllowed != null && webSocketURL != null && version != null) {
+            DialApplication(name, isStopAllowed, state, instanceURL, OCastAdditionalData(webSocketURL, version))
         } else {
             null
+        }
+    }
+
+    /**
+     * Parses the application state.
+     *
+     * @param string The string to parse the state from.
+     * @return The state, or null if the state could not be parsed properly.
+     */
+    private fun parseApplicationState(string: String): DialApplication.State? {
+        return when (string) {
+            "running" -> DialApplication.State.Running
+            "stopped" -> DialApplication.State.Stopped
+            "hidden" -> DialApplication.State.Hidden
+            else -> {
+                string
+                    .split("installable=")
+                    .takeIf { it.size > 1 }
+                    ?.elementAtOrNull(1)
+                    ?.let {
+                        try {
+                            DialApplication.State.Installable(URL(it))
+                        } catch (exception: java.lang.Exception) {
+                            null
+                        }
+                    }
+            }
         }
     }
 }
