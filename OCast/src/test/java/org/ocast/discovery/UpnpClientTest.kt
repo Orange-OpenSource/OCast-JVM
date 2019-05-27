@@ -40,18 +40,18 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 
 /**
- * Unit tests for the [DialClient] class.
+ * Unit tests for the [UpnpClient] class.
  */
 @RunWith(PowerMockRunner::class)
 @PowerMockIgnore("javax.net.ssl.*") // This fixes a java.lang.AssertionError with OkHttp and PowerMock
-@PrepareForTest(DialClient::class)
-class DialClientTest {
+@PrepareForTest(UpnpClient::class)
+class UpnpClientTest {
 
     /** The mocked web server. */
     private val server = MockWebServer()
 
-    /** The DialClient to test. */
-    private val dialClient = DialClient()
+    /** The UpnpClient to test. */
+    private val upnpClient = UpnpClient()
 
     @Before
     fun setUp() {
@@ -75,7 +75,7 @@ class DialClientTest {
         val callback = mock<(UpnpDevice?) -> Unit>()
 
         // When
-        dialClient.getDevice(server.url("/").toString(), callback)
+        upnpClient.getDevice(server.url("/").toString(), callback)
 
         // Then
         assertEquals("Thu, 4 Apr 2019 17:50:30 GMT", server.takeRequest().getHeader("Date"))
@@ -109,7 +109,7 @@ class DialClientTest {
         val synchronizedCallback = SynchronizedFunction1(callback)
 
         // When
-        dialClient.getDevice(server.url("/").toString(), synchronizedCallback)
+        upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
         // Then
         synchronizedCallback.waitUntilInvoked(5, TimeUnit.SECONDS)
@@ -131,7 +131,7 @@ class DialClientTest {
         val synchronizedCallback = SynchronizedFunction1(callback)
 
         // When
-        dialClient.getDevice(server.url("/").toString(), synchronizedCallback)
+        upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
         // Then
         synchronizedCallback.waitUntilInvoked(5, TimeUnit.SECONDS)
@@ -168,7 +168,7 @@ class DialClientTest {
         val synchronizedCallback = SynchronizedFunction1(callback)
 
         // When
-        dialClient.getDevice(":(", synchronizedCallback) // Malformed location
+        upnpClient.getDevice(":(", synchronizedCallback) // Malformed location
 
         // Then
         synchronizedCallback.waitUntilInvoked(5, TimeUnit.SECONDS)
@@ -201,7 +201,7 @@ class DialClientTest {
         val synchronizedCallback = SynchronizedFunction1(callback)
 
         // When
-        dialClient.getDevice(server.url("/").toString(), synchronizedCallback)
+        upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
         // Then
         synchronizedCallback.waitUntilInvoked(5, TimeUnit.SECONDS)
@@ -239,7 +239,7 @@ class DialClientTest {
         val synchronizedCallback = SynchronizedFunction1(callback)
 
         // When
-        dialClient.getDevice(server.url("/").toString(), synchronizedCallback)
+        upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
         // Then
         synchronizedCallback.waitUntilInvoked(2, TimeUnit.MINUTES)
@@ -277,7 +277,7 @@ class DialClientTest {
         val synchronizedCallback = SynchronizedFunction1(callback)
 
         // When
-        dialClient.getDevice(server.url("/").toString(), synchronizedCallback)
+        upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
         // Then
         synchronizedCallback.waitUntilInvoked(2, TimeUnit.MINUTES)
@@ -292,8 +292,8 @@ class DialClientTest {
         /** The mocked web server. */
         private val server = MockWebServer()
 
-        /** The DialClient to test. */
-        private val dialClient = DialClient()
+        /** The UpnpClient to test. */
+        private val upnpClient = UpnpClient()
 
         companion object {
 
@@ -330,7 +330,7 @@ class DialClientTest {
             val synchronizedCallback = SynchronizedFunction1(callback)
 
             // When
-            dialClient.getDevice(server.url("/").toString(), synchronizedCallback)
+            upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
             // Then
             synchronizedCallback.waitUntilInvoked(5, TimeUnit.SECONDS)

@@ -31,11 +31,11 @@ import kotlin.concurrent.schedule
  * This class represents the entry point for the discovery of OCast devices.
  *
  * @param socket The SSDP socket.
- * @param dialClient The client which performs DIAL requests.
+ * @param upnpClient The client which performs UPnP requests.
  */
 internal class DeviceDiscovery constructor(
     private val socket: SocketProvider = SocketProvider(),
-    private val dialClient: DialClient = DialClient()
+    private val upnpClient: UpnpClient = UpnpClient()
 ) {
 
     /**
@@ -282,8 +282,8 @@ internal class DeviceDiscovery constructor(
             if (uuid != null) {
                 ssdpDatesByUuid[uuid] = Date()
                 if (devicesByUuid[uuid] == null) {
-                    // Launch a DIAL device description request to retrieve info about the device that responded
-                    dialClient.getDevice(response.location) { device ->
+                    // Launch a UPnP device description request to retrieve info about the device that responded
+                    upnpClient.getDevice(response.location) { device ->
                         synchronized(devicesByUuid) {
                             // Check that this device has not already been added because M-SEARCH requests are sent twice
                             if (device != null && devicesByUuid[uuid] == null) {

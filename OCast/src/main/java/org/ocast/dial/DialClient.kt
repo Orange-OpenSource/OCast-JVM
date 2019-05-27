@@ -34,7 +34,7 @@ import javax.xml.parsers.DocumentBuilderFactory
  *
  * @param baseURL The base URL of the DIAL service.
  */
-internal class Dial(private val baseURL: URL) {
+internal class DialClient(private val baseURL: URL) {
 
     /** The OkHttp client which will send DIAL requests. */
     private val client = OkHttpClient()
