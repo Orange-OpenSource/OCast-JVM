@@ -170,7 +170,8 @@ internal class DialClient(private val baseURL: URL) {
                                 val additionalDataChildNodes = node.childNodes.asList()
                                 for (otherNode in additionalDataChildNodes) {
                                     when (otherNode.nodeName) {
-                                        "ocast:X_OCAST_App2AppURL" -> webSocketURL = runCatching { URI(otherNode.textContent) }.getOrNull()
+                                        // Trim X_OCAST_App2AppURL because sometimes has new lines and spaces as prefix and suffix
+                                        "ocast:X_OCAST_App2AppURL" -> webSocketURL = runCatching { URI(otherNode.textContent.trim()) }.getOrNull()
                                         "ocast:X_OCAST_Version" -> version = otherNode.textContent
                                     }
                                 }
