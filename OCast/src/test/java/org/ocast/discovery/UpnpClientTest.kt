@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit
 @RunWith(PowerMockRunner::class)
 @PowerMockIgnore("javax.net.ssl.*") // This fixes a java.lang.AssertionError with OkHttp and PowerMock
 @PrepareForTest(UpnpClient::class)
-internal class UpnpClientTest : HttpClientTest(){
+internal class UpnpClientTest : HttpClientTest() {
 
     /** The UpnpClient to test. */
     private val upnpClient = UpnpClient()
@@ -233,7 +233,7 @@ internal class UpnpClientTest : HttpClientTest(){
         // Then
         synchronizedCallback.await(2, TimeUnit.MINUTES)
         val deviceCaptor = argumentCaptor<UpnpDevice>()
-        verify(callback, times(1)).invoke(deviceCaptor.capture())
+        verify(callback, times(2)).invoke(deviceCaptor.capture())
         assertNull(deviceCaptor.firstValue)
         assertNull(deviceCaptor.secondValue)
     }

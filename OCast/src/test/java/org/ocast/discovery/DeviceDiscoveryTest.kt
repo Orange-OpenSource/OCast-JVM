@@ -50,7 +50,7 @@ class DeviceDiscoveryTest {
     /** The mocked socket provider. */
     private val socketProvider = spy<SocketProvider>()
 
-    /** The mocked upnp client. */
+    /** The mocked UPnP client. */
     private val upnpClient = mock<UpnpClient>()
 
     /** The mocked discovery listener. */
@@ -463,7 +463,7 @@ class DeviceDiscoveryTest {
     }
 
     /**
-     * Stubs the responses to the device description requests received by the upnp client.
+     * Stubs the responses to the device description requests received by the UPnP client.
      *
      * @param devicesByLocation A hash map where the key is the location used to perform the device description request and the value is the associated device.
      */
