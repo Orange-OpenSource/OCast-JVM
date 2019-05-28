@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$/OCast" />
             <option value="$PROJECT_DIR$/sampleDesktopJava" />
             <option value="$PROJECT_DIR$/sampleDesktopKotlin" />
+            <option value="$PROJECT_DIR$/sampleMobile" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
