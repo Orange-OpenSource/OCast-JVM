@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity(), EventListener {
     }
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var viewModel: MainViewModel
+    private lateinit var mainViewModel: MainViewModel
 
     private var mediaRouterCallback: MediaRouter.Callback = MediaRouterCallback()
     // private lateinit var oCastRouteHelper: OCastRouteHelper
@@ -47,11 +47,11 @@ class MainActivity : AppCompatActivity(), EventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
         binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main).apply {
             this.lifecycleOwner = this@MainActivity
-            this.viewModel = viewModel
+            this.viewModel = mainViewModel
         }
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
@@ -63,6 +63,9 @@ class MainActivity : AppCompatActivity(), EventListener {
         super.onStart()
 
         // oCastRouteHelper.addPublicEventListener(this)
+
+        // TODO pour test
+        mainViewModel.deviceConnected.updateValue(true)
     }
 
     override fun onStop() {
@@ -89,14 +92,14 @@ class MainActivity : AppCompatActivity(), EventListener {
     */
 
     override fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {
-        if (viewModel.selectedDevice.value == device) {
-            viewModel.playbackStatus.updateValue(status)
+        if (mainViewModel.selectedDevice.value == device) {
+            mainViewModel.playbackStatus.updateValue(status)
         }
     }
 
     override fun onMetadataChanged(device: Device, metadata: MetadataChangedEvent) {
-        if (viewModel.selectedDevice.value == device) {
-            viewModel.mediaMetadata.updateValue(metadata)
+        if (mainViewModel.selectedDevice.value == device) {
+            mainViewModel.mediaMetadata.updateValue(metadata)
         }
     }
 
@@ -115,6 +118,7 @@ class MainActivity : AppCompatActivity(), EventListener {
                 Log.d(TAG, "OCast device selected: ${device.friendlyName}")
                 viewModel.selectedDevice.updateValue(device)
                 // TODO connect device
+                viewModel.deviceConnected.updateValue(true)
             }
             */
         }
@@ -124,6 +128,7 @@ class MainActivity : AppCompatActivity(), EventListener {
             if (oCastRouteHelper.isOCastRouteInfo(route)) {
                 Log.d(TAG, "OCast device unselected")
                 // TODO : disconnect device
+                viewModel.deviceConnected.updateValue(false)
             }
             */
         }
