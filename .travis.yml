@@ -16,8 +16,6 @@ jobs:
       script: ./gradlew ktlint
     - name: Unit tests
       script: ./gradlew :OCast:test
-script:
-  - ./gradlew clean assemble ktlint :OCast:test
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
