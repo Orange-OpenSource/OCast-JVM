@@ -120,7 +120,7 @@ class DialClientTest {
         assertEquals("LaCléTV-32F7", device.friendlyName)
         assertEquals("Innopia", device.manufacturer)
         assertEquals("cléTV", device.modelName)
-        assertEquals("b055-9ae7-44a8-ba6c-0009743932f7", device.uuid)
+        assertEquals("b042f955-9ae7-44a8-ba6c-0009743932f7", device.uuid)
     }
 
     @Test
