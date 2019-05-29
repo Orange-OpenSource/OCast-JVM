@@ -39,7 +39,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 /**
  * This class handles the retrieval of OCast devices through the DIAL protocol.
  */
-internal open class DialClient {
+internal open class DialClient{
 
     /** The OkHttp client which will send device description requests. */
     private val client = OkHttpClient()
