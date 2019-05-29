@@ -8,22 +8,13 @@ android:
     - build-tools-28.0.3
     - android-28
     - platforms-android-28
-stages:
-  - build
-  - static analysis
-  - test
 jobs:
-  allow_failures:
-    - name: ktlint
   include:
-    - stage: build
-      name: Assemble
+    - name: Assemble
       script: ./gradlew assemble
-    - stage: static analysis
-      name: ktlint
+    - name: Kotlin linter
       script: ./gradlew ktlint
-    - stage: test
-      name: Unit tests
+    - name: Unit tests
       script: ./gradlew :OCast:test
 script:
   - ./gradlew clean assemble ktlint :OCast:test
