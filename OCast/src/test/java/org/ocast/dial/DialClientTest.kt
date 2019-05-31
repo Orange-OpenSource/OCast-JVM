@@ -77,7 +77,7 @@ internal class DialClientTest : HttpClientTest() {
         assertEquals("OrangeTVReceiverProd", application?.name)
         assertEquals(true, application?.isStopAllowed)
         assertEquals(DialApplication.State.Running, application?.state)
-        assertEquals(URL("$baseURL/run"), application?.instanceURL)
+        assertEquals(URL(baseURL, "run"), application?.instanceURL(baseURL))
         assertEquals(URI("wss://192.168.1.65:4433/ocast"), application?.additionalData?.webSocketURL)
         assertEquals("1.0", application?.additionalData?.version)
     }
@@ -110,7 +110,7 @@ internal class DialClientTest : HttpClientTest() {
         assertEquals("OrangeTVReceiverProd", application?.name)
         assertEquals(true, application?.isStopAllowed)
         assertEquals(DialApplication.State.Running, application?.state)
-        assertEquals(URL("http://192.168.1.23:8008/apps/OrangeTVReceiverProd/run"), application?.instanceURL)
+        assertEquals(URL("http://192.168.1.23:8008/apps/OrangeTVReceiverProd/run"), application?.instanceURL(baseURL))
         assertNull(application?.additionalData?.webSocketURL)
         assertNull(application?.additionalData?.version)
     }
@@ -386,7 +386,7 @@ internal class DialClientTest : HttpClientTest() {
     }
 
     @Test
-    fun stopApplicationWithMissingInstanceURLFails() {
+    fun stopApplicationWithMalformedInstanceURLFails() {
         // Given
         val getApplicationResponse = """
             <service xmlns="urn:dial-multiscreen-org:schemas:dial" xmlns:ocast="urn:cast-ocast-org:service:cast:1" dialVer="2.1">
@@ -397,8 +397,9 @@ internal class DialClientTest : HttpClientTest() {
                 <ocast:X_OCAST_App2AppURL>wss://192.168.1.65:4433/ocast</ocast:X_OCAST_App2AppURL>
                 <ocast:X_OCAST_Version>1.0</ocast:X_OCAST_Version>
               </additionalData>
+              <link rel="run" href="http://(^_^)>
             </service>
-            """.trimIndent() // Instance URL is missing (ie link element)
+            """.trimIndent() // Instance URL is malformed
 
         server.enqueue(MockResponse().setBody(getApplicationResponse))
         server.enqueue(MockResponse())

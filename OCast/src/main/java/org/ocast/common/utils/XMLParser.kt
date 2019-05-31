@@ -110,4 +110,13 @@ data class XMLElement(
     operator fun get(childName: String): XMLElement {
         return children.first { it.name == childName }
     }
+
+    /**
+     * Returns the first child element matching the given name, or `null` if there is no such element.
+     *
+     * @return The child XML element, or `null` if there is no such element.
+     */
+    fun getOrNull(childName: String): XMLElement? {
+        return children.firstOrNull { it.name == childName }
+    }
 }

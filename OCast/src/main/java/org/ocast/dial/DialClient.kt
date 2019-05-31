@@ -19,16 +19,8 @@ package org.ocast.dial
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
-import okhttp3.Response
-import org.ocast.common.asList
 import org.ocast.common.enqueue
-import org.ocast.common.item
-import org.ocast.core.utils.OCastLog
-import org.xml.sax.InputSource
-import java.io.StringReader
-import java.net.URI
 import java.net.URL
-import javax.xml.parsers.DocumentBuilderFactory
 
 /**
  * Instances of this class handle DIAL requests.
@@ -49,7 +41,7 @@ internal class DialClient(private val baseURL: URL) {
     fun startApplication(name: String, onComplete: (Result<Unit>) -> Unit) {
         try {
             val request = Request.Builder()
-                .url("$baseURL/$name")
+                .url(URL(baseURL, name))
                 .post(RequestBody.create(null, byteArrayOf()))
                 .build()
             client.newCall(request).enqueue { result ->
@@ -70,10 +62,11 @@ internal class DialClient(private val baseURL: URL) {
         getApplication(name) { getApplicationResult ->
             getApplicationResult.onFailure { onComplete(getApplicationResult.map {}) }
             getApplicationResult.onSuccess { application ->
-                if (application.isStopAllowed && application.instanceURL != null) {
+                val instanceURL = application.instanceURL(baseURL)
+                if (application.isStopAllowed && instanceURL != null) {
                     try {
                         val request = Request.Builder()
-                            .url(application.instanceURL)
+                            .url(instanceURL)
                             .delete()
                             .build()
                         client.newCall(request).enqueue { stopApplicationResult ->
@@ -99,115 +92,15 @@ internal class DialClient(private val baseURL: URL) {
     fun getApplication(name: String, onComplete: (Result<DialApplication<OCastAdditionalData>>) -> Unit) {
         try {
             val request = Request.Builder()
-                .url("$baseURL/$name")
+                .url(URL(baseURL, name))
                 .build()
             client.newCall(request).enqueue { result ->
-                onComplete(result.mapCatching { parseApplicationInformationResponse(it) })
+                onComplete(result.mapCatching { response ->
+                    DialApplication.decode(response.body()?.string().orEmpty())
+                })
             }
         } catch (exception: Exception) {
             onComplete(Result.failure(exception))
-        }
-    }
-
-    /**
-     * Parses the response of an application information request.
-     *
-     * Below is an example of an application information response:
-     *
-     * <?xml​ ​version="1.0"​ ​encoding="UTF-8"?>
-     * <service​ ​xmlns="urn:dial-multiscreen-org:schemas:dial"​ ​dialVer="1.7">
-     *     <name>Name</name>
-     *     <options allowStop="true"/>
-     *     <state>running</state>
-     *     <link rel="run" href="run"/>
-     *     <additionalData>
-     *         <ocast:X_OCAST_App2AppURL>wss://IP:4433/ocast</ocast:X_OCAST_App2AppURL>
-     *         <ocast:X_OCAST_Version>1.0</ocast:X_OCAST_Version >
-     *     </additionalData>
-     * </service>
-     *
-     * @param response The OkHttp response.
-     * @return The application described by the [response], or null if the response could not be parsed properly.
-     * @throws DialError If there was an error while parsing the response.
-     */
-    @Throws(DialError::class)
-    private fun parseApplicationInformationResponse(response: Response): DialApplication<OCastAdditionalData> {
-        var name: String? = null
-        var isStopAllowed: Boolean? = null
-        var state: DialApplication.State? = null
-        var instanceURL: URL? = null
-        var hasAdditionalData = false
-        var webSocketURL: URI? = null
-        var version: String? = null
-
-        try {
-            if (response.isSuccessful) {
-                val responseString = response.body()?.string()
-                if (responseString != null) {
-                    val documentBuilderFactory = DocumentBuilderFactory.newInstance()
-                    val documentBuilder = documentBuilderFactory.newDocumentBuilder()
-                    val document = documentBuilder.parse(InputSource(StringReader(responseString)))
-                    val serviceNode = document.childNodes.item("service")
-                    val serviceChildNodes = serviceNode?.childNodes?.asList().orEmpty()
-                    for (node in serviceChildNodes) {
-                        when (node.nodeName) {
-                            "name" -> name = node.textContent
-                            "options" -> {
-                                when (node.attributes.getNamedItem("allowStop").textContent) {
-                                    "true" -> isStopAllowed = true
-                                    "false" -> isStopAllowed = false
-                                }
-                            }
-                            "state" -> state = parseApplicationState(node.textContent.orEmpty())
-                            "link" -> {
-                                val href = node.attributes.getNamedItem("href").textContent
-                                instanceURL = runCatching { URL(href) }
-                                    .recover { URL("$baseURL/${href ?: "run"}") }
-                                    .getOrNull()
-                            }
-                            "additionalData" -> {
-                                hasAdditionalData = true
-                                val additionalDataChildNodes = node.childNodes.asList()
-                                for (otherNode in additionalDataChildNodes) {
-                                    when (otherNode.nodeName) {
-                                        // Trim X_OCAST_App2AppURL because sometimes has new lines and spaces as prefix and suffix
-                                        "ocast:X_OCAST_App2AppURL" -> webSocketURL = runCatching { URI(otherNode.textContent.trim()) }.getOrNull()
-                                        "ocast:X_OCAST_Version" -> version = otherNode.textContent
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (exception: Exception) {
-            OCastLog.error("Parse application information response failed", exception)
-        }
-
-        if (name == null || isStopAllowed == null || !hasAdditionalData) {
-            throw DialError("Parse application information response failed")
-        }
-
-        return DialApplication(name, isStopAllowed, state, instanceURL, OCastAdditionalData(webSocketURL, version))
-    }
-
-    /**
-     * Parses a string to retrieve the application state.
-     *
-     * @param string The string to parse the state from.
-     * @return The state, or null if the state could not be parsed properly.
-     * @throws Exception If there was an error while parsing the string.
-     */
-    @Throws(Exception::class)
-    private fun parseApplicationState(string: String): DialApplication.State {
-        return when (string) {
-            "running" -> DialApplication.State.Running
-            "stopped" -> DialApplication.State.Stopped
-            "hidden" -> DialApplication.State.Hidden
-            else -> {
-                val installationUrlString = string.split("installable=").elementAt(1)
-                DialApplication.State.Installable(URL(installationUrlString))
-            }
         }
     }
 }
