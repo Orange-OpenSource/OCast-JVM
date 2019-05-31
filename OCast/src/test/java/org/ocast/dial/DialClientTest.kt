@@ -270,7 +270,7 @@ internal class DialClientTest : HttpClientTest() {
         server.enqueue(MockResponse().setResponseCode(201)) // Successful response with 201 HTTP code
         server.enqueue(MockResponse()) // Successful response with 200 HTTP code (application is already starting or running)
         val callback = mock<(Result<Unit>) -> Unit>()
-        val synchronizedCallback = SynchronizedFunction1(callback)
+        val synchronizedCallback = SynchronizedFunction1(callback, 2)
 
         // When
         dialClient.startApplication("", synchronizedCallback)
