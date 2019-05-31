@@ -99,6 +99,8 @@ data class XMLElement(
 
     /**
      * Returns the first child element matching the given name.
+     *
+     * @return The child XML element.
      * @throws [NoSuchElementException] If no such XML element is found.
      */
     @Throws(NoSuchElementException::class)
