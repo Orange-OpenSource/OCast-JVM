@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ocast.common.utils.xml.parser
+package org.ocast.common.utils
 
 import org.w3c.dom.Node
 import org.xml.sax.InputSource
@@ -22,7 +22,12 @@ import java.io.StringReader
 import javax.xml.parsers.DocumentBuilderFactory
 
 /**
- * This class parses XML content.
+ * A simple XML parser which makes parsing more concise.
+ * The [parse] method returns the root [XMLElement] where every child element can easily be accessed with a chain of brackets.
+ * For instance:
+ * val xml = <foo><bar><baz>BAZ</baz></bar></foo>
+ * val rootXMLElement = XMLParser().parse(xml)
+ * val bazXMLElement = rootXMLElement["foo"]["bar"]["baz"]
  */
 class XMLParser {
 
@@ -43,14 +48,19 @@ class XMLParser {
     }
 
     /**
-     * Parses an XML [Node].
+     * Parses an XML node.
      *
-     * @param node The XML [Node] to parse.
+     * @param node The XML node to parse.
      * @return The [XMLElement] for this node.
      */
     private fun parseNode(node: Node): XMLElement {
-        val childNodes = node.childNodes.asList()
-        val name = node.nodeName
+        val childNodes = node
+            .childNodes
+            .run {
+                (0 until length).map { item(it) }
+            }
+        // Document node value "#document" corresponds to the org.w3c.dom.Document instance and is replaced by an empty string
+        val name = if (node.nodeType == Node.DOCUMENT_NODE) "" else node.nodeName
         val value = childNodes
             .firstOrNull { it.nodeType == Node.TEXT_NODE }
             ?.nodeValue
@@ -58,9 +68,11 @@ class XMLParser {
             .orEmpty()
         val attributes = node
             .attributes
-            ?.asMap()
-            ?.entries
-            ?.associate { it.key to it.value.nodeValue }
+            ?.run {
+                (0 until length).associate { index ->
+                    with(item(index)) { Pair(nodeName, nodeValue) }
+                }
+            }
             .orEmpty()
         val children = childNodes
             .filter { it.nodeType == Node.ELEMENT_NODE }

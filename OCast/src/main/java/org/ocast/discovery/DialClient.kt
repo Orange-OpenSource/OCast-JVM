@@ -21,7 +21,7 @@ import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import org.ocast.common.utils.xml.parser.XMLParser
+import org.ocast.common.utils.XMLParser
 import org.ocast.core.utils.OCastLog
 import org.ocast.discovery.models.UpnpDevice
 import org.ocast.discovery.utils.UpnpTools

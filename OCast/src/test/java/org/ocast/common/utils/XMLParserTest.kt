@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ocast.common.utils.xml.parser
+package org.ocast.common.utils
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -39,6 +39,7 @@ class XMLParserTest {
         val rootXMLElement = XMLParser().parse(xml)
 
         // Then
+        assertEquals("", rootXMLElement.name)
         assertEquals("", rootXMLElement.value)
         assertEquals(0, rootXMLElement.attributes.size)
         assertEquals(1, rootXMLElement.children.size)
@@ -71,5 +72,6 @@ class XMLParserTest {
         val rootXMLElement = XMLParser().parse(xml)
 
         // Then
+        // An exception is thrown
     }
 }
