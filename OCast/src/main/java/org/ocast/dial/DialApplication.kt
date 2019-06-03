@@ -134,7 +134,7 @@ internal data class DialApplication<T>(
          */
         @Throws(Exception::class)
         fun decode(xml: String): DialApplication<OCastAdditionalData> {
-            val rootXMLElement = XMLParser().parse(xml)
+            val rootXMLElement = XMLParser.parse(xml)
             val serviceXMLElement = rootXMLElement[XML_SERVICE_ELEMENT_NAME]
             val name = serviceXMLElement[XML_NAME_ELEMENT_NAME].value
             val isStopAllowed = serviceXMLElement[XML_OPTIONS_ELEMENT_NAME].attributes[XML_ALLOW_STOP_ATTRIBUTE_NAME] == XML_TRUE_TEXT_VALUE
