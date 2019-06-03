@@ -29,7 +29,12 @@ import javax.xml.parsers.DocumentBuilderFactory
  * val rootXMLElement = XMLParser().parse(xml)
  * val bazXMLElement = rootXMLElement["foo"]["bar"]["baz"]
  */
-class XMLParser {
+object XMLParser {
+
+    /** The builder that will generate the [org.w3c.dom.Document] instance from an XML string. */
+    private val documentBuilder = DocumentBuilderFactory
+        .newInstance()
+        .newDocumentBuilder()
 
     /**
      * Parses an XML string.
@@ -40,8 +45,6 @@ class XMLParser {
      */
     @Throws(Exception::class)
     fun parse(xml: String): XMLElement {
-        val documentBuilderFactory = DocumentBuilderFactory.newInstance()
-        val documentBuilder = documentBuilderFactory.newDocumentBuilder()
         val document = documentBuilder.parse(InputSource(StringReader(xml)))
 
         return parseNode(document)

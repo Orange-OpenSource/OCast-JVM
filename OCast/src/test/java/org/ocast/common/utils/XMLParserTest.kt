@@ -36,7 +36,7 @@ class XMLParserTest {
         """.trimIndent()
 
         // When
-        val rootXMLElement = XMLParser().parse(xml)
+        val rootXMLElement = XMLParser.parse(xml)
 
         // Then
         assertEquals("", rootXMLElement.name)
@@ -69,7 +69,7 @@ class XMLParserTest {
         val xml = "<malformed></xml>"
 
         // When
-        val rootXMLElement = XMLParser().parse(xml)
+        val rootXMLElement = XMLParser.parse(xml)
 
         // Then
         // An exception is thrown

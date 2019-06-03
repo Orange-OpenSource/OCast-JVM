@@ -95,10 +95,10 @@ internal open class DialClient {
             if (response.isSuccessful) {
                 val headers = response.headers()
                 val applicationURLString = headers["Application-DIAL-URL"] ?: headers["Application-URL"]
-                applicationURL = applicationURLString?.let { URL(applicationURLString) }
+                applicationURL = URL(applicationURLString)
                 val responseString = response.body()?.string()
                 if (responseString != null) {
-                    val rootXMLElement = XMLParser().parse(responseString)
+                    val rootXMLElement = XMLParser.parse(responseString)
                     val deviceXMLElement = rootXMLElement["root"]["device"]
                     friendlyName = deviceXMLElement["friendlyName"].value
                     manufacturer = deviceXMLElement["manufacturer"].value
