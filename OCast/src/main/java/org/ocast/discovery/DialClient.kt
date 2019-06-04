@@ -21,20 +21,16 @@ import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import org.ocast.common.utils.XMLParser
 import org.ocast.core.utils.OCastLog
 import org.ocast.discovery.models.UpnpDevice
 import org.ocast.discovery.utils.UpnpTools
-import org.w3c.dom.Node
-import org.w3c.dom.NodeList
-import org.xml.sax.InputSource
 import java.io.IOException
-import java.io.StringReader
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
-import javax.xml.parsers.DocumentBuilderFactory
 
 /**
  * This class handles the retrieval of OCast devices through the DIAL protocol.
@@ -99,23 +95,15 @@ internal open class DialClient {
             if (response.isSuccessful) {
                 val headers = response.headers()
                 val applicationURLString = headers["Application-DIAL-URL"] ?: headers["Application-URL"]
-                applicationURL = applicationURLString?.let { URL(applicationURLString) }
+                applicationURL = URL(applicationURLString)
                 val responseString = response.body()?.string()
                 if (responseString != null) {
-                    val documentBuilderFactory = DocumentBuilderFactory.newInstance()
-                    val documentBuilder = documentBuilderFactory.newDocumentBuilder()
-                    val document = documentBuilder.parse(InputSource(StringReader(responseString)))
-                    val rootNode = document.childNodes.item("root")
-                    val deviceNode = rootNode?.childNodes?.item("device")
-                    val deviceChildNodes = deviceNode?.childNodes?.asList().orEmpty()
-                    for (node in deviceChildNodes) {
-                        when (node.nodeName) {
-                            "friendlyName" -> friendlyName = node.textContent
-                            "manufacturer" -> manufacturer = node.textContent
-                            "modelName" -> modelName = node.textContent
-                            "UDN" -> udn = node.textContent
-                        }
-                    }
+                    val rootXMLElement = XMLParser.parse(responseString)
+                    val deviceXMLElement = rootXMLElement["root"]["device"]
+                    friendlyName = deviceXMLElement["friendlyName"].value
+                    manufacturer = deviceXMLElement["manufacturer"].value
+                    modelName = deviceXMLElement["modelName"].value
+                    udn = deviceXMLElement["UDN"].value
                 }
             }
         } catch (exception: Exception) {
@@ -135,27 +123,3 @@ internal open class DialClient {
         }
     }
 }
-
-//region NodeList extensions
-
-/**
- * Transforms a [NodeList] into a [List] of [Node]s.
- * This makes it easier to use with chaining and higher-order functions such as map and filter.
- *
- * @return The list of [Node]s.
- */
-private fun NodeList.asList(): List<Node> {
-    return (0 until length).map { item(it) }
-}
-
-/**
- * Returns the node with the given [name].
- *
- * @param name The name of the node to find.
- * @return The found node, or null if it does not exist.
- */
-private fun NodeList.item(name: String): Node? {
-    return asList().firstOrNull { it.nodeName == name }
-}
-
-//endregion
