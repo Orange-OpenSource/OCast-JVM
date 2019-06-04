@@ -32,40 +32,39 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
-class OCastRouteHelperTest {
+class OCastMediaRouteHelperTest {
 
     private lateinit var fakeDevice: FakeDeviceMediaRouteProvider
-    private lateinit var oCastRouteHelper: OCastRouteHelper
-    private val handler = Handler(Looper.getMainLooper())
-    private var mediaRouterCallback: MediaRouter.Callback = MediaRouterCallback()
+    private lateinit var oCastMediaRouteHelper: OCastMediaRouteHelper
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var mediaRouterCallback = MediaRouterCallback()
     private var mediaRouteDevice: MediaRouteDevice? = null
 
     @Before
     fun setUp() {
         val appContext = InstrumentationRegistry.getTargetContext()
 
-        handler.post {
+        mainHandler.post {
             mediaRouteDevice = null
 
             fakeDevice = FakeDeviceMediaRouteProvider(appContext)
 
-            oCastRouteHelper = OCastRouteHelper(appContext, listOf(ReferenceDevice::class.java))
-            oCastRouteHelper.addMediaRouterCallback(mediaRouterCallback)
-            oCastRouteHelper.addMediaRouteProvider(fakeDevice)
+            oCastMediaRouteHelper = OCastMediaRouteHelper(appContext, listOf(ReferenceDevice::class.java))
+            oCastMediaRouteHelper.addMediaRouterCallback(mediaRouterCallback)
+            oCastMediaRouteHelper.addMediaRouteProvider(fakeDevice)
         }
     }
 
     @After
     fun tearDown() {
-        oCastRouteHelper.removeMediaRouteProvider(fakeDevice)
-        oCastRouteHelper.removeMediaRouterCallback(mediaRouterCallback)
+        oCastMediaRouteHelper.removeMediaRouteProvider(fakeDevice)
+        oCastMediaRouteHelper.removeMediaRouterCallback(mediaRouterCallback)
     }
 
     private val latch = CountDownLatch(1)
 
     @Test
-    fun callsListenerOnDeviceAdded() {
-
+    fun fakeDeviceCallsListenerOnDeviceAdded() {
         latch.await(10, TimeUnit.SECONDS)
 
         Assert.assertEquals(mediaRouteDevice?.friendlyName, FakeDeviceMediaRouteProvider.FAKE_DEVICE_NAME)

@@ -21,21 +21,17 @@ import android.os.Looper;
 import org.ocast.core.models.CallbackWrapper;
 import org.ocast.core.models.Consumer;
 
-public class UICallbackWrapper implements CallbackWrapper {
+public class AndroidUIThreadCallbackWrapper implements CallbackWrapper {
+
+    private Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     public  <T> Consumer<T> wrap(Consumer<T> consumer) {
-        return i -> {
-            Handler handler = new Handler(Looper.getMainLooper());
-            handler.post(() -> consumer.run(i));
-        };
+        return t -> handler.post(() -> consumer.run(t));
     }
 
     @Override
     public Runnable wrap(Runnable runnable) {
-        return () -> {
-            Handler handler = new Handler(Looper.getMainLooper());
-            handler.post(runnable);
-        };
+        return () -> handler.post(runnable);
     }
 }

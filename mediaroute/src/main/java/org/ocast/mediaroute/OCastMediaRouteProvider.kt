@@ -36,15 +36,15 @@ import org.ocast.core.DeviceListener
 import org.ocast.core.OCastCenter
 import java.util.Collections
 
-internal class OCastMediaRouteProvider(private val ctx: Context, private val oCastCenter: OCastCenter, private val mainHandler: Handler) : MediaRouteProvider(ctx) {
+internal class OCastMediaRouteProvider(context: Context, private val oCastCenter: OCastCenter, private val mainHandler: Handler) : MediaRouteProvider(context) {
 
     internal companion object {
         internal const val FILTER_CATEGORY_OCAST = "org.ocast.CATEGORY_OCAST"
         private const val TAG = "OCastMediaRouteProvider"
     }
 
-    private val routes = Collections.synchronizedMap(mutableMapOf<String, MediaRouteDescriptor>())
-    private var haveReceiverCreated = false
+    private val routeDescriptorsByUuid = Collections.synchronizedMap(mutableMapOf<String, MediaRouteDescriptor>())
+    private var isWifiMonitorReceiverRegistered = false
     private var isActiveScan = false
 
     init {
@@ -58,28 +58,23 @@ internal class OCastMediaRouteProvider(private val ctx: Context, private val oCa
                 MediaRouteDevice(device)
             )
         }
-        val controlIntentFilters = mutableListOf<IntentFilter>().apply {
-            add(IntentFilter().apply {
-                addCategory(FILTER_CATEGORY_OCAST)
-            })
+        val controlFilter = IntentFilter().apply {
+            addCategory(FILTER_CATEGORY_OCAST)
         }
-
         return MediaRouteDescriptor.Builder(device.uuid, device.friendlyName)
             .setDescription(device.modelName)
-            .addControlFilters(controlIntentFilters)
+            .addControlFilter(controlFilter)
             .setExtras(bundledDevice)
             .build()
     }
 
     private fun publishRoutes() {
         mainHandler.post {
-            descriptor = MediaRouteProviderDescriptor.Builder().apply {
-                synchronized(routes) {
-                    for (entry in routes.entries) {
-                        addRoute(entry.value)
-                    }
-                }
-            }.build()
+            descriptor = synchronized(routeDescriptorsByUuid) {
+                MediaRouteProviderDescriptor.Builder()
+                    .apply { addRoutes(routeDescriptorsByUuid.values) }
+                    .build()
+            }
         }
     }
 
@@ -99,24 +94,20 @@ internal class OCastMediaRouteProvider(private val ctx: Context, private val oCa
         if (request != null) {
             Log.d(TAG, "onDiscoveryRequest $request")
             isActiveScan = request.isActiveScan
-            if (!haveReceiverCreated) {
-                haveReceiverCreated = true
-                val wifiMonitorIntentFilter = IntentFilter().apply {
-                    addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
-                }
-                ctx.registerReceiver(wifiMonitorReceiver, wifiMonitorIntentFilter)
-                routes.clear()
-                publishRoutes()
+            if (!isWifiMonitorReceiverRegistered) {
+                isWifiMonitorReceiverRegistered = true
+                val wifiMonitorIntentFilter = IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION)
+                context.registerReceiver(wifiMonitorReceiver, wifiMonitorIntentFilter)
             }
-            val activeNetwork = (ctx.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetworkInfo
-            val haveWifiConnected = activeNetwork?.isConnectedOrConnecting == true && activeNetwork.type == ConnectivityManager.TYPE_WIFI
-            if (haveWifiConnected) {
+            val activeNetwork = (context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetworkInfo
+            val isWifiConnected = activeNetwork?.isConnectedOrConnecting == true && activeNetwork.type == ConnectivityManager.TYPE_WIFI
+            if (isWifiConnected) {
                 oCastCenter.resumeDiscovery(isActiveScan)
             }
         } else {
-            if (haveReceiverCreated) {
-                ctx.unregisterReceiver(wifiMonitorReceiver)
-                haveReceiverCreated = false
+            if (isWifiMonitorReceiverRegistered) {
+                context.unregisterReceiver(wifiMonitorReceiver)
+                isWifiMonitorReceiverRegistered = false
             }
             oCastCenter.stopDiscovery()
         }
@@ -125,18 +116,16 @@ internal class OCastMediaRouteProvider(private val ctx: Context, private val oCa
     private inner class OCastMediaRouteDeviceListener : DeviceListener {
 
         override fun onDeviceAdded(device: Device) {
-            routes[device.uuid] = createMediaRouteDescriptor(device)
+            routeDescriptorsByUuid[device.uuid] = createMediaRouteDescriptor(device)
             publishRoutes()
         }
 
         override fun onDeviceRemoved(device: Device) {
-            val iterator = routes.entries.iterator()
-            while (iterator.hasNext()) {
-                val entry = iterator.next()
-                if (entry.key == device.uuid) {
-                    iterator.remove()
-                    break
-                }
+            synchronized(routeDescriptorsByUuid) {
+                routeDescriptorsByUuid
+                    .keys
+                    .firstOrNull { it == device.uuid }
+                    ?.run { routeDescriptorsByUuid.remove(this) }
             }
             publishRoutes()
         }
@@ -152,7 +141,7 @@ internal class OCastMediaRouteProvider(private val ctx: Context, private val oCa
         override fun onReceive(context: Context?, intent: Intent?) {
             if (!isInitialStickyBroadcast && intent?.action == WifiManager.NETWORK_STATE_CHANGED_ACTION) {
                 val networkInfo = intent.getParcelableExtra<NetworkInfo>(WifiManager.EXTRA_NETWORK_INFO)
-                if (networkInfo.isConnected) {
+                if (networkInfo?.isConnected == true) {
                     if (!isConnected) {
                         Log.d(TAG, "Wifi is connected: $networkInfo")
                         onConnectionStateChanged(true)

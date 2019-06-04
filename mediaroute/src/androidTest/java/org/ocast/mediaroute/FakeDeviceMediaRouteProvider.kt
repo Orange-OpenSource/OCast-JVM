@@ -63,10 +63,9 @@ class FakeDeviceMediaRouteProvider(context: Context) : MediaRouteProvider(contex
     }
 
     override fun onDiscoveryRequestChanged(request: MediaRouteDiscoveryRequest?) {
-        if (request == null || request.selector == null) {
-            return
+        if (request?.selector != null) {
+            publishRoutes()
         }
-        publishRoutes()
     }
 
     override fun onCreateRouteController(routeId: String): RouteController? {
@@ -74,6 +73,8 @@ class FakeDeviceMediaRouteProvider(context: Context) : MediaRouteProvider(contex
     }
 
     private fun publishRoutes() {
-        descriptor = MediaRouteProviderDescriptor.Builder().addRoute(mediaRouteDescriptor).build()
+        descriptor = MediaRouteProviderDescriptor.Builder()
+            .addRoute(mediaRouteDescriptor)
+            .build()
     }
 }

@@ -24,11 +24,11 @@ import java.net.URL
 
 @Parcelize
 data class MediaRouteDevice(
-    var uuid: String?,
-    var friendlyName: String?,
-    var manufacturer: String?,
-    var modelName: String?,
-    var applicationURL: URL?
+    var uuid: String,
+    var friendlyName: String,
+    var manufacturer: String,
+    var modelName: String,
+    var applicationURL: URL
 ) : Parcelable {
 
     companion object {
