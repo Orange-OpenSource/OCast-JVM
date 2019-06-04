@@ -20,6 +20,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import org.ocast.common.enqueue
+import org.ocast.dial.models.DialApplication
+import org.ocast.dial.models.DialError
 import java.net.URL
 
 /**
@@ -62,7 +64,7 @@ internal class DialClient(private val baseURL: URL) {
         getApplication(name) { getApplicationResult ->
             getApplicationResult.onFailure { onComplete(getApplicationResult.map {}) }
             getApplicationResult.onSuccess { application ->
-                val instanceURL = application.instanceURL(baseURL)
+                val instanceURL = application.getInstanceURL(baseURL)
                 if (application.isStopAllowed && instanceURL != null) {
                     try {
                         val request = Request.Builder()
@@ -89,7 +91,7 @@ internal class DialClient(private val baseURL: URL) {
      * @param name The name of the application to retrieve information from.
      * @param onComplete The lambda that will be called when the request is completed.
      */
-    fun getApplication(name: String, onComplete: (Result<DialApplication<OCastAdditionalData>>) -> Unit) {
+    fun getApplication(name: String, onComplete: (Result<DialApplication>) -> Unit) {
         try {
             val request = Request.Builder()
                 .url(URL(baseURL, name))

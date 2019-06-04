@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ocast.dial
+package org.ocast.dial.models
 
 /**
  * This class represents a DIAL error.

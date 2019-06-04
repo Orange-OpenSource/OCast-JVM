@@ -25,6 +25,7 @@ import junit.framework.TestCase.assertNull
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.SocketPolicy
 import org.junit.Test
+import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.ocast.common.SynchronizedFunction1
@@ -41,32 +42,35 @@ import java.util.concurrent.TimeUnit
 /**
  * Unit tests for the [UpnpClient] class.
  */
-@RunWith(PowerMockRunner::class)
-@PowerMockIgnore("javax.net.ssl.*") // This fixes a java.lang.AssertionError with OkHttp and PowerMock
-@PrepareForTest(UpnpClient::class)
-internal class UpnpClientTest : HttpClientTest() {
+@RunWith(Enclosed::class)
+internal class UpnpClientTest {
 
-    /** The UpnpClient to test. */
-    private val upnpClient = UpnpClient()
+    @RunWith(PowerMockRunner::class)
+    @PowerMockIgnore("javax.net.ssl.*") // This fixes a java.lang.AssertionError with OkHttp and PowerMock
+    @PrepareForTest(UpnpClient::class)
+    class NotParameterized : HttpClientTest() {
 
-    @Test
-    fun getDeviceRequestContainsDateHeader() {
-        // Given
-        val date = Date(1554400230000) // Thu, 4 Apr 2019 17:50:30 GMT
-        PowerMockito.whenNew(Date::class.java).withNoArguments().thenReturn(date)
-        val callback = mock<(UpnpDevice?) -> Unit>()
+        /** The UpnpClient to test. */
+        private val upnpClient = UpnpClient()
 
-        // When
-        upnpClient.getDevice(server.url("/").toString(), callback)
+        @Test
+        fun getDeviceRequestContainsDateHeader() {
+            // Given
+            val date = Date(1554400230000) // Thu, 4 Apr 2019 17:50:30 GMT
+            PowerMockito.whenNew(Date::class.java).withNoArguments().thenReturn(date)
+            val callback = mock<(UpnpDevice?) -> Unit>()
 
-        // Then
-        assertEquals("Thu, 4 Apr 2019 17:50:30 GMT", server.takeRequest().getHeader("Date"))
-    }
+            // When
+            upnpClient.getDevice(server.url("/").toString(), callback)
 
-    @Test
-    fun getDeviceWithSuccessfulResponseSucceeds() {
-        // Given
-        val response = """
+            // Then
+            assertEquals("Thu, 4 Apr 2019 17:50:30 GMT", server.takeRequest().getHeader("Date"))
+        }
+
+        @Test
+        fun getDeviceWithSuccessfulResponseSucceeds() {
+            // Given
+            val response = """
                 <root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:r="urn:restful-tv-org:schemas:upnp-dd">
                   <specVersion>
                     <major>1</major>
@@ -82,50 +86,50 @@ internal class UpnpClientTest : HttpClientTest() {
                 </root>
             """.trimIndent()
 
-        server.enqueue(
-            MockResponse()
-                .setHeader("Application-DIAL-URL", "http://127.0.0.1:8008/apps")
-                .setBody(response)
-        )
-        val callback = mock<(UpnpDevice?) -> Unit>()
-        val synchronizedCallback = SynchronizedFunction1(callback)
+            server.enqueue(
+                MockResponse()
+                    .setHeader("Application-DIAL-URL", "http://127.0.0.1:8008/apps")
+                    .setBody(response)
+            )
+            val callback = mock<(UpnpDevice?) -> Unit>()
+            val synchronizedCallback = SynchronizedFunction1(callback)
 
-        // When
-        upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
+            // When
+            upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
-        // Then
-        synchronizedCallback.await(5, TimeUnit.SECONDS)
-        val deviceCaptor = argumentCaptor<UpnpDevice>()
-        verify(callback, times(1)).invoke(deviceCaptor.capture())
-        val device = deviceCaptor.firstValue
-        assertEquals("http://127.0.0.1:8008/apps", device.applicationURL.toString())
-        assertEquals("LaCléTV-32F7", device.friendlyName)
-        assertEquals("Innopia", device.manufacturer)
-        assertEquals("cléTV", device.modelName)
-        assertEquals("b042f955-9ae7-44a8-ba6c-0009743932f7", device.uuid)
-    }
+            // Then
+            synchronizedCallback.await(5, TimeUnit.SECONDS)
+            val deviceCaptor = argumentCaptor<UpnpDevice>()
+            verify(callback, times(1)).invoke(deviceCaptor.capture())
+            val device = deviceCaptor.firstValue
+            assertEquals("http://127.0.0.1:8008/apps", device.applicationURL.toString())
+            assertEquals("LaCléTV-32F7", device.friendlyName)
+            assertEquals("Innopia", device.manufacturer)
+            assertEquals("cléTV", device.modelName)
+            assertEquals("b042f955-9ae7-44a8-ba6c-0009743932f7", device.uuid)
+        }
 
-    @Test
-    fun getDeviceWithUnsuccessfulResponseFails() {
-        // Given
-        server.enqueue(MockResponse().setResponseCode(404)) // Unsuccessful response
-        val callback = mock<(UpnpDevice?) -> Unit>()
-        val synchronizedCallback = SynchronizedFunction1(callback)
+        @Test
+        fun getDeviceWithUnsuccessfulResponseFails() {
+            // Given
+            server.enqueue(MockResponse().setResponseCode(404)) // Unsuccessful response
+            val callback = mock<(UpnpDevice?) -> Unit>()
+            val synchronizedCallback = SynchronizedFunction1(callback)
 
-        // When
-        upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
+            // When
+            upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
-        // Then
-        synchronizedCallback.await(5, TimeUnit.SECONDS)
-        val deviceCaptor = argumentCaptor<UpnpDevice>()
-        verify(callback, times(1)).invoke(deviceCaptor.capture())
-        assertNull(deviceCaptor.firstValue)
-    }
+            // Then
+            synchronizedCallback.await(5, TimeUnit.SECONDS)
+            val deviceCaptor = argumentCaptor<UpnpDevice>()
+            verify(callback, times(1)).invoke(deviceCaptor.capture())
+            assertNull(deviceCaptor.firstValue)
+        }
 
-    @Test
-    fun getDeviceWithMalformedLocationFails() {
-        // Given
-        val response = """
+        @Test
+        fun getDeviceWithMalformedLocationFails() {
+            // Given
+            val response = """
                 <root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:r="urn:restful-tv-org:schemas:upnp-dd">
                   <specVersion>
                     <major>1</major>
@@ -141,28 +145,28 @@ internal class UpnpClientTest : HttpClientTest() {
                 </root>
             """.trimIndent()
 
-        server.enqueue(
-            MockResponse()
-                .setHeader("Application-DIAL-URL", "http://127.0.0.1:8008/apps")
-                .setBody(response)
-        )
-        val callback = mock<(UpnpDevice?) -> Unit>()
-        val synchronizedCallback = SynchronizedFunction1(callback)
+            server.enqueue(
+                MockResponse()
+                    .setHeader("Application-DIAL-URL", "http://127.0.0.1:8008/apps")
+                    .setBody(response)
+            )
+            val callback = mock<(UpnpDevice?) -> Unit>()
+            val synchronizedCallback = SynchronizedFunction1(callback)
 
-        // When
-        upnpClient.getDevice(":(", synchronizedCallback) // Malformed location
+            // When
+            upnpClient.getDevice(":(", synchronizedCallback) // Malformed location
 
-        // Then
-        synchronizedCallback.await(5, TimeUnit.SECONDS)
-        val deviceCaptor = argumentCaptor<UpnpDevice>()
-        verify(callback, times(1)).invoke(deviceCaptor.capture())
-        assertNull(deviceCaptor.firstValue)
-    }
+            // Then
+            synchronizedCallback.await(5, TimeUnit.SECONDS)
+            val deviceCaptor = argumentCaptor<UpnpDevice>()
+            verify(callback, times(1)).invoke(deviceCaptor.capture())
+            assertNull(deviceCaptor.firstValue)
+        }
 
-    @Test
-    fun getDeviceWithMissingApplicationUrlHeaderFails() {
-        // Given
-        val response = """
+        @Test
+        fun getDeviceWithMissingApplicationUrlHeaderFails() {
+            // Given
+            val response = """
                 <root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:r="urn:restful-tv-org:schemas:upnp-dd">
                   <specVersion>
                     <major>1</major>
@@ -178,24 +182,24 @@ internal class UpnpClientTest : HttpClientTest() {
                 </root>
             """.trimIndent()
 
-        server.enqueue(MockResponse().setBody(response)) // Missing application URL header
-        val callback = mock<(UpnpDevice?) -> Unit>()
-        val synchronizedCallback = SynchronizedFunction1(callback)
+            server.enqueue(MockResponse().setBody(response)) // Missing application URL header
+            val callback = mock<(UpnpDevice?) -> Unit>()
+            val synchronizedCallback = SynchronizedFunction1(callback)
 
-        // When
-        upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
+            // When
+            upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
-        // Then
-        synchronizedCallback.await(5, TimeUnit.SECONDS)
-        val deviceCaptor = argumentCaptor<UpnpDevice>()
-        verify(callback, times(1)).invoke(deviceCaptor.capture())
-        assertNull(deviceCaptor.firstValue)
-    }
+            // Then
+            synchronizedCallback.await(5, TimeUnit.SECONDS)
+            val deviceCaptor = argumentCaptor<UpnpDevice>()
+            verify(callback, times(1)).invoke(deviceCaptor.capture())
+            assertNull(deviceCaptor.firstValue)
+        }
 
-    @Test
-    fun getDeviceWithTimeoutFails() {
-        // Given
-        val response = """
+        @Test
+        fun getDeviceWithTimeoutFails() {
+            // Given
+            val response = """
                 <root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:r="urn:restful-tv-org:schemas:upnp-dd">
                   <specVersion>
                     <major>1</major>
@@ -211,31 +215,32 @@ internal class UpnpClientTest : HttpClientTest() {
                 </root>
             """.trimIndent()
 
-        server.enqueue(
-            MockResponse()
-                .setHeader("Application-DIAL-URL", "http://127.0.0.1:8008/apps")
-                .setBody(response)
-                .setSocketPolicy(SocketPolicy.NO_RESPONSE) // Read response header timeout
-        )
-        server.enqueue(
-            MockResponse()
-                .setHeader("Application-DIAL-URL", "http://127.0.0.1:8008/apps")
-                .setBody(response)
-                .setBodyDelay(1, TimeUnit.DAYS) // Read response body timeout
-        )
-        val callback = mock<(UpnpDevice?) -> Unit>()
-        val synchronizedCallback = SynchronizedFunction1(callback, 2)
+            server.enqueue(
+                MockResponse()
+                    .setHeader("Application-DIAL-URL", "http://127.0.0.1:8008/apps")
+                    .setBody(response)
+                    .setSocketPolicy(SocketPolicy.NO_RESPONSE) // Read response header timeout
+            )
+            server.enqueue(
+                MockResponse()
+                    .setHeader("Application-DIAL-URL", "http://127.0.0.1:8008/apps")
+                    .setBody(response)
+                    .setBodyDelay(1, TimeUnit.DAYS) // Read response body timeout
+            )
+            val callback = mock<(UpnpDevice?) -> Unit>()
+            val synchronizedCallback = SynchronizedFunction1(callback, 2)
 
-        // When
-        upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
-        upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
+            // When
+            upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
+            upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
 
-        // Then
-        synchronizedCallback.await(2, TimeUnit.MINUTES)
-        val deviceCaptor = argumentCaptor<UpnpDevice>()
-        verify(callback, times(2)).invoke(deviceCaptor.capture())
-        assertNull(deviceCaptor.firstValue)
-        assertNull(deviceCaptor.secondValue)
+            // Then
+            synchronizedCallback.await(2, TimeUnit.MINUTES)
+            val deviceCaptor = argumentCaptor<UpnpDevice>()
+            verify(callback, times(2)).invoke(deviceCaptor.capture())
+            assertNull(deviceCaptor.firstValue)
+            assertNull(deviceCaptor.secondValue)
+        }
     }
 
     @RunWith(Parameterized::class)

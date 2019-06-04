@@ -19,6 +19,7 @@ package org.ocast.discovery
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
@@ -26,61 +27,64 @@ import org.junit.runners.Parameterized
  * Unit tests for the [SsdpMessage] class.
  * Please note that newlines in raw strings literals are encoded as "\n" and not "\r\n".
  */
+@RunWith(Enclosed::class)
 class SsdpMessageTest {
 
-    //region M-Search request
+    class NotParameterized {
 
-    @Test
-    fun createMulticastMSearchRequestSucceeds() {
-        // Given
-        val mSearchRequest = SsdpMSearchRequest(
-            "239.255.255.250:1900",
-            5,
-            "urn:cast-ocast-org:service:cast:1"
-        )
+        //region M-Search request
 
-        // When
-        val mSearchRequestString = String(mSearchRequest.data)
+        @Test
+        fun createMulticastMSearchRequestSucceeds() {
+            // Given
+            val mSearchRequest = SsdpMSearchRequest(
+                "239.255.255.250:1900",
+                5,
+                "urn:cast-ocast-org:service:cast:1"
+            )
 
-        // Then
-        val expectedMSearchRequestString = "M-SEARCH * HTTP/1.1\r\n" +
+            // When
+            val mSearchRequestString = String(mSearchRequest.data)
+
+            // Then
+            val expectedMSearchRequestString = "M-SEARCH * HTTP/1.1\r\n" +
                 "HOST: 239.255.255.250:1900\r\n" +
                 "MAN: \"ssdp:discover\"\r\n" +
                 "MX: 5\r\n" +
                 "ST: urn:cast-ocast-org:service:cast:1"
 
-        assertSsdpMessageEquals(expectedMSearchRequestString, mSearchRequestString)
-    }
+            assertSsdpMessageEquals(expectedMSearchRequestString, mSearchRequestString)
+        }
 
-    @Test
-    fun createUnicastMSearchRequestSucceeds() {
-        // Given
-        val mSearchRequest = SsdpMSearchRequest(
-            "192.168.1.123:1900",
-            null, // MX header is not present for unicast request
-            "urn:cast-ocast-org:service:cast:1"
-        )
+        @Test
+        fun createUnicastMSearchRequestSucceeds() {
+            // Given
+            val mSearchRequest = SsdpMSearchRequest(
+                "192.168.1.123:1900",
+                null, // MX header is not present for unicast request
+                "urn:cast-ocast-org:service:cast:1"
+            )
 
-        // When
-        val mSearchRequestString = String(mSearchRequest.data)
+            // When
+            val mSearchRequestString = String(mSearchRequest.data)
 
-        // Then
-        val expectedMSearchRequestString = "M-SEARCH * HTTP/1.1\r\n" +
+            // Then
+            val expectedMSearchRequestString = "M-SEARCH * HTTP/1.1\r\n" +
                 "HOST: 192.168.1.123:1900\r\n" +
                 "MAN: \"ssdp:discover\"\r\n" +
                 "ST: urn:cast-ocast-org:service:cast:1"
 
-        assertSsdpMessageEquals(expectedMSearchRequestString, mSearchRequestString)
-    }
+            assertSsdpMessageEquals(expectedMSearchRequestString, mSearchRequestString)
+        }
 
-    //endregion
+        //endregion
 
-    //region M-Search response
+        //region M-Search response
 
-    @Test
-    fun parseMSearchResponseSucceeds() {
-        // Given
-        val mSearchResponseString = "HTTP/1.1 200 OK\r\n" +
+        @Test
+        fun parseMSearchResponseSucceeds() {
+            // Given
+            val mSearchResponseString = "HTTP/1.1 200 OK\r\n" +
                 "LOCATION: http://10.0.0.28:56790/device-desc.xml\r\n" +
                 "CACHE-CONTROL: max-age=1800\r\n" +
                 "EXT:\r\n" +
@@ -90,20 +94,20 @@ class SsdpMessageTest {
                 "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7\r\n" +
                 "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
 
-        // When
-        val mSearchResponse = SsdpMessage.fromData(mSearchResponseString.toByteArray()) as? SsdpMSearchResponse
+            // When
+            val mSearchResponse = SsdpMessage.fromData(mSearchResponseString.toByteArray()) as? SsdpMSearchResponse
 
-        // Then
-        assertEquals("http://10.0.0.28:56790/device-desc.xml", mSearchResponse?.location)
-        assertEquals("Linux/4.9 UPnP/1.1 quick_ssdp/1.1", mSearchResponse?.server)
-        assertEquals("uuid:b042f955-9ae7-44a8-ba6c-0009743932f7", mSearchResponse?.usn)
-        assertEquals("urn:cast-ocast-org:service:cast:1", mSearchResponse?.searchTarget)
-    }
+            // Then
+            assertEquals("http://10.0.0.28:56790/device-desc.xml", mSearchResponse?.location)
+            assertEquals("Linux/4.9 UPnP/1.1 quick_ssdp/1.1", mSearchResponse?.server)
+            assertEquals("uuid:b042f955-9ae7-44a8-ba6c-0009743932f7", mSearchResponse?.usn)
+            assertEquals("urn:cast-ocast-org:service:cast:1", mSearchResponse?.searchTarget)
+        }
 
-    @Test
-    fun parseMSearchResponseWithMissingMandatoryHeaderFails() {
-        // Given
-        val mSearchResponseString = "HTTP/1.1 200 OK\r\n" +
+        @Test
+        fun parseMSearchResponseWithMissingMandatoryHeaderFails() {
+            // Given
+            val mSearchResponseString = "HTTP/1.1 200 OK\r\n" +
                 "LOCATION: http://10.0.0.28:56790/device-desc.xml\r\n" +
                 "CACHE-CONTROL: max-age=1800\r\n" +
                 "EXT:\r\n" +
@@ -113,17 +117,17 @@ class SsdpMessageTest {
                 // Mandatory USN header is missing
                 "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
 
-        // When
-        val mSearchResponse = SsdpMessage.fromData(mSearchResponseString.toByteArray())
+            // When
+            val mSearchResponse = SsdpMessage.fromData(mSearchResponseString.toByteArray())
 
-        // Then
-        assertNull(mSearchResponse)
-    }
+            // Then
+            assertNull(mSearchResponse)
+        }
 
-    @Test
-    fun parseMSearchResponseWithMisplacedStartLineFails() {
-        // Given
-        val mSearchResponseString = "LOCATION: http://10.0.0.28:56790/device-desc.xml\r\n" +
+        @Test
+        fun parseMSearchResponseWithMisplacedStartLineFails() {
+            // Given
+            val mSearchResponseString = "LOCATION: http://10.0.0.28:56790/device-desc.xml\r\n" +
                 "HTTP/1.1 200 OK\r\n" + // Start line is misplaced
                 "CACHE-CONTROL: max-age=1800\r\n" +
                 "EXT:\r\n" +
@@ -133,17 +137,17 @@ class SsdpMessageTest {
                 "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7\r\n" +
                 "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
 
-        // When
-        val mSearchResponse = SsdpMessage.fromData(mSearchResponseString.toByteArray())
+            // When
+            val mSearchResponse = SsdpMessage.fromData(mSearchResponseString.toByteArray())
 
-        // Then
-        assertNull(mSearchResponse)
-    }
+            // Then
+            assertNull(mSearchResponse)
+        }
 
-    @Test
-    fun parseMSearchResponseWithLowercaseHeadersSucceeds() {
-        // Given
-        val mSearchResponseString = "HTTP/1.1 200 OK\r\n" +
+        @Test
+        fun parseMSearchResponseWithLowercaseHeadersSucceeds() {
+            // Given
+            val mSearchResponseString = "HTTP/1.1 200 OK\r\n" +
                 "location: http://10.0.0.28:56790/device-desc.xml\r\n" +
                 "cache-control: max-age=1800\r\n" +
                 "ext:\r\n" +
@@ -153,14 +157,49 @@ class SsdpMessageTest {
                 "usn: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7\r\n" +
                 "wakeup: MAC=00:09:74:39:32:f7;Timeout=10"
 
-        // When
-        val mSearchResponse = SsdpMessage.fromData(mSearchResponseString.toByteArray()) as? SsdpMSearchResponse
+            // When
+            val mSearchResponse = SsdpMessage.fromData(mSearchResponseString.toByteArray()) as? SsdpMSearchResponse
 
-        // Then
-        assertEquals("http://10.0.0.28:56790/device-desc.xml", mSearchResponse?.location)
-        assertEquals("Linux/4.9 UPnP/1.1 quick_ssdp/1.1", mSearchResponse?.server)
-        assertEquals("uuid:b042f955-9ae7-44a8-ba6c-0009743932f7", mSearchResponse?.usn)
-        assertEquals("urn:cast-ocast-org:service:cast:1", mSearchResponse?.searchTarget)
+            // Then
+            assertEquals("http://10.0.0.28:56790/device-desc.xml", mSearchResponse?.location)
+            assertEquals("Linux/4.9 UPnP/1.1 quick_ssdp/1.1", mSearchResponse?.server)
+            assertEquals("uuid:b042f955-9ae7-44a8-ba6c-0009743932f7", mSearchResponse?.usn)
+            assertEquals("urn:cast-ocast-org:service:cast:1", mSearchResponse?.searchTarget)
+        }
+
+        //endregion
+
+        @Test
+        fun parseEmptyMessageFails() {
+            // Given
+            val messageString = ""
+
+            // When
+            val message = SsdpMessage.fromData(messageString.toByteArray())
+
+            // Then
+            assertNull(message)
+        }
+
+        /**
+         * Asserts that two SSDP messages are equal.
+         *
+         * @param expected Expected SSDP message.
+         * @param actual The SSDP message to check against [expected].
+         */
+        private fun assertSsdpMessageEquals(expected: String, actual: String) {
+            val newlineRegex = "\\R".toRegex()
+            val expectedLines = expected.split(newlineRegex).toMutableList()
+            val actualLines = actual.split(newlineRegex).toMutableList()
+
+            // Assert start lines are the same
+            val expectedStartLine = expectedLines.removeAt(0)
+            val actualStartLine = actualLines.removeAt(0)
+            assertEquals(expectedStartLine, actualStartLine)
+
+            // Assert other lines are the same, possibly in a different order
+            assertEquals(expectedLines.sort(), actualLines.sort())
+        }
     }
 
     @RunWith(Parameterized::class)
@@ -195,39 +234,5 @@ class SsdpMessageTest {
             assertEquals("uuid:b042f955-9ae7-44a8-ba6c-0009743932f7", mSearchResponse?.usn)
             assertEquals("urn:cast-ocast-org:service:cast:1", mSearchResponse?.searchTarget)
         }
-    }
-
-    //endregion
-
-    @Test
-    fun parseEmptyMessageFails() {
-        // Given
-        val messageString = ""
-
-        // When
-        val message = SsdpMessage.fromData(messageString.toByteArray())
-
-        // Then
-        assertNull(message)
-    }
-
-    /**
-     * Asserts that two SSDP messages are equal.
-     *
-     * @param expected Expected SSDP message.
-     * @param actual The SSDP message to check against [expected].
-     */
-    private fun assertSsdpMessageEquals(expected: String, actual: String) {
-        val newlineRegex = "\\R".toRegex()
-        val expectedLines = expected.split(newlineRegex).toMutableList()
-        val actualLines = actual.split(newlineRegex).toMutableList()
-
-        // Assert start lines are the same
-        val expectedStartLine = expectedLines.removeAt(0)
-        val actualStartLine = actualLines.removeAt(0)
-        assertEquals(expectedStartLine, actualStartLine)
-
-        // Assert other lines are the same, possibly in a different order
-        assertEquals(expectedLines.sort(), actualLines.sort())
     }
 }

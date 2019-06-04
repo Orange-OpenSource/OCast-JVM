@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ocast.dial
+package org.ocast.dial.models
 
 import org.ocast.common.utils.XMLParser
 import java.net.MalformedURLException
@@ -30,26 +30,26 @@ import java.net.URL
  * @param instancePath The application instance path. Used to build the instance URL.
  * @param additionalData The additional data for this application.
  */
-internal data class DialApplication<T>(
+internal data class DialApplication(
     val name: String,
     val isStopAllowed: Boolean,
     val state: State? = null,
     private val instancePath: String? = null,
-    val additionalData: T
-) where T : DialAdditionalData {
+    val additionalData: OCastAdditionalData
+) {
 
     companion object {
 
         /**
-         * Decodes an XML string to an OCast [DialApplication].
+         * Decodes an XML string to a [DialApplication].
          *
          * @param xml The XML string to decode.
          * @return The decoded application.
          * @throws Exception If an error occurs while decoding the DIAL application.
          */
         @Throws(Exception::class)
-        fun decode(xml: String): DialApplication<OCastAdditionalData> {
-            return Decoder().decode(xml)
+        fun decode(xml: String): DialApplication {
+            return Decoder.decode(xml)
         }
     }
 
@@ -59,7 +59,7 @@ internal data class DialApplication<T>(
      * @param baseURL The base URL of the DIAL server.
      * @return The instance URL, or `null` if the URL could not be generated.
      */
-    fun instanceURL(baseURL: URL): URL? {
+    fun getInstanceURL(baseURL: URL): URL? {
         return runCatching { URL(instancePath) }
             .recoverCatching { URL(baseURL, instancePath ?: "run") }
             .getOrNull()
@@ -94,27 +94,28 @@ internal data class DialApplication<T>(
     }
 
     /**
-     * This class decodes instances of [DialApplication] from XML strings.
+     * This object decodes instances of [DialApplication] from XML strings.
      */
-    private class Decoder {
+    private object Decoder {
 
-        companion object {
-
-            private const val XML_SERVICE_ELEMENT_NAME = "service"
-            private const val XML_NAME_ELEMENT_NAME = "name"
-            private const val XML_OPTIONS_ELEMENT_NAME = "options"
-            private const val XML_STATE_ELEMENT_NAME = "state"
-            private const val XML_LINK_ELEMENT_NAME = "link"
-            private const val XML_HREF_ATTRIBUTE_NAME = "href"
-            private const val XML_ADDITIONAL_DATA_ELEMENT_NAME = "additionalData"
-            private const val XML_ALLOW_STOP_ATTRIBUTE_NAME = "allowStop"
-            private const val XML_OCAST_APP_2_APP_URL_ELEMENT_NAME = "ocast:X_OCAST_App2AppURL"
-            private const val XML_OCAST_VERSION_ELEMENT_NAME = "ocast:X_OCAST_Version"
-            private const val XML_TRUE_TEXT_VALUE = "true"
-        }
+        private const val XML_SERVICE_ELEMENT_NAME = "service"
+        private const val XML_NAME_ELEMENT_NAME = "name"
+        private const val XML_OPTIONS_ELEMENT_NAME = "options"
+        private const val XML_STATE_ELEMENT_NAME = "state"
+        private const val XML_LINK_ELEMENT_NAME = "link"
+        private const val XML_HREF_ATTRIBUTE_NAME = "href"
+        private const val XML_ADDITIONAL_DATA_ELEMENT_NAME = "additionalData"
+        private const val XML_ALLOW_STOP_ATTRIBUTE_NAME = "allowStop"
+        private const val XML_OCAST_APP_2_APP_URL_ELEMENT_NAME = "ocast:X_OCAST_App2AppURL"
+        private const val XML_OCAST_VERSION_ELEMENT_NAME = "ocast:X_OCAST_Version"
+        private const val XML_TRUE_TEXT_VALUE = "true"
+        private const val XML_RUNNING_STATE_TEXT_VALUE = "running"
+        private const val XML_STOPPED_STATE_TEXT_VALUE = "stopped"
+        private const val XML_HIDDEN_STATE_TEXT_VALUE = "hidden"
+        private const val XML_INSTALLABLE_STATE_TEXT_VALUE = "installable"
 
         /**
-         * Decodes an XML string to an OCast [DialApplication].
+         * Decodes an XML string to a [DialApplication].
          * Below is an XML string example:
          * <?xml​ ​version="1.0"​ ​encoding="UTF-8"?>
          * <service​ ​xmlns="urn:dial-multiscreen-org:schemas:dial"​ ​dialVer="1.7">
@@ -133,7 +134,7 @@ internal data class DialApplication<T>(
          * @throws Exception If an error occurs while decoding the DIAL application.
          */
         @Throws(Exception::class)
-        fun decode(xml: String): DialApplication<OCastAdditionalData> {
+        fun decode(xml: String): DialApplication {
             val rootXMLElement = XMLParser.parse(xml)
             val serviceXMLElement = rootXMLElement[XML_SERVICE_ELEMENT_NAME]
             val name = serviceXMLElement[XML_NAME_ELEMENT_NAME].value
@@ -153,7 +154,13 @@ internal data class DialApplication<T>(
                 .getOrNull(XML_OCAST_VERSION_ELEMENT_NAME)
                 ?.value
 
-            return DialApplication(name, isStopAllowed, state, instancePath, OCastAdditionalData(webSocketURL, version))
+            return DialApplication(
+                name,
+                isStopAllowed,
+                state,
+                instancePath,
+                OCastAdditionalData(webSocketURL, version)
+            )
         }
 
         /**
@@ -167,12 +174,12 @@ internal data class DialApplication<T>(
         @Throws(DialError::class, MalformedURLException::class)
         private fun decodeState(rawState: String): State {
             return when (rawState) {
-                "running" -> State.Running
-                "stopped" -> State.Stopped
-                "hidden" -> State.Hidden
+                XML_RUNNING_STATE_TEXT_VALUE -> State.Running
+                XML_STOPPED_STATE_TEXT_VALUE -> State.Stopped
+                XML_HIDDEN_STATE_TEXT_VALUE -> State.Hidden
                 else -> {
                     val installationUrlString = try {
-                        rawState.split("installable=").elementAt(1)
+                        rawState.split("$XML_INSTALLABLE_STATE_TEXT_VALUE=").elementAt(1)
                     } catch (exception: Exception) {
                         throw DialError("Unknown DIAL application state")
                     }
@@ -184,11 +191,6 @@ internal data class DialApplication<T>(
 }
 
 /**
- * A base class that represents additional data in a DIAL application information response.
- */
-internal open class DialAdditionalData
-
-/**
  * This class represents the additional data related to OCast when receiving DIAL application information response.
  *
  * @param webSocketURL The OCast web socket URL.
@@ -197,4 +199,4 @@ internal open class DialAdditionalData
 internal data class OCastAdditionalData(
     val webSocketURL: URI? = null,
     val version: String? = null
-) : DialAdditionalData()
+)
