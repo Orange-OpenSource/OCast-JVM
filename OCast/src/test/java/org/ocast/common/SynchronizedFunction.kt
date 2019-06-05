@@ -24,34 +24,34 @@ import java.util.concurrent.TimeUnit
  * This is the parent class for all SynchronizedFunctionN classes.
  *
  * @param function The function to synchronize on.
+ * @param count The number of times countDown() must be called before threads can pass through await()
  */
-abstract class SynchronizedFunction<R>(protected open val function: Function<R>) {
+abstract class SynchronizedFunction<R>(protected open val function: Function<R>, private val count: Int) {
 
     /** The latch. */
-    private val latch = CountDownLatch(1)
+    private val latch = CountDownLatch(count)
 
     /**
-     * Sets the function as invoked.
-     * This releases the waiting threads if waitUntilInvoked has been called before.
+     * Decrements the count of the [function] invocation, releasing all waiting threads if the count reaches zero.
      */
-    protected fun setInvoked() {
+    protected fun countDown() {
         latch.countDown()
     }
 
     /**
-     * Blocks the current thread until setInvoked is called.
+     * Causes the current thread to wait until the [function] has been invoked [count] times, unless the thread is interrupted.
      */
-    fun waitUntilInvoked() {
+    fun await() {
         latch.await()
     }
 
     /**
-     * Blocks the current thread until setInvoked is called, or until the specified timeout has elapsed.
+     * Causes the current thread to wait until the [function] has been invoked [count] times, unless the thread is interrupted, or the specified waiting time elapses.
      *
      * @param timeout The maximum time to wait.
      * @param unit The time unit for the [timeout].
      */
-    fun waitUntilInvoked(timeout: Long, unit: TimeUnit) {
+    fun await(timeout: Long, unit: TimeUnit) {
         latch.await(timeout, unit)
     }
 }
@@ -60,12 +60,13 @@ abstract class SynchronizedFunction<R>(protected open val function: Function<R>)
  * This class represents a synchronized function with 1 parameter.
  *
  * @param function The function to synchronize on.
+ * @param count The number of times countDown() must be called before threads can pass through await()
  */
-class SynchronizedFunction1<R, S>(override val function: Function1<R, S>) : SynchronizedFunction<S>(function), Function1<R, S> {
+class SynchronizedFunction1<R, S>(override val function: Function1<R, S>, count: Int = 1) : SynchronizedFunction<S>(function, count), Function1<R, S> {
 
     override fun invoke(p1: R): S {
         val returnValue = function.invoke(p1)
-        setInvoked()
+        countDown()
 
         return returnValue
     }

@@ -33,9 +33,9 @@ import java.util.Locale
 import java.util.TimeZone
 
 /**
- * This class handles the retrieval of OCast devices through the DIAL protocol.
+ * This class handles the retrieval of OCast devices through the UPnP protocol.
  */
-internal open class DialClient {
+internal open class UpnpClient {
 
     /** The OkHttp client which will send device description requests. */
     private val client = OkHttpClient()
@@ -47,7 +47,7 @@ internal open class DialClient {
 
     /**
      * Retrieves a device.
-     * This method launches a device description request according to the DIAL protocol.
+     * This method launches a device description request according to the UPnP protocol.
      *
      * @param location The device location from the SSDP M-SEARCH response.
      * @param onComplete The lambda that will be called when the device is retrieved. The [UpnpDevice] parameter of the lambda is null if the device could not be retrieved.
