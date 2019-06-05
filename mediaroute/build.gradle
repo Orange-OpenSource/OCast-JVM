@@ -71,17 +71,11 @@ dependencies {
     implementation "com.android.support:appcompat-v7:$support_lib_version"
     implementation "com.android.support:mediarouter-v7:$support_lib_version"
 
-    def withoutHamcrest = {
-        exclude group: 'org.hamcrest', module: 'hamcrest-core'
-        exclude group: 'org.hamcrest', module: 'hamcrest-library'
-        exclude group: 'org.hamcrest', module: 'hamcrest-integration'
-    }
-
     // Tests Android
     testImplementation "com.android.support:multidex:$multidex_version"
 
-    androidTestImplementation "com.android.support.test:runner:$runner_version", withoutHamcrest
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$espresso_version", withoutHamcrest
+    androidTestImplementation "com.android.support.test:runner:$runner_version"
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:$espresso_version"
 
     androidTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockito_kotlin_version"
     androidTestImplementation "org.powermock:powermock-api-mockito2:$powermock_version"
