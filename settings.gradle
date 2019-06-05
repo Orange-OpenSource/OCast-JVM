@@ -1,1 +1,1 @@
-include ':OCast', ':sampleDesktopJava', ':sampleDesktopKotlin', ':sampleMobile'
+include ':OCast', ':sampleDesktopJava', ':sampleDesktopKotlin', ':sampleMobile', ':mediaroute'

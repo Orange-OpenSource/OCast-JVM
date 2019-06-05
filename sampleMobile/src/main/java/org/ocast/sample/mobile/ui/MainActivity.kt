@@ -20,14 +20,20 @@ import android.arch.lifecycle.ViewModelProviders
 import android.databinding.DataBindingUtil
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.view.MenuItemCompat
 import android.support.v7.app.AppCompatDelegate
+import android.support.v7.app.MediaRouteActionProvider
 import android.support.v7.media.MediaRouter
+import android.util.Log
+import android.view.Menu
 import org.ocast.core.Device
 import org.ocast.core.EventListener
+import org.ocast.core.ReferenceDevice
 import org.ocast.core.models.CustomEvent
 import org.ocast.core.models.MetadataChangedEvent
 import org.ocast.core.models.PlaybackStatusEvent
 import org.ocast.core.models.UpdateStatusEvent
+import org.ocast.mediaroute.OCastMediaRouteHelper
 import org.ocast.sample.mobile.R
 import org.ocast.sample.mobile.databinding.ActivityMainBinding
 import org.ocast.sample.mobile.utils.updateValue
@@ -42,7 +48,7 @@ class MainActivity : AppCompatActivity(), EventListener {
     private lateinit var mainViewModel: MainViewModel
 
     private var mediaRouterCallback: MediaRouter.Callback = MediaRouterCallback()
-    // private lateinit var oCastRouteHelper: OCastRouteHelper
+    private lateinit var oCastMediaRouteHelper: OCastMediaRouteHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,25 +62,28 @@ class MainActivity : AppCompatActivity(), EventListener {
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
 
-        // oCastRouteHelper = OCastRouteHelper(this, UICallbackWrapper(), listOf(ReferenceDevice::class.java))
+        oCastMediaRouteHelper = OCastMediaRouteHelper(this, listOf(ReferenceDevice::class.java))
+        oCastMediaRouteHelper.addMediaRouterCallback(mediaRouterCallback)
     }
 
     override fun onStart() {
         super.onStart()
 
-        // oCastRouteHelper.addPublicEventListener(this)
-
-        // TODO pour test
-        mainViewModel.deviceConnected.updateValue(true)
+        oCastMediaRouteHelper.addEventListener(this)
     }
 
     override fun onStop() {
         super.onStop()
 
-        // oCastRouteHelper.removePublicEventListener(this)
+        oCastMediaRouteHelper.removeEventListener(this)
     }
 
-    /*
+    override fun onDestroy() {
+        super.onDestroy()
+
+        oCastMediaRouteHelper.removeMediaRouterCallback(mediaRouterCallback)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         super.onCreateOptionsMenu(menu)
 
@@ -85,11 +94,10 @@ class MainActivity : AppCompatActivity(), EventListener {
         val actionProvider = MenuItemCompat.getActionProvider(mediaRouteMenuItem) as MediaRouteActionProvider
 
         // Set the MediaRouteActionProvider selector for device discovery.
-        actionProvider.routeSelector = oCastRouteHelper.mediaRouteSelector
+        actionProvider.routeSelector = oCastMediaRouteHelper.mediaRouteSelector
 
         return true
     }
-    */
 
     override fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {
         if (mainViewModel.selectedDevice.value == device) {
@@ -110,51 +118,41 @@ class MainActivity : AppCompatActivity(), EventListener {
     }
 
     private inner class MediaRouterCallback : MediaRouter.Callback() {
-        override fun onRouteSelected(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
 
-            /*
-            val device = oCastRouteHelper.getDeviceFromRoute(route)
+        override fun onRouteSelected(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
+            val device = oCastMediaRouteHelper.getDeviceFromRoute(route)
             if (device != null) {
                 Log.d(TAG, "OCast device selected: ${device.friendlyName}")
-                viewModel.selectedDevice.updateValue(device)
+                mainViewModel.selectedDevice.updateValue(device)
                 // TODO connect device
-                viewModel.deviceConnected.updateValue(true)
+                mainViewModel.deviceConnected.updateValue(true)
             }
-            */
         }
 
         override fun onRouteUnselected(mediaRouter: MediaRouter?, route: MediaRouter.RouteInfo?) {
-            /*
-            if (oCastRouteHelper.isOCastRouteInfo(route)) {
+            if (oCastMediaRouteHelper.isOCastRouteInfo(route)) {
                 Log.d(TAG, "OCast device unselected")
                 // TODO : disconnect device
-                viewModel.deviceConnected.updateValue(false)
+                mainViewModel.deviceConnected.updateValue(false)
             }
-            */
         }
 
         override fun onRouteRemoved(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
-            /*
-            if (oCastRouteHelper.isOCastRouteInfo(route)) {
+            if (oCastMediaRouteHelper.isOCastRouteInfo(route)) {
                 Log.d(TAG, "OCast device removed")
             }
-            */
         }
 
         override fun onRouteAdded(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
-            /*
-            if (oCastRouteHelper.isOCastRouteInfo(route)) {
+            if (oCastMediaRouteHelper.isOCastRouteInfo(route)) {
                 Log.d(TAG, "OCast device added")
             }
-            */
         }
 
         override fun onRouteChanged(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
-            /*
-            if (oCastRouteHelper.isOCastRouteInfo(route)) {
+            if (oCastMediaRouteHelper.isOCastRouteInfo(route)) {
                 Log.d(TAG, "OCast device changed")
             }
-            */
         }
     }
 }

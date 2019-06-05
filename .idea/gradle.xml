@@ -9,6 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/OCast" />
+            <option value="$PROJECT_DIR$/mediaroute" />
             <option value="$PROJECT_DIR$/sampleDesktopJava" />
             <option value="$PROJECT_DIR$/sampleDesktopKotlin" />
             <option value="$PROJECT_DIR$/sampleMobile" />

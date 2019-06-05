@@ -48,12 +48,12 @@ public abstract class Device {
     // Device configuration
 
     @NotNull
-    protected String getUuid() {
+    public String getUuid() {
         return upnpDevice.getUuid();
     }
 
     @NotNull
-    protected URL getApplicationURL() {
+    public URL getApplicationURL() {
         return upnpDevice.getApplicationURL();
     }
 
