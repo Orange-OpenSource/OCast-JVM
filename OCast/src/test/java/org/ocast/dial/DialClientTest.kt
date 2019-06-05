@@ -33,6 +33,10 @@ import org.ocast.common.HttpClientTest
 import org.ocast.common.SynchronizedFunction1
 import org.ocast.common.removeXMLElement
 import org.ocast.dial.models.DialApplication
+import org.ocast.dial.models.DialApplication.Decoder.XML_HIDDEN_STATE_TEXT_VALUE
+import org.ocast.dial.models.DialApplication.Decoder.XML_INSTALLABLE_STATE_TEXT_VALUE
+import org.ocast.dial.models.DialApplication.Decoder.XML_RUNNING_STATE_TEXT_VALUE
+import org.ocast.dial.models.DialApplication.Decoder.XML_STOPPED_STATE_TEXT_VALUE
 import java.net.URI
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -466,10 +470,10 @@ internal class DialClientTest {
             @JvmStatic
             @Parameterized.Parameters
             fun data() = listOf(
-                "running" to DialApplication.State.Running,
-                "stopped" to DialApplication.State.Stopped,
-                "installable=http://" to DialApplication.State.Installable(URL("http://")),
-                "hidden" to DialApplication.State.Hidden
+                XML_RUNNING_STATE_TEXT_VALUE to DialApplication.State.Running,
+                XML_STOPPED_STATE_TEXT_VALUE to DialApplication.State.Stopped,
+                "$XML_INSTALLABLE_STATE_TEXT_VALUE=http://" to DialApplication.State.Installable(URL("http://")),
+                XML_HIDDEN_STATE_TEXT_VALUE to DialApplication.State.Hidden
             )
         }
 

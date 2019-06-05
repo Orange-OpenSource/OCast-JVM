@@ -96,23 +96,23 @@ internal data class DialApplication(
     /**
      * This object decodes instances of [DialApplication] from XML strings.
      */
-    private object Decoder {
+    internal object Decoder {
 
-        private const val XML_SERVICE_ELEMENT_NAME = "service"
-        private const val XML_NAME_ELEMENT_NAME = "name"
-        private const val XML_OPTIONS_ELEMENT_NAME = "options"
-        private const val XML_STATE_ELEMENT_NAME = "state"
-        private const val XML_LINK_ELEMENT_NAME = "link"
-        private const val XML_HREF_ATTRIBUTE_NAME = "href"
-        private const val XML_ADDITIONAL_DATA_ELEMENT_NAME = "additionalData"
-        private const val XML_ALLOW_STOP_ATTRIBUTE_NAME = "allowStop"
-        private const val XML_OCAST_APP_2_APP_URL_ELEMENT_NAME = "ocast:X_OCAST_App2AppURL"
-        private const val XML_OCAST_VERSION_ELEMENT_NAME = "ocast:X_OCAST_Version"
-        private const val XML_TRUE_TEXT_VALUE = "true"
-        private const val XML_RUNNING_STATE_TEXT_VALUE = "running"
-        private const val XML_STOPPED_STATE_TEXT_VALUE = "stopped"
-        private const val XML_HIDDEN_STATE_TEXT_VALUE = "hidden"
-        private const val XML_INSTALLABLE_STATE_TEXT_VALUE = "installable"
+        const val XML_SERVICE_ELEMENT_NAME = "service"
+        const val XML_NAME_ELEMENT_NAME = "name"
+        const val XML_OPTIONS_ELEMENT_NAME = "options"
+        const val XML_STATE_ELEMENT_NAME = "state"
+        const val XML_LINK_ELEMENT_NAME = "link"
+        const val XML_HREF_ATTRIBUTE_NAME = "href"
+        const val XML_ADDITIONAL_DATA_ELEMENT_NAME = "additionalData"
+        const val XML_ALLOW_STOP_ATTRIBUTE_NAME = "allowStop"
+        const val XML_OCAST_APP_2_APP_URL_ELEMENT_NAME = "ocast:X_OCAST_App2AppURL"
+        const val XML_OCAST_VERSION_ELEMENT_NAME = "ocast:X_OCAST_Version"
+        const val XML_TRUE_TEXT_VALUE = "true"
+        const val XML_RUNNING_STATE_TEXT_VALUE = "running"
+        const val XML_STOPPED_STATE_TEXT_VALUE = "stopped"
+        const val XML_HIDDEN_STATE_TEXT_VALUE = "hidden"
+        const val XML_INSTALLABLE_STATE_TEXT_VALUE = "installable"
 
         /**
          * Decodes an XML string to a [DialApplication].
