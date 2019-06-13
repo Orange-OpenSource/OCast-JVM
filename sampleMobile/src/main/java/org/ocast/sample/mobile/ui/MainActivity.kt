@@ -30,6 +30,7 @@ import org.ocast.core.Device
 import org.ocast.core.EventListener
 import org.ocast.core.ReferenceDevice
 import org.ocast.core.models.CustomEvent
+import org.ocast.core.models.Media
 import org.ocast.core.models.MetadataChangedEvent
 import org.ocast.core.models.PlaybackStatusEvent
 import org.ocast.core.models.UpdateStatusEvent
@@ -98,6 +99,31 @@ class MainActivity : AppCompatActivity(), EventListener {
         return true
     }
 
+    private fun startApplication(device: Device) {
+        device.applicationName = "Orange-DefaultReceiver-DEV"
+        device.startApplication({
+            prepareMedia(device)
+        }, {
+            oCastError -> Log.e(TAG, "startApplication error $oCastError.errorMessage")
+        })
+    }
+
+    private fun prepareMedia(device: Device) {
+        device.prepareMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
+            1,
+            "Big Buck Bunny",
+            "sampleAppKotlin",
+            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+            Media.Type.VIDEO,
+            Media.TransferMode.STREAMED,
+            true,
+            null, {
+                mainViewModel.deviceConnected.updateValue(true)
+            }, {
+                oCastError -> Log.e(TAG, "prepareMedia error $oCastError.status")
+            })
+    }
+
     override fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {
         if (mainViewModel.selectedDevice.value == device) {
             mainViewModel.playbackStatus.updateValue(status)
@@ -123,15 +149,15 @@ class MainActivity : AppCompatActivity(), EventListener {
             if (device != null) {
                 Log.d(TAG, "OCast device selected: ${device.friendlyName}")
                 mainViewModel.selectedDevice.updateValue(device)
-                // TODO connect device
-                mainViewModel.deviceConnected.updateValue(true)
+                startApplication(device)
             }
         }
 
         override fun onRouteUnselected(mediaRouter: MediaRouter?, route: MediaRouter.RouteInfo?) {
-            if (OCastMediaRouteHelper.isOCastRouteInfo(route)) {
+            val device = OCastMediaRouteHelper.getDeviceFromRoute(route)
+            if (device != null) {
                 Log.d(TAG, "OCast device unselected")
-                // TODO : disconnect device
+                device.stopApplication({}, {})
                 mainViewModel.deviceConnected.updateValue(false)
             }
         }

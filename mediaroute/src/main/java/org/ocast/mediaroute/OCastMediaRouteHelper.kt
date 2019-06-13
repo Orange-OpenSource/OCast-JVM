@@ -63,9 +63,7 @@ object OCastMediaRouteHelper {
      */
     fun addMediaRouterCallback(mediaRouterCallback: MediaRouter.Callback) {
         mainHandler.post {
-            mediaRouteSelector?.let {
-                mediaRouter?.addCallback(it, mediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
-            }
+            mediaRouter?.addCallback(mediaRouteSelector, mediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
         }
     }
 
@@ -85,13 +83,7 @@ object OCastMediaRouteHelper {
         return oCastCenter.devices.firstOrNull { it.uuid == mediaRouteDevice?.uuid }
     }
 
-    fun isOCastRouteInfo(routeInfo: MediaRouter.RouteInfo?): Boolean {
-        return mediaRouteSelector?.let {
-            routeInfo?.matchesSelector(it) == true
-        } ?: run {
-            false
-        }
-    }
+    fun isOCastRouteInfo(routeInfo: MediaRouter.RouteInfo?) = routeInfo?.matchesSelector(mediaRouteSelector) == true
 
     fun addEventListener(listener: EventListener) {
         oCastCenter.addEventListener(listener)
