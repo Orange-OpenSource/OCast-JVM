@@ -24,7 +24,6 @@ import org.ocast.core.Device
 import org.ocast.core.models.Media
 import org.ocast.core.models.MetadataChangedEvent
 import org.ocast.core.models.PlaybackStatusEvent
-import org.ocast.core.models.TrackDescription
 
 class MainViewModel : ViewModel() {
 
