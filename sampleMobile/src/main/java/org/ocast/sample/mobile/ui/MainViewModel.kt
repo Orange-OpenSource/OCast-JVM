@@ -40,12 +40,6 @@ class MainViewModel : ViewModel() {
     val mediaState: LiveData<Media.PlayerState> = Transformations.map(playbackStatus) { it?.state }
 
     val mediaMetadata = MutableLiveData<MetadataChangedEvent>()
-    val mediaAudioTracks = MutableLiveData<List<TrackDescription?>>()
-    val mediaAudioTrack = MutableLiveData<TrackDescription?>()
-    val mediaAudioTrackPosition = MutableLiveData<Int>()
-    val mediaSubtitleTracks = MutableLiveData<List<TrackDescription?>>()
-    val mediaSubtitleTrack = MutableLiveData<TrackDescription?>()
-    val mediaSubtitleTrackPosition = MutableLiveData<Int>()
     val mediaTitle: LiveData<String> = Transformations.map(mediaMetadata) { it?.title }
 
     fun onPlayPauseButtonClick() {

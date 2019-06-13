@@ -32,6 +32,7 @@ class OCastMediaRouteHelper(context: Context, devices: List<Class<out Device>>) 
     private val oCastCenter = OCastCenter(AndroidUIThreadCallbackWrapper())
     private val mainHandler = Handler(Looper.getMainLooper())
     private val mediaRouter: MediaRouter
+    private val oCastProvider: OCastMediaRouteProvider
 
     val mediaRouteSelector: MediaRouteSelector
     val devices: List<Device>
@@ -44,12 +45,16 @@ class OCastMediaRouteHelper(context: Context, devices: List<Class<out Device>>) 
         devices.forEach {
             oCastCenter.registerDevice(it)
         }
-        val oCastProvider = OCastMediaRouteProvider(context.applicationContext, oCastCenter, mainHandler)
+        oCastProvider = OCastMediaRouteProvider(context.applicationContext, oCastCenter, mainHandler)
         mediaRouter = MediaRouter.getInstance(context.applicationContext)
         mediaRouter.addProvider(oCastProvider)
         mediaRouteSelector = MediaRouteSelector.Builder()
             .addControlCategory(OCastMediaRouteProvider.FILTER_CATEGORY_OCAST)
             .build()
+    }
+
+    fun release() {
+        mediaRouter.removeProvider(oCastProvider)
     }
 
     /**

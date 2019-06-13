@@ -82,6 +82,7 @@ class MainActivity : AppCompatActivity(), EventListener {
         super.onDestroy()
 
         oCastMediaRouteHelper.removeMediaRouterCallback(mediaRouterCallback)
+        oCastMediaRouteHelper.release()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
