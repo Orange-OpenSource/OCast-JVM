@@ -27,34 +27,33 @@ import org.ocast.core.Device
 import org.ocast.core.OCastCenter
 import org.ocast.core.EventListener
 
-class OCastMediaRouteHelper(context: Context, devices: List<Class<out Device>>) {
+object OCastMediaRouteHelper {
 
     private val oCastCenter = OCastCenter(AndroidUIThreadCallbackWrapper())
     private val mainHandler = Handler(Looper.getMainLooper())
-    private val mediaRouter: MediaRouter
-    private val oCastProvider: OCastMediaRouteProvider
+    private var mediaRouter: MediaRouter? = null
+    private var initialized = false
 
-    val mediaRouteSelector: MediaRouteSelector
+    var mediaRouteSelector = MediaRouteSelector.Builder()
+        .addControlCategory(OCastMediaRouteProvider.FILTER_CATEGORY_OCAST)
+        .build()
     val devices: List<Device>
         get() = oCastCenter.devices
 
-    init {
-        if (Looper.getMainLooper() != Looper.myLooper()) {
-            throw RuntimeException("${this::class.java.simpleName} should be instantiated on the UI thread.")
-        }
-        devices.forEach {
-            oCastCenter.registerDevice(it)
-        }
-        oCastProvider = OCastMediaRouteProvider(context.applicationContext, oCastCenter, mainHandler)
-        mediaRouter = MediaRouter.getInstance(context.applicationContext)
-        mediaRouter.addProvider(oCastProvider)
-        mediaRouteSelector = MediaRouteSelector.Builder()
-            .addControlCategory(OCastMediaRouteProvider.FILTER_CATEGORY_OCAST)
-            .build()
-    }
+    fun init(context: Context, devices: List<Class<out Device>>) {
 
-    fun release() {
-        mediaRouter.removeProvider(oCastProvider)
+        if (!initialized) {
+            if (Looper.getMainLooper() != Looper.myLooper()) {
+                throw RuntimeException("${this::class.java.simpleName} should be instantiated on the UI thread.")
+            }
+            initialized = true
+            devices.forEach {
+                oCastCenter.registerDevice(it)
+            }
+            val oCastProvider = OCastMediaRouteProvider(context.applicationContext, oCastCenter, mainHandler)
+            mediaRouter = MediaRouter.getInstance(context.applicationContext)
+            mediaRouter?.addProvider(oCastProvider)
+        }
     }
 
     /**
@@ -64,7 +63,9 @@ class OCastMediaRouteHelper(context: Context, devices: List<Class<out Device>>) 
      */
     fun addMediaRouterCallback(mediaRouterCallback: MediaRouter.Callback) {
         mainHandler.post {
-            mediaRouter.addCallback(mediaRouteSelector, mediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
+            mediaRouteSelector?.let {
+                mediaRouter?.addCallback(it, mediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
+            }
         }
     }
 
@@ -75,7 +76,7 @@ class OCastMediaRouteHelper(context: Context, devices: List<Class<out Device>>) 
      */
     fun removeMediaRouterCallback(mediaRouterCallback: MediaRouter.Callback) {
         mainHandler.post {
-            mediaRouter.removeCallback(mediaRouterCallback)
+            mediaRouter?.removeCallback(mediaRouterCallback)
         }
     }
 
@@ -84,7 +85,13 @@ class OCastMediaRouteHelper(context: Context, devices: List<Class<out Device>>) 
         return oCastCenter.devices.firstOrNull { it.uuid == mediaRouteDevice?.uuid }
     }
 
-    fun isOCastRouteInfo(routeInfo: MediaRouter.RouteInfo?) = routeInfo?.matchesSelector(mediaRouteSelector) == true
+    fun isOCastRouteInfo(routeInfo: MediaRouter.RouteInfo?): Boolean {
+        return mediaRouteSelector?.let {
+            routeInfo?.matchesSelector(it) == true
+        } ?: run {
+            false
+        }
+    }
 
     fun addEventListener(listener: EventListener) {
         oCastCenter.addEventListener(listener)
@@ -96,13 +103,13 @@ class OCastMediaRouteHelper(context: Context, devices: List<Class<out Device>>) 
 
     internal fun addMediaRouteProvider(mediaRouteProvider: MediaRouteProvider) {
         mainHandler.post {
-            mediaRouter.addProvider(mediaRouteProvider)
+            mediaRouter?.addProvider(mediaRouteProvider)
         }
     }
 
     internal fun removeMediaRouteProvider(mediaRouteProvider: MediaRouteProvider) {
         mainHandler.post {
-            mediaRouter.removeProvider(mediaRouteProvider)
+            mediaRouter?.removeProvider(mediaRouteProvider)
         }
     }
 }
