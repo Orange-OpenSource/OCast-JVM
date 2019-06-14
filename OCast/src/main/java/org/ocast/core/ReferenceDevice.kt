@@ -377,7 +377,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         onError.wrapRun(throwable)
     }
 
-    private fun <T> Consumer<T>.wrapRun(param: T) {
+    protected fun <T> Consumer<T>.wrapRun(param: T) {
         callbackWrapper.wrap(this).run(param)
     }
 

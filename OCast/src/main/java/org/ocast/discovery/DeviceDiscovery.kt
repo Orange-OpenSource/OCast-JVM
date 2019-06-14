@@ -88,7 +88,7 @@ internal class DeviceDiscovery constructor(
      * The search targets which the searched devices should correspond to.
      * Setting this property results in sending an SSDP M-SEARCH request immediately if discovery is on-going.
      * */
-    var searchTargets = emptyList<String>()
+    var searchTargets = emptySet<String>()
         set(value) {
             field = value
             if (!socket.isClosed) {

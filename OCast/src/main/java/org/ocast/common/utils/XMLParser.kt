@@ -31,10 +31,8 @@ import javax.xml.parsers.DocumentBuilderFactory
  */
 object XMLParser {
 
-    /** The builder that will generate the [org.w3c.dom.Document] instance from an XML string. */
-    private val documentBuilder = DocumentBuilderFactory
-        .newInstance()
-        .newDocumentBuilder()
+    /** The [javax.xml.parsers.DocumentBuilder] factory. */
+    private val documentBuilderFactory = DocumentBuilderFactory.newInstance()
 
     /**
      * Parses an XML string.
@@ -45,7 +43,10 @@ object XMLParser {
      */
     @Throws(Exception::class)
     fun parse(xml: String): XMLElement {
-        val document = documentBuilder.parse(InputSource(StringReader(xml)))
+        // A new document builder must be instantiated each time this method is called otherwise an exception is thrown when concurrent parsing occurs
+        val document = documentBuilderFactory
+            .newDocumentBuilder()
+            .parse(InputSource(StringReader(xml)))
 
         return parseNode(document)
     }
