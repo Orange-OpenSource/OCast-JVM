@@ -40,26 +40,31 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
 
     private var webSocket: WebSocket? = null
 
+    var isConnected = false
+        private set
+
     /**
      * Connects the socket to the remote host.
      */
     fun connect() {
-        OCastLog.debug("Socket: Connecting...")
-        try {
-            val builder = OkHttpClient.Builder().apply {
-                if (sslConfiguration != null) {
-                    sslSocketFactory(sslConfiguration.socketFactory, sslConfiguration.trustManager)
-                    hostnameVerifier(sslConfiguration.hostnameVerifier)
+        if (!isConnected) {
+            OCastLog.debug("Socket: Connecting...")
+            try {
+                val builder = OkHttpClient.Builder().apply {
+                    if (sslConfiguration != null) {
+                        sslSocketFactory(sslConfiguration.socketFactory, sslConfiguration.trustManager)
+                        hostnameVerifier(sslConfiguration.hostnameVerifier)
+                    }
+                    pingInterval(PING_INTERVAL, TimeUnit.SECONDS)
+                    connectTimeout(5, TimeUnit.SECONDS)
                 }
-                pingInterval(PING_INTERVAL, TimeUnit.SECONDS)
-                connectTimeout(5, TimeUnit.SECONDS)
+                val client = builder.build()
+                val request = Request.Builder().url(webSocketURL).build()
+                webSocket = client.newWebSocket(request, this)
+            } catch (e: Exception) {
+                OCastLog.error("Socket: Error create socket", e)
+                listener.onDisconnected(this, e)
             }
-            val client = builder.build()
-            val request = Request.Builder().url(webSocketURL).build()
-            webSocket = client.newWebSocket(request, this)
-        } catch (e: Exception) {
-            OCastLog.error("Socket: Error create socket", e)
-            listener.onDisconnected(this, e)
         }
     }
 
@@ -68,9 +73,15 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
      * @return `true` if the disconnection is performed, `false` if the the socket is not connected.
      */
     fun disconnect(): Boolean {
-        OCastLog.debug("Socket: Disconnecting...")
-        val success = webSocket?.close(1000, "normal closure") ?: false
-        listener.onDisconnected(this, null)
+        var success = false
+        if (isConnected) {
+            isConnected = false
+            OCastLog.debug("Socket: Disconnecting...")
+            success = webSocket?.close(1000, "normal closure") ?: false
+            if (success) {
+                listener.onDisconnected(this, null)
+            }
+        }
         return success
     }
 
@@ -95,6 +106,7 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
      * @param response
      */
     override fun onOpen(webSocket: WebSocket, response: Response) {
+        isConnected = true
         OCastLog.debug("Socket: Connected !")
         listener.onConnected(this, webSocketURL)
     }
@@ -118,6 +130,7 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
      * @param response
      */
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+        isConnected = false
         listener.onDisconnected(this, t)
     }
 
