@@ -18,7 +18,7 @@
 
 package org.ocast.core.models
 
-class OCastError internal constructor(val code: Int, val errorMessage: String) {
+class OCastError(val code: Int, val errorMessage: String) {
 
     constructor(errorMessage: String) : this(Status.CLIENT_ERROR.code, errorMessage)
 
