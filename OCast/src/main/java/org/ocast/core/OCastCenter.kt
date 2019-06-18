@@ -121,8 +121,8 @@ open class OCastCenter @JvmOverloads constructor(private val callbackWrapper: Ca
     private val deviceDiscoveryListener = object : DeviceDiscovery.Listener {
         override fun onDevicesAdded(devices: List<UpnpDevice>) {
             devices.forEach { upnpDevice ->
-                createDevice(upnpDevice).let { device ->
-                    device?.let { this@OCastCenter.deviceListener.onDeviceAdded(it) }
+                createDevice(upnpDevice)?.let { device ->
+                    this@OCastCenter.deviceListener.onDeviceAdded(device)
                 }
             }
         }
