@@ -42,6 +42,13 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         private const val EVENT_DEVICE_UPDATE_STATUS = "updateStatus"
     }
 
+    protected enum class State {
+        CONNECTING,
+        CONNECTED,
+        DISCONNECTING,
+        DISCONNECTED
+    }
+
     override fun getSearchTarget() = "urn:cast-ocast-org:service:cast:1"
     override fun getManufacturer() = "Orange SA"
 
@@ -53,12 +60,12 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         super.setApplicationName(applicationName)
     }
 
-    private var state = State.DISCONNECTED
+    protected var state = State.DISCONNECTED
     private val sequenceID: AtomicLong = AtomicLong(0)
-    private var clientUuid = UUID.randomUUID().toString()
-    private var isApplicationRunning = false
-    private var webSocket: WebSocketProvider? = null
-    private var onSocketConnected: Runnable? = null
+    protected var clientUuid = UUID.randomUUID().toString()
+    protected var isApplicationRunning = false
+    protected var webSocket: WebSocketProvider? = null
+    protected var onConnected: Runnable? = null
     private val webSocketURL: String
         get() {
             val protocol = if (sslConfiguration != null) "wss" else "ws"
@@ -115,8 +122,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 try {
                     webSocket = WebSocketProvider(webSocketURL, sslConfiguration, this)
                     state = State.CONNECTING
+                    onConnected = onSuccess
                     webSocket?.connect()
-                    onSocketConnected = onSuccess
                 } catch (ex: Exception) {
                     onError.wrapRun(OCastError("Unable to init SocketProvider"))
                 }
@@ -127,7 +134,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     override fun disconnect() {
         if (state != State.DISCONNECTING && state != State.DISCONNECTED) {
             state = State.DISCONNECTING
-            onSocketConnected = null
+            onConnected = null
             webSocket?.disconnect()
         }
     }
@@ -137,24 +144,24 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     //region SocketProviderListener
 
     override fun onDisconnected(webSocketProvider: WebSocketProvider, error: Throwable?) {
-        state = State.DISCONNECTED
-        // Send error callback to all waiting commands
-        synchronized(replyCallbacksBySequenceID) {
-            replyCallbacksBySequenceID.forEach { (_, callback) ->
-                callback.wrapOnError(OCastError("Socket has been disconnected"))
+        if (state != State.DISCONNECTED) {
+            state = State.DISCONNECTED
+            // Send error callback to all waiting commands
+            synchronized(replyCallbacksBySequenceID) {
+                replyCallbacksBySequenceID.forEach { (_, callback) ->
+                    callback.wrapOnError(OCastError("Socket has been disconnected"))
+                }
+                replyCallbacksBySequenceID.clear()
             }
-            replyCallbacksBySequenceID.clear()
+            onConnected = null
+            deviceListener?.onDeviceDisconnected(this, error)
         }
-        onSocketConnected = null
-        deviceListener?.onDeviceDisconnected(this, error)
     }
 
     override fun onConnected(webSocketProvider: WebSocketProvider, url: String) {
         state = State.CONNECTED
-        onSocketConnected?.wrapRun()
-        onSocketConnected = null
-
-        // TODO a finir
+        onConnected?.wrapRun()
+        onConnected = null
     }
 
     override fun onDataReceived(webSocketProvider: WebSocketProvider, data: String) {
@@ -344,7 +351,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         }
     }
 
-    private fun sendToWebSocket(id: Long, layerMessage: String, startApplicationIfNeeded: Boolean, onError: Consumer<OCastError>) {
+    protected fun sendToWebSocket(id: Long, layerMessage: String, startApplicationIfNeeded: Boolean, onError: Consumer<OCastError>) {
         val send = {
             if (webSocket?.send(layerMessage) == false) {
                 replyCallbacksBySequenceID.remove(id)
@@ -373,19 +380,19 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         }
     }
 
-    private fun ReplyCallback<*>.wrapOnError(throwable: OCastError) {
+    protected fun ReplyCallback<*>.wrapOnError(throwable: OCastError) {
         onError.wrapRun(throwable)
     }
 
-    private fun <T> Consumer<T>.wrapRun(param: T) {
+    protected fun <T> Consumer<T>.wrapRun(param: T) {
         callbackWrapper.wrap(this).run(param)
     }
 
-    private fun Runnable.wrapRun() {
+    protected fun Runnable.wrapRun() {
         callbackWrapper.wrap(this).run()
     }
 
-    private fun generateSequenceID(): Long {
+    protected fun generateSequenceID(): Long {
         if (sequenceID.get() == Long.MAX_VALUE) {
             sequenceID.set(0)
         }

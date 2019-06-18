@@ -62,7 +62,7 @@ class DeviceDiscoveryTest {
     @Before
     fun setUp() {
         discovery.listener = listener
-        discovery.searchTargets = mutableListOf("urn:cast-ocast-org:service:cast:1")
+        discovery.searchTargets = setOf("urn:cast-ocast-org:service:cast:1")
         discovery.interval = 5
     }
 

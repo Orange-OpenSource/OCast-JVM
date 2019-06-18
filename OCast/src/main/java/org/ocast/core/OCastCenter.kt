@@ -40,17 +40,18 @@ open class OCastCenter @JvmOverloads constructor(private val callbackWrapper: Ca
     val devices: List<Device>
         get() = detectedDevices.toList()
 
-    private fun createDevice(device: UpnpDevice): Device {
-        registeredDevicesByManufacturer[device.manufacturer]?.getConstructor(UpnpDevice::class.java)?.newInstance(device)?.apply {
-            deviceListener = this@OCastCenter.deviceListener
-            eventListener = this@OCastCenter.eventListener
-            callbackWrapper = this@OCastCenter.callbackWrapper
-            // Custom actions on custom device
-            onCreateDevice(this)
-            detectedDevices.add(this)
-            return this
-        }
-        throw IllegalArgumentException("could not create device ${device.manufacturer}. Did you register it properly ?")
+    private fun createDevice(device: UpnpDevice): Device? {
+        return registeredDevicesByManufacturer[device.manufacturer]
+            ?.getConstructor(UpnpDevice::class.java)
+            ?.newInstance(device)
+            ?.apply {
+                deviceListener = this@OCastCenter.deviceListener
+                eventListener = this@OCastCenter.eventListener
+                callbackWrapper = this@OCastCenter.callbackWrapper
+                // Custom actions on custom device
+                onCreateDevice(this)
+                detectedDevices.add(this)
+            }
     }
 
     private fun removeDevice(device: Device) {
@@ -72,7 +73,7 @@ open class OCastCenter @JvmOverloads constructor(private val callbackWrapper: Ca
     fun registerDevice(deviceClass: Class<out Device>) {
         val device = deviceClass.getConstructor(UpnpDevice::class.java).newInstance(UpnpDevice())
         registeredDevicesByManufacturer[device.manufacturer] = deviceClass
-        deviceDiscovery.searchTargets = deviceDiscovery.searchTargets + device.searchTarget
+        deviceDiscovery.searchTargets += device.searchTarget
     }
 
     fun addEventListener(listener: EventListener) {
@@ -119,9 +120,9 @@ open class OCastCenter @JvmOverloads constructor(private val callbackWrapper: Ca
 
     private val deviceDiscoveryListener = object : DeviceDiscovery.Listener {
         override fun onDevicesAdded(devices: List<UpnpDevice>) {
-            devices.forEach {
-                createDevice(it).apply {
-                    this.deviceListener?.onDeviceAdded(this)
+            devices.forEach { upnpDevice ->
+                createDevice(upnpDevice)?.let { device ->
+                    this@OCastCenter.deviceListener.onDeviceAdded(device)
                 }
             }
         }
@@ -130,7 +131,7 @@ open class OCastCenter @JvmOverloads constructor(private val callbackWrapper: Ca
             devices.forEach { device ->
                 synchronized(detectedDevices) {
                     detectedDevices.firstOrNull { device.uuid == it.uuid }?.let {
-                        it.deviceListener?.onDeviceRemoved(it)
+                        this@OCastCenter.deviceListener.onDeviceRemoved(it)
                         removeDevice(it)
                     }
                 }
