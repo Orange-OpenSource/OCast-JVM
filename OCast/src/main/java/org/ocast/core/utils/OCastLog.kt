@@ -29,7 +29,7 @@ class OCastLog {
             get() = Thread.currentThread().stackTrace.firstOrNull { it.className !in fqcnIgnore }?.className ?: ""
 
         @JvmStatic
-        fun error(message: String, throwable: Throwable) {
+        fun error(message: String, throwable: Throwable? = null) {
             log(Level.SEVERE, message, throwable)
         }
 

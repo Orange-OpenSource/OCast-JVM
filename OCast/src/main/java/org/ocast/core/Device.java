@@ -27,13 +27,6 @@ import java.net.URL;
 
 public abstract class Device {
 
-    enum State {
-        CONNECTING,
-        CONNECTED,
-        DISCONNECTING,
-        DISCONNECTED
-    }
-
     @NotNull private final UpnpDevice upnpDevice;
     @Nullable private String applicationName;
     @Nullable private DeviceListener deviceListener;
