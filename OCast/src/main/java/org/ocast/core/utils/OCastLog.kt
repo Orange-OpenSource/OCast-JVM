@@ -19,32 +19,78 @@ package org.ocast.core.utils
 import java.util.logging.Level
 import java.util.logging.Logger
 
+/**
+ * This class logs OCast messages.
+ */
 class OCastLog {
 
     companion object {
 
-        private val fqcnIgnore = listOf("java.lang.Thread", "${OCastLog::class.java.name}\$Companion", OCastLog::class.java.name)
+        /**
+         * Indicates if the OCast logs are enabled.
+         * Default value is false.
+         */
+        @JvmStatic
+        var isEnabled = false
 
+        /** The list of FQCNs (Fully Qualified Class Names) that should be ignored when parsing the stacktrace to get the log tag.  */
+        private val fqcnIgnore = listOf(Thread::class.java.name, Companion::class.java.name, OCastLog::class.java.name)
+
+        /** The log tag. */
         private val tag: String
-            get() = Thread.currentThread().stackTrace.firstOrNull { it.className !in fqcnIgnore }?.className ?: ""
+            get() = Thread
+                .currentThread()
+                .stackTrace
+                .firstOrNull { it.className !in fqcnIgnore }
+                ?.className
+                .orEmpty()
 
+        /**
+         * Logs an error message.
+         * Does nothing if [isEnabled] is false.
+         *
+         * @param throwable The throwable associated with the error message.
+         * @param message A lambda that returns the message to be logged.
+         */
         @JvmStatic
-        fun error(message: String, throwable: Throwable? = null) {
-            log(Level.SEVERE, message, throwable)
+        fun error(throwable: Throwable? = null, message: () -> String) {
+            log(Level.SEVERE, throwable, message)
         }
 
+        /**
+         * Logs an info message.
+         * Does nothing if [isEnabled] is false.
+         *
+         * @param message A lambda that returns the message to be logged.
+         */
         @JvmStatic
-        fun info(message: String) {
-            log(Level.INFO, message)
+        fun info(message: () -> String) {
+            log(Level.INFO, null, message)
         }
 
+        /**
+         * Logs a debug message.
+         * Does nothing if [isEnabled] is false.
+         *
+         * @param message A lambda that returns the message to be logged.
+         */
         @JvmStatic
-        fun debug(message: String) {
-            log(Level.WARNING, message)
+        fun debug(message: () -> String) {
+            log(Level.WARNING, null, message)
         }
 
-        private fun log(level: Level, message: String, throwable: Throwable? = null) {
-            Logger.getLogger(tag).log(level, "$tag: $message", throwable)
+        /**
+         * Logs a message.
+         * Does nothing if [isEnabled] is false.
+         *
+         * @param level The message level.
+         * @param throwable The throwable associated with the message.
+         * @param message A lambda that returns the message to be logged.
+         */
+        private fun log(level: Level, throwable: Throwable?, message: () -> String) {
+            if (isEnabled) {
+                Logger.getLogger(tag).log(level, "$tag: ${message()}", throwable)
+            }
         }
     }
 }

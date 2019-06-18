@@ -26,6 +26,7 @@ import org.ocast.core.models.Media
 import org.ocast.core.models.MetadataChangedEvent
 import org.ocast.core.models.PlaybackStatusEvent
 import org.ocast.core.models.UpdateStatusEvent
+import org.ocast.core.utils.OCastLog
 import java.util.concurrent.CountDownLatch
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -50,6 +51,7 @@ class AppKotlin : EventListener, DeviceListener {
         oCastCenter.addEventListener(this)
         oCastCenter.addDeviceListener(this)
         oCastCenter.registerDevice(ReferenceDevice::class.java)
+        OCastLog.isEnabled = true
     }
 
     fun run() {
