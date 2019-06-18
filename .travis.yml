@@ -7,11 +7,16 @@ android:
     - platform-tools
     - build-tools-28.0.3
     - android-28
+stages:
+  - build
+  - verification
 jobs:
   include:
-    - name: Assemble
+    - stage: build
+      name: Assemble
       script: ./gradlew assemble
-    - name: Kotlin linter
+    - stage: verification
+      name: Kotlin linter
       script: ./gradlew ktlint
     - name: Unit tests
       script: ./gradlew :OCast:test
