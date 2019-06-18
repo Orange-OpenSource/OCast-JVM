@@ -34,7 +34,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
 
         internal const val SERVICE_APPLICATION = "org.ocast.webapp"
 
-        const val DOMAIN_BROWSER = "browser"
+        internal const val DOMAIN_BROWSER = "browser"
         internal const val DOMAIN_SETTINGS = "settings"
 
         private const val EVENT_MEDIA_PLAYBACK_STATUS = "playbackStatus"
