@@ -42,7 +42,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         private const val EVENT_DEVICE_UPDATE_STATUS = "updateStatus"
     }
 
-    protected enum class DeviceState {
+    protected enum class State {
         CONNECTING,
         CONNECTED,
         DISCONNECTING,
@@ -60,7 +60,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         super.setApplicationName(applicationName)
     }
 
-    protected var state = DeviceState.DISCONNECTED
+    protected var state = State.DISCONNECTED
     private val sequenceID: AtomicLong = AtomicLong(0)
     protected var clientUuid = UUID.randomUUID().toString()
     protected var isApplicationRunning = false
@@ -84,10 +84,10 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         }
 
         when (state) {
-            DeviceState.CONNECTING -> onError.wrapRun(OCastError("Device is connecting, start cannot be processed yet"))
-            DeviceState.CONNECTED -> startDialApp(onSuccess, onError)
-            DeviceState.DISCONNECTING -> onError.wrapRun(OCastError("Device is connecting, start cannot be processed."))
-            DeviceState.DISCONNECTED -> {
+            State.CONNECTING -> onError.wrapRun(OCastError("Device is connecting, start cannot be processed yet"))
+            State.CONNECTED -> startDialApp(onSuccess, onError)
+            State.DISCONNECTING -> onError.wrapRun(OCastError("Device is connecting, start cannot be processed."))
+            State.DISCONNECTED -> {
                 connect({
                     startDialApp(onSuccess, onError)
                 }, {
@@ -115,13 +115,13 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
 
     override fun connect(onSuccess: Runnable, onError: Consumer<OCastError>) {
         when (state) {
-            DeviceState.CONNECTING -> onError.wrapRun(OCastError("Device is already connecting"))
-            DeviceState.CONNECTED -> onSuccess.wrapRun()
-            DeviceState.DISCONNECTING -> onError.wrapRun(OCastError("Device is disconnecting"))
-            DeviceState.DISCONNECTED -> {
+            State.CONNECTING -> onError.wrapRun(OCastError("Device is already connecting"))
+            State.CONNECTED -> onSuccess.wrapRun()
+            State.DISCONNECTING -> onError.wrapRun(OCastError("Device is disconnecting"))
+            State.DISCONNECTED -> {
                 try {
                     webSocket = WebSocketProvider(webSocketURL, sslConfiguration, this)
-                    state = DeviceState.CONNECTING
+                    state = State.CONNECTING
                     onConnected = onSuccess
                     webSocket?.connect()
                 } catch (ex: Exception) {
@@ -132,8 +132,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     }
 
     override fun disconnect() {
-        if (state != DeviceState.DISCONNECTING && state != DeviceState.DISCONNECTED) {
-            state = DeviceState.DISCONNECTING
+        if (state != State.DISCONNECTING && state != State.DISCONNECTED) {
+            state = State.DISCONNECTING
             onConnected = null
             webSocket?.disconnect()
         }
@@ -144,8 +144,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     //region SocketProviderListener
 
     override fun onDisconnected(webSocketProvider: WebSocketProvider, error: Throwable?) {
-        if (state != DeviceState.DISCONNECTED) {
-            state = DeviceState.DISCONNECTED
+        if (state != State.DISCONNECTED) {
+            state = State.DISCONNECTED
             // Send error callback to all waiting commands
             synchronized(replyCallbacksBySequenceID) {
                 replyCallbacksBySequenceID.forEach { (_, callback) ->
@@ -159,7 +159,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     }
 
     override fun onConnected(webSocketProvider: WebSocketProvider, url: String) {
-        state = DeviceState.CONNECTED
+        state = State.CONNECTED
         onConnected?.wrapRun()
         onConnected = null
     }
