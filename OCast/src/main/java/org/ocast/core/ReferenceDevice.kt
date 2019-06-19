@@ -186,7 +186,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                                 event.wrapOnError(OCastError(replyData.params.code, "Command error code ${replyData.params.code}"))
                             }
                         } else {
-                            event.wrapOnError(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code,"Bad status value ${deviceLayer.status}"))
+                            event.wrapOnError(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Bad status value ${deviceLayer.status}"))
                         }
                     }
                 }
