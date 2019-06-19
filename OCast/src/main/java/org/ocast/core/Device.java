@@ -32,7 +32,7 @@ public abstract class Device {
     @Nullable private DeviceListener deviceListener;
     @Nullable private EventListener eventListener;
     @NotNull private CallbackWrapper callbackWrapper = new SimpleCallbackWrapper();
-    @Nullable private SSLConfiguration sslConfiguration;
+    @Nullable protected SSLConfiguration sslConfiguration;
 
     Device(@NotNull UpnpDevice upnpDevice) {
         this.upnpDevice = upnpDevice;
@@ -131,7 +131,7 @@ public abstract class Device {
 
     // Settings device commands
     public abstract void getUpdateStatus(@NotNull Consumer<UpdateStatus> onSuccess, @NotNull Consumer<OCastDeviceSettingsError> onError);
-    public abstract void getDeviceID(@NotNull Consumer<DeviceId> onSuccess, @NotNull Consumer<OCastDeviceSettingsError> onError);
+    public abstract void getDeviceID(@NotNull Consumer<DeviceID> onSuccess, @NotNull Consumer<OCastDeviceSettingsError> onError);
 
     // Settings input commands
     public abstract void sendKeyPressed(@NotNull KeyPressed keyPressed, @NotNull Runnable onSuccess, @NotNull Consumer<OCastInputSettingsError> onError);

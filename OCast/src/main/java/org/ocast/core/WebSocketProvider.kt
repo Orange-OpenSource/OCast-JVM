@@ -38,16 +38,23 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
         const val PING_INTERVAL = 5L
     }
 
+    enum class State {
+        CONNECTING,
+        CONNECTED,
+        DISCONNECTING,
+        DISCONNECTED
+    }
+
     private var webSocket: WebSocket? = null
 
-    var isConnected = false
+    var state = State.DISCONNECTED
         private set
 
     /**
      * Connects the socket to the remote host.
      */
     fun connect() {
-        if (!isConnected) {
+        if (state == State.DISCONNECTED) {
             OCastLog.debug("Socket: Connecting...")
             try {
                 val builder = OkHttpClient.Builder().apply {
@@ -74,8 +81,7 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
      */
     fun disconnect(): Boolean {
         var success = false
-        if (isConnected) {
-            isConnected = false
+        if (state == State.CONNECTED) {
             OCastLog.debug("Socket: Disconnecting...")
             success = webSocket?.close(1000, "normal closure") ?: false
             if (success) {
@@ -91,9 +97,13 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
      * @return `true` if the send is performed, `false` if the the socket is not connected or the payload is too long.
      */
     fun send(message: String): Boolean {
-        OCastLog.debug("Socket: send $message")
-        return if (message.length <= MAX_PAYLOAD_SIZE) {
-            webSocket?.send(message) ?: false
+        return if (state == State.CONNECTED) {
+            OCastLog.debug("Socket: send $message")
+            if (message.length <= MAX_PAYLOAD_SIZE) {
+                webSocket?.send(message) ?: false
+            } else {
+                false
+            }
         } else {
             false
         }
@@ -106,7 +116,7 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
      * @param response
      */
     override fun onOpen(webSocket: WebSocket, response: Response) {
-        isConnected = true
+        state = State.CONNECTED
         OCastLog.debug("Socket: Connected !")
         listener.onConnected(this, webSocketURL)
     }
@@ -120,6 +130,30 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
     override fun onMessage(webSocket: WebSocket, text: String) {
         listener.onDataReceived(this, text)
     }
+    /**
+     * Invoked when the remote peer has indicated that no more incoming messages will be transmitted.
+     *
+     * @param webSocket
+     * @param code
+     * @param reason
+     */
+    override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+        OCastLog.debug("Socket: Closing...")
+        state = State.DISCONNECTING
+    }
+
+    /**
+     * Invoked when both peers have indicated that no more messages will be transmitted and the
+     * connection has been successfully released. No further calls to this listener will be made.
+     *
+     * @param webSocket
+     * @param code
+     * @param reason
+     */
+    override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+        OCastLog.debug("Socket: Closed !")
+        state = State.DISCONNECTED
+    }
 
     /**
      * Invoked when a web socket has been closed due to an error reading from or writing to the network.
@@ -130,7 +164,7 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
      * @param response
      */
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-        isConnected = false
+        state = State.DISCONNECTED
         listener.onDisconnected(this, t)
     }
 
