@@ -23,7 +23,7 @@ import org.ocast.core.models.Consumer;
 
 public class AndroidUIThreadCallbackWrapper implements CallbackWrapper {
 
-    private Handler handler = new Handler(Looper.getMainLooper());
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     @Override
     public  <T> Consumer<T> wrap(Consumer<T> consumer) {
