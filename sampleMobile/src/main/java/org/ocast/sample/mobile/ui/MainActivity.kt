@@ -145,19 +145,17 @@ class MainActivity : AppCompatActivity(), EventListener {
     private inner class MediaRouterCallback : MediaRouter.Callback() {
 
         override fun onRouteSelected(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
-            val device = OCastMediaRouteHelper.getDeviceFromRoute(route)
-            if (device != null) {
-                Log.d(TAG, "OCast device selected: ${device.friendlyName}")
-                mainViewModel.selectedDevice.updateValue(device)
-                startApplication(device)
+            OCastMediaRouteHelper.getDeviceFromRoute(route)?.apply {
+                Log.d(TAG, "OCast device selected: $friendlyName")
+                mainViewModel.selectedDevice.updateValue(this)
+                startApplication(this)
             }
         }
 
         override fun onRouteUnselected(mediaRouter: MediaRouter?, route: MediaRouter.RouteInfo?) {
-            val device = OCastMediaRouteHelper.getDeviceFromRoute(route)
-            if (device != null) {
+            OCastMediaRouteHelper.getDeviceFromRoute(route)?.apply {
                 Log.d(TAG, "OCast device unselected")
-                device.stopApplication({}, {})
+                stopApplication({}, {})
                 mainViewModel.deviceConnected.updateValue(false)
             }
         }
