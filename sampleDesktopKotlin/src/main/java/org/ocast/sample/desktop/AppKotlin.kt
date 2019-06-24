@@ -51,7 +51,7 @@ class AppKotlin : EventListener, DeviceListener {
         oCastCenter.addEventListener(this)
         oCastCenter.addDeviceListener(this)
         oCastCenter.registerDevice(ReferenceDevice::class.java)
-        OCastLog.isEnabled = true
+        OCastLog.level = OCastLog.Level.ALL
     }
 
     fun run() {

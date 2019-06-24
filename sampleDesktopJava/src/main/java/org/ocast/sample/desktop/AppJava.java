@@ -51,7 +51,7 @@ public class AppJava implements EventListener, DeviceListener {
         oCastCenter.addDeviceListener(this);
         oCastCenter.addEventListener(this);
         oCastCenter.registerDevice(ReferenceDevice.class);
-        OCastLog.setEnabled(true);
+        OCastLog.setLevel(OCastLog.Level.ALL);
     }
 
     private void run() {

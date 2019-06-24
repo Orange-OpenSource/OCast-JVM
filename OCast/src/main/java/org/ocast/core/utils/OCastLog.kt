@@ -16,7 +16,6 @@
 
 package org.ocast.core.utils
 
-import java.util.logging.Level
 import java.util.logging.Logger
 
 /**
@@ -27,17 +26,18 @@ class OCastLog {
     companion object {
 
         /**
-         * Indicates if the OCast logs are enabled.
-         * Default value is false.
+         * The current OCast log level.
+         * Default value is [Level.OFF].
          */
         @JvmStatic
-        var isEnabled = false
+        var level = Level.OFF
 
         /** The list of FQCNs (Fully Qualified Class Names) that should be ignored when parsing the stacktrace to get the log tag.  */
         private val fqcnIgnore = listOf(Thread::class.java.name, Companion::class.java.name, OCastLog::class.java.name)
 
         /** The log tag. */
-        private val tag: String
+        @PublishedApi
+        internal val tag: String
             get() = Thread
                 .currentThread()
                 .stackTrace
@@ -47,50 +47,73 @@ class OCastLog {
 
         /**
          * Logs an error message.
-         * Does nothing if [isEnabled] is false.
+         * Does nothing if [level] is [Level.OFF].
          *
          * @param throwable The throwable associated with the error message.
          * @param message A lambda that returns the message to be logged.
          */
         @JvmStatic
-        fun error(throwable: Throwable? = null, message: () -> String) {
-            log(Level.SEVERE, throwable, message)
+        inline fun error(throwable: Throwable? = null, message: () -> String) {
+            log(Level.ERROR, throwable, message)
         }
 
         /**
          * Logs an info message.
-         * Does nothing if [isEnabled] is false.
+         * Does nothing if [level] is [Level.OFF] or [Level.ERROR].
          *
          * @param message A lambda that returns the message to be logged.
          */
         @JvmStatic
-        fun info(message: () -> String) {
+        inline fun info(message: () -> String) {
             log(Level.INFO, null, message)
         }
 
         /**
          * Logs a debug message.
-         * Does nothing if [isEnabled] is false.
+         * Does nothing if [level] is [Level.OFF], [Level.ERROR] or [Level.INFO].
          *
          * @param message A lambda that returns the message to be logged.
          */
         @JvmStatic
-        fun debug(message: () -> String) {
-            log(Level.WARNING, null, message)
+        inline fun debug(message: () -> String) {
+            log(Level.DEBUG, null, message)
         }
 
         /**
          * Logs a message.
-         * Does nothing if [isEnabled] is false.
          *
          * @param level The message level.
          * @param throwable The throwable associated with the message.
          * @param message A lambda that returns the message to be logged.
          */
-        private fun log(level: Level, throwable: Throwable?, message: () -> String) {
-            if (isEnabled) {
-                Logger.getLogger(tag).log(level, "$tag: ${message()}", throwable)
+        @PublishedApi
+        internal inline fun log(level: Level, throwable: Throwable?, message: () -> String) {
+            if (this.level.loggerLevel.intValue() <= level.loggerLevel.intValue()) {
+                Logger.getLogger(tag).log(level.loggerLevel, "$tag: ${message()}", throwable)
             }
         }
+    }
+
+    /**
+     * Represents the OCast log level.
+     *
+     * @param loggerLevel The corresponding [Logger] level.
+     */
+    enum class Level(@PublishedApi internal val loggerLevel: java.util.logging.Level) {
+
+        /** Indicates that the log message will not be displayed. */
+        OFF(java.util.logging.Level.OFF),
+
+        /** Indicates that the log is an error message. */
+        ERROR(java.util.logging.Level.SEVERE),
+
+        /** Indicates that the log is an informational message. */
+        INFO(java.util.logging.Level.INFO),
+
+        /** Indicates that the log is a debug message. */
+        DEBUG(java.util.logging.Level.FINEST),
+
+        /** Indicates that the log message is always displayed. */
+        ALL(java.util.logging.Level.ALL);
     }
 }
