@@ -186,7 +186,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                                 event.wrapOnError(OCastError(replyData.params.code, "Command error code ${replyData.params.code}"))
                             }
                         } else {
-                            event.wrapOnError(OCastError("Unknown status value ${deviceLayer.status}"))
+                            event.wrapOnError(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Bad status value ${deviceLayer.status}"))
                         }
                     }
                 }
@@ -313,8 +313,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         sendCommand(DOMAIN_SETTINGS, DeviceMessage(GetUpdateStatus().build()), onSuccess, Consumer { onError.run(OCastDeviceSettingsError(it)) }, UpdateStatus::class.java)
     }
 
-    override fun getDeviceID(onSuccess: Consumer<DeviceId>, onError: Consumer<OCastDeviceSettingsError>) {
-        sendCommand(DOMAIN_SETTINGS, DeviceMessage(GetDeviceID().build()), onSuccess, Consumer { onError.run(OCastDeviceSettingsError(it)) }, DeviceId::class.java)
+    override fun getDeviceID(onSuccess: Consumer<DeviceID>, onError: Consumer<OCastDeviceSettingsError>) {
+        sendCommand(DOMAIN_SETTINGS, DeviceMessage(GetDeviceID().build()), onSuccess, Consumer { onError.run(OCastDeviceSettingsError(it)) }, DeviceID::class.java)
     }
 
     //endregion

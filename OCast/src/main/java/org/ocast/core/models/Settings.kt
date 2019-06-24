@@ -147,7 +147,7 @@ class UpdateStatus(
  * @param code
  * @param id
  */
-class DeviceId(
+class DeviceID(
     @JsonIgnore override val code: Int,
     @JsonProperty("id") val id: String
 ) : SettingsReplyParams(code)

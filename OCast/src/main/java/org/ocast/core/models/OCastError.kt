@@ -12,8 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Created by Thierry Tassain on 01/04/2019.
  */
 
 package org.ocast.core.models
@@ -24,7 +22,8 @@ class OCastError(val code: Int, val errorMessage: String) {
 
     enum class Status(val code: Int) {
         SUCCESS(0),
-        CLIENT_ERROR(-2);
+        CLIENT_ERROR(-2),
+        DEVICE_LAYER_ERROR(-3)
     }
 }
 
@@ -35,7 +34,8 @@ class OCastDeviceSettingsError(val errorMessage: String, val status: Status) {
     enum class Status(val code: Int) {
         SUCCESS(0),
         UNKNOWN_ERROR(-1),
-        CLIENT_ERROR(-2)
+        CLIENT_ERROR(-2),
+        DEVICE_LAYER_ERROR(-3)
     }
 }
 
@@ -46,7 +46,8 @@ class OCastInputSettingsError(val errorMessage: String, val status: Status) {
     enum class Status(val code: Int) {
         SUCCESS(0),
         UNKNOWN_ERROR(-1),
-        CLIENT_ERROR(-2)
+        CLIENT_ERROR(-2),
+        DEVICE_LAYER_ERROR(-3)
     }
 }
 
@@ -81,6 +82,7 @@ class OCastMediaError(val errorMessage: String, val status: Status) {
         MISSING_PARAMETER(2422),
         INTERNAL_ERROR(2500),
         UNKNOWN_ERROR(-1),
-        CLIENT_ERROR(-2)
+        CLIENT_ERROR(-2),
+        DEVICE_LAYER_ERROR(-3)
     }
 }

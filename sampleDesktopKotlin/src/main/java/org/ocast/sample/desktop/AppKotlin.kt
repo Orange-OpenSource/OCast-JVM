@@ -29,6 +29,7 @@ import org.ocast.core.models.UpdateStatusEvent
 import java.util.concurrent.CountDownLatch
 import java.util.logging.Level
 import java.util.logging.Logger
+import kotlin.system.exitProcess
 
 class AppKotlin : EventListener, DeviceListener {
 
@@ -62,7 +63,7 @@ class AppKotlin : EventListener, DeviceListener {
             Thread.currentThread().interrupt()
         }
 
-        System.exit(0)
+        exitProcess(0)
     }
 
     private fun startApplication(device: Device) {
