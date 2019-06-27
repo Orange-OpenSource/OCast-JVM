@@ -26,6 +26,13 @@ class OCastLog {
     companion object {
 
         /**
+         * Indicates if debug is enabled.
+         * When false, this constant optimizes bytecode by removing code related to logs.
+         */
+        @PublishedApi
+        internal const val DEBUG = false
+
+        /**
          * The current OCast log level.
          * Default value is [Level.OFF].
          */
@@ -88,7 +95,7 @@ class OCastLog {
          */
         @PublishedApi
         internal inline fun log(level: Level, throwable: Throwable?, message: () -> String) {
-            if (this.level.loggerLevel.intValue() <= level.loggerLevel.intValue()) {
+            if (DEBUG && this.level.loggerLevel.intValue() <= level.loggerLevel.intValue()) {
                 Logger.getLogger(tag).log(level.loggerLevel, "$tag: ${message()}", throwable)
             }
         }
