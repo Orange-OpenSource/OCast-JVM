@@ -28,6 +28,7 @@ import org.ocast.core.models.Media;
 import org.ocast.core.models.MetadataChangedEvent;
 import org.ocast.core.models.PlaybackStatusEvent;
 import org.ocast.core.models.UpdateStatusEvent;
+import org.ocast.core.utils.OCastLog;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
@@ -50,6 +51,7 @@ public class AppJava implements EventListener, DeviceListener {
         oCastCenter.addDeviceListener(this);
         oCastCenter.addEventListener(this);
         oCastCenter.registerDevice(ReferenceDevice.class);
+        OCastLog.setLevel(OCastLog.Level.ALL);
     }
 
     private void run() {

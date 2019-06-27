@@ -230,7 +230,7 @@ internal class DeviceDiscovery constructor(
                 try {
                     socket.send(request.data, SSDP_MULTICAST_ADDRESS, SSDP_MULTICAST_PORT)
                 } catch (exception: IOException) {
-                    OCastLog.error("Could not send SSDP M-SEARCH request", exception)
+                    OCastLog.error(exception) { "Could not send SSDP M-SEARCH request" }
                 }
             }
         }

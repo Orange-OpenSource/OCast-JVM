@@ -195,7 +195,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             // Remove callback
             replyCallbacksBySequenceID.remove(deviceLayer.identifier)
         } catch (e: Exception) {
-            OCastLog.error("Receive a bad formatted message: $data", e)
+            OCastLog.error(e) { "Receive a bad formatted message: $data" }
         }
     }
 
