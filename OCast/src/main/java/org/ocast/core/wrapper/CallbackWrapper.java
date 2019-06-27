@@ -14,24 +14,12 @@
  * limitations under the License.
  */
 
-package org.ocast.mediaroute;
+package org.ocast.core.wrapper;
 
-import android.os.Handler;
-import android.os.Looper;
-import org.ocast.core.models.CallbackWrapper;
 import org.ocast.core.models.Consumer;
 
-public class AndroidUIThreadCallbackWrapper implements CallbackWrapper {
+public interface CallbackWrapper {
 
-    private final Handler handler = new Handler(Looper.getMainLooper());
-
-    @Override
-    public  <T> Consumer<T> wrap(Consumer<T> consumer) {
-        return t -> handler.post(() -> consumer.run(t));
-    }
-
-    @Override
-    public Runnable wrap(Runnable runnable) {
-        return () -> handler.post(runnable);
-    }
+    <T> Consumer<T> wrap(Consumer<T> consumer);
+    Runnable wrap(Runnable runnable);
 }

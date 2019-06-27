@@ -19,9 +19,10 @@ package org.ocast.core;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
-import org.ocast.common.utils.CallbackWrapperOwner;
+import org.ocast.core.wrapper.CallbackWrapper;
+import org.ocast.core.wrapper.CallbackWrapperOwner;
 import org.ocast.core.models.*;
-import org.ocast.core.utils.SimpleCallbackWrapper;
+import org.ocast.core.wrapper.SimpleCallbackWrapper;
 import org.ocast.discovery.models.UpnpDevice;
 
 import java.net.URL;

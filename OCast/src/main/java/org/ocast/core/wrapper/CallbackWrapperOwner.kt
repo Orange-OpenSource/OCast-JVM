@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.ocast.common.utils
+package org.ocast.core.wrapper
 
-import org.ocast.core.models.CallbackWrapper
 import org.ocast.core.models.Consumer
 
 /**

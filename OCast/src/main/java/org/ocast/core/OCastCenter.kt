@@ -16,13 +16,13 @@
 
 package org.ocast.core
 
-import org.ocast.common.utils.CallbackWrapperOwner
-import org.ocast.core.models.CallbackWrapper
+import org.ocast.core.wrapper.CallbackWrapperOwner
+import org.ocast.core.wrapper.CallbackWrapper
 import org.ocast.core.models.CustomEvent
 import org.ocast.core.models.MetadataChangedEvent
 import org.ocast.core.models.PlaybackStatusEvent
 import org.ocast.core.models.UpdateStatusEvent
-import org.ocast.core.utils.SimpleCallbackWrapper
+import org.ocast.core.wrapper.SimpleCallbackWrapper
 import org.ocast.discovery.DeviceDiscovery
 import org.ocast.discovery.models.UpnpDevice
 import java.util.Collections

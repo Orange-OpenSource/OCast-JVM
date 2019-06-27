@@ -26,6 +26,7 @@ import org.ocast.mediaroute.models.MediaRouteDevice
 import org.ocast.core.Device
 import org.ocast.core.OCastCenter
 import org.ocast.core.EventListener
+import org.ocast.mediaroute.wrapper.AndroidUIThreadCallbackWrapper
 
 class OCastMediaRouteHelper(context: Context, devices: List<Class<out Device>>) {
 

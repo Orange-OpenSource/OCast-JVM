@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-package org.ocast.core.models;
+package org.ocast.core.wrapper;
 
-public interface CallbackWrapper {
+import org.ocast.core.models.Consumer;
 
-    <T> Consumer<T> wrap(Consumer<T> consumer);
-    Runnable wrap(Runnable runnable);
+public class SimpleCallbackWrapper implements CallbackWrapper {
+
+    @Override
+    public  <T> Consumer<T> wrap(Consumer<T> consumer) {
+        return consumer;
+    }
+
+    @Override
+    public Runnable wrap(Runnable runnable) {
+        return runnable;
+    }
 }
