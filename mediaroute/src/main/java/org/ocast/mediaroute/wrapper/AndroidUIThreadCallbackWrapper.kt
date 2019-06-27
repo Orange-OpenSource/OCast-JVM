@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.ocast.mediaroute.wrapper;
+package org.ocast.mediaroute.wrapper
 
-import android.os.Handler;
-import android.os.Looper;
-import org.ocast.core.wrapper.CallbackWrapper;
-import org.ocast.core.models.Consumer;
+import android.os.Handler
+import android.os.Looper
+import org.ocast.core.wrapper.CallbackWrapper
+import org.ocast.core.models.Consumer
 
 /**
  * This class is an implementation of [CallbackWrapper] for Android.
