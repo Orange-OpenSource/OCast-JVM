@@ -16,6 +16,7 @@
 
 package org.ocast.core
 
+import org.ocast.common.utils.CallbackWrapperOwner
 import org.ocast.core.models.CallbackWrapper
 import org.ocast.core.models.CustomEvent
 import org.ocast.core.models.MetadataChangedEvent
@@ -26,7 +27,13 @@ import org.ocast.discovery.DeviceDiscovery
 import org.ocast.discovery.models.UpnpDevice
 import java.util.Collections
 
-open class OCastCenter @JvmOverloads constructor(private val callbackWrapper: CallbackWrapper = SimpleCallbackWrapper()) {
+open class OCastCenter : CallbackWrapperOwner {
+
+    override var callbackWrapper: CallbackWrapper = SimpleCallbackWrapper()
+        set(value) {
+            field = value
+            devices.forEach { it.callbackWrapper = value }
+        }
 
     private val deviceDiscovery = DeviceDiscovery()
 
@@ -110,12 +117,6 @@ open class OCastCenter @JvmOverloads constructor(private val callbackWrapper: Ca
         deviceDiscovery.stop()
     }
 
-    protected fun <T> Iterable<T>.wrapRun(action: (T) -> Unit) {
-        forEach {
-            callbackWrapper.wrap(action).run(it)
-        }
-    }
-
     //region Discovery listener
 
     private val deviceDiscoveryListener = object : DeviceDiscovery.Listener {
@@ -139,7 +140,7 @@ open class OCastCenter @JvmOverloads constructor(private val callbackWrapper: Ca
         }
 
         override fun onDiscoveryStopped(error: Throwable?) {
-            oCastCenterListeners.wrapRun { it.onDiscoveryStopped(error) }
+            oCastCenterListeners.wrapForEach { it.onDiscoveryStopped(error) }
         }
     }
 
@@ -150,19 +151,19 @@ open class OCastCenter @JvmOverloads constructor(private val callbackWrapper: Ca
     private val eventListener = object : EventListener {
 
         override fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {
-            eventListeners.wrapRun { it.onPlaybackStatus(device, status) }
+            eventListeners.wrapForEach { it.onPlaybackStatus(device, status) }
         }
 
         override fun onMetadataChanged(device: Device, metadata: MetadataChangedEvent) {
-            eventListeners.wrapRun { it.onMetadataChanged(device, metadata) }
+            eventListeners.wrapForEach { it.onMetadataChanged(device, metadata) }
         }
 
         override fun onUpdateStatus(device: Device, updateStatus: UpdateStatusEvent) {
-            eventListeners.wrapRun { it.onUpdateStatus(device, updateStatus) }
+            eventListeners.wrapForEach { it.onUpdateStatus(device, updateStatus) }
         }
 
         override fun onCustomEvent(device: Device, customEvent: CustomEvent) {
-            eventListeners.wrapRun { it.onCustomEvent(device, customEvent) }
+            eventListeners.wrapForEach { it.onCustomEvent(device, customEvent) }
         }
     }
 
@@ -173,15 +174,15 @@ open class OCastCenter @JvmOverloads constructor(private val callbackWrapper: Ca
     private val deviceListener = object : DeviceListener {
 
         override fun onDeviceAdded(device: Device) {
-            deviceListeners.wrapRun { it.onDeviceAdded(device) }
+            deviceListeners.wrapForEach { it.onDeviceAdded(device) }
         }
 
         override fun onDeviceRemoved(device: Device) {
-            deviceListeners.wrapRun { it.onDeviceRemoved(device) }
+            deviceListeners.wrapForEach { it.onDeviceRemoved(device) }
         }
 
         override fun onDeviceDisconnected(device: Device, error: Throwable?) {
-            deviceListeners.wrapRun { it.onDeviceDisconnected(device, error) }
+            deviceListeners.wrapForEach { it.onDeviceDisconnected(device, error) }
         }
     }
 

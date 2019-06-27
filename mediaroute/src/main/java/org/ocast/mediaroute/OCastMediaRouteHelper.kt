@@ -29,7 +29,7 @@ import org.ocast.core.EventListener
 
 class OCastMediaRouteHelper(context: Context, devices: List<Class<out Device>>) {
 
-    private val oCastCenter = OCastCenter(AndroidUIThreadCallbackWrapper())
+    private val oCastCenter = OCastCenter().apply { callbackWrapper = AndroidUIThreadCallbackWrapper() }
     private val mainHandler = Handler(Looper.getMainLooper())
     private val mediaRouter: MediaRouter
 
