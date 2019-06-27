@@ -27,12 +27,12 @@ internal interface CallbackWrapperOwner {
     var callbackWrapper: CallbackWrapper
 
     /**
-     * Wraps and runs the lambda.
+     * Wraps and invokes the lambda.
      *
-     * @param param The parameter passed to the run method of the wrapped lambda.
+     * @param param The parameter passed to the invoked method of the wrapped lambda.
      */
-    fun <T> ((T) -> Unit).wrapRun(param: T) {
-        callbackWrapper.wrap(this).run(param)
+    fun <T> ((T) -> Unit).wrapInvoke(param: T) {
+        callbackWrapper.wrap(Consumer<T> { invoke(it) }).run(param)
     }
 
     /**
@@ -57,6 +57,6 @@ internal interface CallbackWrapperOwner {
      * @param action The lambda to wrap and perform.
      */
     fun <T> Iterable<T>.wrapForEach(action: (T) -> Unit) {
-        forEach { action.wrapRun(it) }
+        forEach { action.wrapInvoke(it) }
     }
 }
