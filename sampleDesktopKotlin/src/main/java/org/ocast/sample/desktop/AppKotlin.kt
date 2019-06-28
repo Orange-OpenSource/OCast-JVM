@@ -110,12 +110,15 @@ class AppKotlin : EventListener, DeviceListener {
     }
 
     override fun onDeviceDisconnected(device: Device, error: Throwable?) {
+        logger.log(Level.WARNING, "onDeviceDisconnected error", error)
     }
 
     override fun onDeviceAdded(device: Device) {
+        logger.log(Level.INFO, "onDeviceAdded: ${device.friendlyName}")
         startApplication(device)
     }
 
     override fun onDeviceRemoved(device: Device) {
+        logger.log(Level.INFO, "onDeviceRemoved: ${device.friendlyName}")
     }
 }

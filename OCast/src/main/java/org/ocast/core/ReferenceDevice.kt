@@ -65,6 +65,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     protected var isApplicationRunning = false
     protected var webSocket: WebSocketProvider? = null
     protected var onConnected: Runnable? = null
+    protected var onDisconnected: Consumer<OCastError>? = null
     private val webSocketURL: String
         get() {
             val protocol = if (sslConfiguration != null) "wss" else "ws"
@@ -122,9 +123,10 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                     webSocket = WebSocketProvider(webSocketURL, sslConfiguration, this)
                     state = State.CONNECTING
                     onConnected = onSuccess
+                    onDisconnected = onError
                     webSocket?.connect()
-                } catch (ex: Exception) {
-                    onError.wrapRun(OCastError("Unable to init SocketProvider"))
+                } catch (exception: Exception) {
+                    onError.wrapRun(OCastError("Unable to init SocketProvider", exception))
                 }
             }
         }
@@ -134,6 +136,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         if (state != State.DISCONNECTING && state != State.DISCONNECTED) {
             state = State.DISCONNECTING
             onConnected = null
+            onDisconnected = null
             webSocket?.disconnect()
         }
     }
@@ -148,12 +151,17 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             // Send error callback to all waiting commands
             synchronized(replyCallbacksBySequenceID) {
                 replyCallbacksBySequenceID.forEach { (_, callback) ->
-                    callback.onError.wrapRun(OCastError("Socket has been disconnected"))
+                    callback.onError.wrapRun(OCastError("Socket has been disconnected", error))
                 }
                 replyCallbacksBySequenceID.clear()
             }
+            if (onDisconnected != null) {
+                onDisconnected?.wrapRun(OCastError("Socket has been disconnected", error))
+            } else {
+                deviceListener?.onDeviceDisconnected(this, error)
+            }
             onConnected = null
-            deviceListener?.onDeviceDisconnected(this, error)
+            onDisconnected = null
         }
     }
 
@@ -161,11 +169,13 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         state = State.CONNECTED
         onConnected?.wrapRun()
         onConnected = null
+        onDisconnected = null
     }
 
     override fun onDataReceived(webSocketProvider: WebSocketProvider, data: String) {
+        var deviceLayer: OCastRawDeviceLayer? = null
         try {
-            val deviceLayer = OCastRawDeviceLayer.decode(data)
+            deviceLayer = OCastRawDeviceLayer.decode(data)
             when (deviceLayer.type) {
                 OCastRawDeviceLayer.Type.EVENT -> analyzeEvent(deviceLayer)
                 OCastRawDeviceLayer.Type.REPLY -> {
@@ -192,10 +202,13 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 }
                 OCastRawDeviceLayer.Type.COMMAND -> {}
             }
-            // Remove callback
-            replyCallbacksBySequenceID.remove(deviceLayer.identifier)
         } catch (e: Exception) {
             OCastLog.error(e) { "Receive a bad formatted message: $data" }
+        } finally {
+            deviceLayer?.let {
+                // Remove callback
+                replyCallbacksBySequenceID.remove(it.identifier)
+            }
         }
     }
 
@@ -345,9 +358,9 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             replyCallbacksBySequenceID[id] = ReplyCallback(replyClass, onSuccess, onError)
             val layerMessage = OCastCommandDeviceLayer(clientUuid, domain, OCastRawDeviceLayer.Type.COMMAND, id, commandMessage).encode()
             sendToWebSocket(id, layerMessage, domain == DOMAIN_BROWSER, onError)
-        } catch (e: Exception) {
+        } catch (exception: Exception) {
             replyCallbacksBySequenceID.remove(id)
-            onError.wrapRun(OCastError("Unable to get string from data"))
+            onError.wrapRun(OCastError("Unable to get string from data", exception))
         }
     }
 

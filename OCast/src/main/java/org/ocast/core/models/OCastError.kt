@@ -16,9 +16,9 @@
 
 package org.ocast.core.models
 
-class OCastError(val code: Int, val errorMessage: String) {
+class OCastError(val code: Int, val errorMessage: String, val throwable: Throwable? = null) {
 
-    constructor(errorMessage: String) : this(Status.CLIENT_ERROR.code, errorMessage)
+    constructor(errorMessage: String, throwable: Throwable? = null) : this(Status.CLIENT_ERROR.code, errorMessage, throwable)
 
     enum class Status(val code: Int) {
         SUCCESS(0),

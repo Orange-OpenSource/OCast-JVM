@@ -57,7 +57,9 @@ class OCastRawDeviceLayer(
     @JsonProperty("id") val identifier: Long,
     @JsonProperty("message") val message: OCastRawApplicationLayer
 ) {
+
     companion object {
+        @Throws(Exception::class)
         fun decode(json: String): OCastRawDeviceLayer {
             return JsonTools.objectMapper.readValue(json)
         }
@@ -107,6 +109,7 @@ class OCastCommandDeviceLayer<T>(
     @JsonProperty("message") val message: OCastApplicationLayer<T>
 ) {
 
+    @Throws(Exception::class)
     fun encode(): String {
         return JsonTools.objectMapper.writeValueAsString(this)
     }
@@ -155,11 +158,15 @@ open class OCastDataLayer<T>(
     @JsonProperty("params") val params: T,
     @JsonProperty("options") val options: JSONObject?
 ) {
+
     companion object {
+
+        @Throws(Exception::class)
         inline fun <reified T> decode(json: String): T {
             return JsonTools.objectMapper.readValue(json)
         }
 
+        @Throws(Exception::class)
         fun <T> decode(json: String, clazz: Class<T>): T {
             return JsonTools.objectMapper.readValue(json, clazz)
         }
@@ -179,7 +186,10 @@ open class OCastRawDataLayer(
     @JsonProperty("params") val params: String,
     @JsonProperty("options") val options: JSONObject?
 ) {
+
     companion object {
+
+        @Throws(Exception::class)
         fun decode(json: String): OCastRawDataLayer {
             return JsonTools.objectMapper.readValue(json)
         }
@@ -196,7 +206,10 @@ open class OCastReplyDataLayer(
     @JsonProperty("name") var name: String,
     @JsonProperty("params") val params: OCastReplyParams
 ) {
+
     companion object {
+
+        @Throws(Exception::class)
         fun decode(json: String): OCastReplyDataLayer {
             return JsonTools.objectMapper.readValue(json)
         }
