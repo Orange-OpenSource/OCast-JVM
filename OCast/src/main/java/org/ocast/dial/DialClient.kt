@@ -43,7 +43,7 @@ internal class DialClient(private val baseURL: URL) {
     fun startApplication(name: String, onComplete: (Result<Unit>) -> Unit) {
         try {
             val request = Request.Builder()
-                .url(URL(baseURL, name))
+                .url(URL("$baseURL/$name"))
                 .post(RequestBody.create(null, byteArrayOf()))
                 .build()
             client.newCall(request).enqueue { result ->
@@ -94,7 +94,7 @@ internal class DialClient(private val baseURL: URL) {
     fun getApplication(name: String, onComplete: (Result<DialApplication>) -> Unit) {
         try {
             val request = Request.Builder()
-                .url(URL(baseURL, name))
+                .url(URL("$baseURL/$name"))
                 .build()
             client.newCall(request).enqueue { result ->
                 onComplete(result.mapCatching { response ->
