@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package org.ocast.core.utils;
+package org.ocast.core.wrapper
 
-import org.ocast.core.models.CallbackWrapper;
-import org.ocast.core.models.Consumer;
+import org.ocast.core.models.Consumer
 
-public class SimpleCallbackWrapper implements CallbackWrapper {
+/**
+ * This class is a simple implementation of a [CallbackWrapper].
+ */
+class SimpleCallbackWrapper : CallbackWrapper {
 
-    @Override
-    public  <T> Consumer<T> wrap(Consumer<T> consumer) {
-        return consumer;
+    override fun <T> wrap(consumer: Consumer<T>): Consumer<T> {
+        return consumer
     }
 
-    @Override
-    public Runnable wrap(Runnable runnable) {
-        return runnable;
+    override fun wrap(runnable: Runnable): Runnable {
+        return runnable
     }
 }

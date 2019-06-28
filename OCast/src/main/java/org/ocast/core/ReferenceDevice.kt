@@ -20,7 +20,6 @@ import org.json.JSONObject
 import org.ocast.core.models.* // ktlint-disable no-wildcard-imports
 import org.ocast.core.utils.OCastLog
 import org.ocast.discovery.models.UpnpDevice
-import java.lang.Exception
 import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
@@ -149,7 +148,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             // Send error callback to all waiting commands
             synchronized(replyCallbacksBySequenceID) {
                 replyCallbacksBySequenceID.forEach { (_, callback) ->
-                    callback.wrapOnError(OCastError("Socket has been disconnected"))
+                    callback.onError.wrapRun(OCastError("Socket has been disconnected"))
                 }
                 replyCallbacksBySequenceID.clear()
             }
@@ -181,12 +180,13 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                                 } else {
                                     Unit
                                 }
-                                event.wrapOnSuccess(reply)
+                                @Suppress("UNCHECKED_CAST")
+                                (it as ReplyCallback<Any?>).onSuccess.wrapRun(reply)
                             } else {
-                                event.wrapOnError(OCastError(replyData.params.code, "Command error code ${replyData.params.code}"))
+                                it.onError.wrapRun(OCastError(replyData.params.code, "Command error code ${replyData.params.code}"))
                             }
                         } else {
-                            event.wrapOnError(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Bad status value ${deviceLayer.status}"))
+                            it.onError.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Bad status value ${deviceLayer.status}"))
                         }
                     }
                 }
@@ -369,27 +369,6 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 onError.wrapRun(it)
             })
         }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    protected fun <T> ReplyCallback<*>.wrapOnSuccess(params: T) {
-        try {
-            (this as ReplyCallback<T>).onSuccess.wrapRun(params)
-        } catch (ex: Exception) {
-            onError.wrapRun(OCastError("Unable to decode reply"))
-        }
-    }
-
-    protected fun ReplyCallback<*>.wrapOnError(throwable: OCastError) {
-        onError.wrapRun(throwable)
-    }
-
-    protected fun <T> Consumer<T>.wrapRun(param: T) {
-        callbackWrapper.wrap(this).run(param)
-    }
-
-    protected fun Runnable.wrapRun() {
-        callbackWrapper.wrap(this).run()
     }
 
     protected fun generateSequenceID(): Long {
