@@ -91,9 +91,6 @@ public class AppJava implements EventListener, DeviceListener {
     @Override
     public void onPlaybackStatus(@NotNull Device device, @NotNull PlaybackStatusEvent status) {
         logger.log(Level.INFO, "[" + device.getFriendlyName() + "]" + "onPlaybackStatus: progress=" + status.getPosition());
-        if (status.getState() == Media.PlayerState.IDLE) {
-            latch.countDown();
-        }
     }
 
     @Override
