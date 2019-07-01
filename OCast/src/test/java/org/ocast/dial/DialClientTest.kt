@@ -86,7 +86,7 @@ internal class DialClientTest {
             assertEquals("OrangeTVReceiverProd", application?.name)
             assertEquals(true, application?.isStopAllowed)
             assertEquals(DialApplication.State.Running, application?.state)
-            assertEquals(URL(baseURL, "run"), application?.getInstanceURL(baseURL))
+            assertEquals(URL("$baseURL/OrangeTVReceiverProd/run"), application?.getInstanceURL(baseURL))
             assertEquals(URI("wss://192.168.1.65:4433/ocast"), application?.additionalData?.webSocketURL)
             assertEquals("1.0", application?.additionalData?.version)
         }
