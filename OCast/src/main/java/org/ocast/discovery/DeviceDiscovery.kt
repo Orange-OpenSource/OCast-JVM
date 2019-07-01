@@ -26,6 +26,7 @@ import java.util.Timer
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.fixedRateTimer
 import kotlin.concurrent.schedule
+import kotlin.math.max
 
 /**
  * This class represents the entry point for the discovery of OCast devices.
@@ -103,7 +104,7 @@ internal class DeviceDiscovery constructor(
      */
     var interval = 30_000L
         set(value) {
-            field = Math.max(value, 5000)
+            field = max(value, 5000)
             if (!socket.isClosed) {
                 refreshDevices()
             }
@@ -229,7 +230,7 @@ internal class DeviceDiscovery constructor(
                 try {
                     socket.send(request.data, SSDP_MULTICAST_ADDRESS, SSDP_MULTICAST_PORT)
                 } catch (exception: IOException) {
-                    OCastLog.error("Could not send SSDP M-SEARCH request", exception)
+                    OCastLog.error(exception) { "Could not send SSDP M-SEARCH request" }
                 }
             }
         }

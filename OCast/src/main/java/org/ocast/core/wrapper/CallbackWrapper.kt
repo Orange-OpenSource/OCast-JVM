@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-package org.ocast.discovery.utils
+package org.ocast.core.wrapper
+
+import org.ocast.core.models.Consumer
 
 /**
- * A singleton object which provides utility methods related to UPnP.
+ * A wrapper for callbacks.
+ * For instance, this interface can be used to run callbacks on the main thread, which depends on the platform OCast is running on.
  */
-internal object UpnpTools {
+interface CallbackWrapper {
 
     /**
-     * The regex used to extract a device UUID from a string.
-     */
-    private val UUID_REGEX = "^uuid:([^:]*)".toRegex()
-
-    /**
-     * Extracts the UUID of a device from a string.
+     * Wraps a [Consumer] into a new one.
      *
-     * @param string The string to extract the UUID from. This is typically a Unique Service Name or a Unique Device Name.
-     * @return The extracted UUID, or null is the UUID could not be extracted.
+     * @param consumer The consumer to wrap.
+     * @return The wrapping consumer.
      */
-    fun extractUuid(string: String): String? {
-        return UUID_REGEX.find(string)?.groupValues?.elementAtOrNull(1)
-    }
+    fun <T> wrap(consumer: Consumer<T>): Consumer<T>
+
+    /**
+     * Wraps a [Runnable] into a new one.
+     *
+     * @param runnable The runnable to wrap.
+     * @return The wrapping runnable.
+     */
+    fun wrap(runnable: Runnable): Runnable
 }

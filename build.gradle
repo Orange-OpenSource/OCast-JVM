@@ -3,7 +3,7 @@
 buildscript {
     ext {
         // Kotlin
-        kotlin_version = '1.3.31'
+        kotlin_version = '1.3.40'
     }
 
     repositories {

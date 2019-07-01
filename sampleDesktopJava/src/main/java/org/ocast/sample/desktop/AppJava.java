@@ -28,6 +28,7 @@ import org.ocast.core.models.Media;
 import org.ocast.core.models.MetadataChangedEvent;
 import org.ocast.core.models.PlaybackStatusEvent;
 import org.ocast.core.models.UpdateStatusEvent;
+import org.ocast.core.utils.OCastLog;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
@@ -50,6 +51,7 @@ public class AppJava implements EventListener, DeviceListener {
         oCastCenter.addDeviceListener(this);
         oCastCenter.addEventListener(this);
         oCastCenter.registerDevice(ReferenceDevice.class);
+        OCastLog.setLevel(OCastLog.Level.ALL);
     }
 
     private void run() {
@@ -68,7 +70,7 @@ public class AppJava implements EventListener, DeviceListener {
     private void startApplication(Device device) {
         device.setApplicationName("Orange-DefaultReceiver-DEV");
         device.startApplication(
-            () -> prepareMedia(device), oCastError -> logger.log(Level.WARNING, "startApplication error:", oCastError.getErrorMessage())
+            () -> prepareMedia(device), oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getErrorMessage())
         );
     }
 
@@ -82,16 +84,13 @@ public class AppJava implements EventListener, DeviceListener {
             Media.TransferMode.STREAMED,
             true,
             null,
-            () -> {}, oCastError -> logger.log(Level.WARNING, "prepareMedia error:", oCastError.getStatus())
+            () -> {}, oCastError -> logger.log(Level.WARNING, "prepareMedia error: " + oCastError.getStatus())
         );
     }
 
     @Override
     public void onPlaybackStatus(@NotNull Device device, @NotNull PlaybackStatusEvent status) {
         logger.log(Level.INFO, "[" + device.getFriendlyName() + "]" + "onPlaybackStatus: progress=" + status.getPosition());
-        if (status.getState() == Media.PlayerState.IDLE) {
-            latch.countDown();
-        }
     }
 
     @Override

@@ -20,7 +20,6 @@ import org.json.JSONObject
 import org.ocast.core.models.* // ktlint-disable no-wildcard-imports
 import org.ocast.core.utils.OCastLog
 import org.ocast.discovery.models.UpnpDevice
-import java.lang.Exception
 import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
@@ -65,7 +64,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     protected var clientUuid = UUID.randomUUID().toString()
     protected var isApplicationRunning = false
     protected var webSocket: WebSocketProvider? = null
-    protected var onConnected: Runnable? = null
+    protected var connectCallback: RunnableCallback? = null
     private val webSocketURL: String
         get() {
             val protocol = if (sslConfiguration != null) "wss" else "ws"
@@ -119,14 +118,10 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             State.CONNECTED -> onSuccess.wrapRun()
             State.DISCONNECTING -> onError.wrapRun(OCastError("Device is disconnecting"))
             State.DISCONNECTED -> {
-                try {
-                    webSocket = WebSocketProvider(webSocketURL, sslConfiguration, this)
-                    state = State.CONNECTING
-                    onConnected = onSuccess
-                    webSocket?.connect()
-                } catch (ex: Exception) {
-                    onError.wrapRun(OCastError("Unable to init SocketProvider"))
-                }
+                webSocket = WebSocketProvider(webSocketURL, sslConfiguration, this)
+                state = State.CONNECTING
+                connectCallback = RunnableCallback(onSuccess, onError)
+                webSocket?.connect()
             }
         }
     }
@@ -134,7 +129,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     override fun disconnect() {
         if (state != State.DISCONNECTING && state != State.DISCONNECTED) {
             state = State.DISCONNECTING
-            onConnected = null
+            connectCallback = null
             webSocket?.disconnect()
         }
     }
@@ -149,24 +144,29 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             // Send error callback to all waiting commands
             synchronized(replyCallbacksBySequenceID) {
                 replyCallbacksBySequenceID.forEach { (_, callback) ->
-                    callback.wrapOnError(OCastError("Socket has been disconnected"))
+                    callback.onError.wrapRun(OCastError("Socket has been disconnected", error))
                 }
                 replyCallbacksBySequenceID.clear()
             }
-            onConnected = null
-            deviceListener?.onDeviceDisconnected(this, error)
+            connectCallback?.also { connectCallback ->
+                connectCallback.onError.wrapRun(OCastError("Socket has been disconnected", error))
+            } ?: run {
+                deviceListener?.onDeviceDisconnected(this, error)
+            }
+            connectCallback = null
         }
     }
 
     override fun onConnected(webSocketProvider: WebSocketProvider, url: String) {
         state = State.CONNECTED
-        onConnected?.wrapRun()
-        onConnected = null
+        connectCallback?.onSuccess?.wrapRun()
+        connectCallback = null
     }
 
     override fun onDataReceived(webSocketProvider: WebSocketProvider, data: String) {
+        var deviceLayer: OCastRawDeviceLayer? = null
         try {
-            val deviceLayer = OCastRawDeviceLayer.decode(data)
+            deviceLayer = OCastRawDeviceLayer.decode(data)
             when (deviceLayer.type) {
                 OCastRawDeviceLayer.Type.EVENT -> analyzeEvent(deviceLayer)
                 OCastRawDeviceLayer.Type.REPLY -> {
@@ -181,21 +181,25 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                                 } else {
                                     Unit
                                 }
-                                event.wrapOnSuccess(reply)
+                                @Suppress("UNCHECKED_CAST")
+                                (it as ReplyCallback<Any?>).onSuccess.wrapRun(reply)
                             } else {
-                                event.wrapOnError(OCastError(replyData.params.code, "Command error code ${replyData.params.code}"))
+                                it.onError.wrapRun(OCastError(replyData.params.code, "Command error code ${replyData.params.code}"))
                             }
                         } else {
-                            event.wrapOnError(OCastError("Unknown status value ${deviceLayer.status}"))
+                            it.onError.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Bad status value ${deviceLayer.status}"))
                         }
                     }
                 }
                 OCastRawDeviceLayer.Type.COMMAND -> {}
             }
-            // Remove callback
-            replyCallbacksBySequenceID.remove(deviceLayer.identifier)
         } catch (e: Exception) {
-            OCastLog.error("Receive a bad formatted message: $data", e)
+            OCastLog.error(e) { "Receive a bad formatted message: $data" }
+        } finally {
+            deviceLayer?.let {
+                // Remove callback
+                replyCallbacksBySequenceID.remove(it.identifier)
+            }
         }
     }
 
@@ -313,8 +317,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         sendCommand(DOMAIN_SETTINGS, DeviceMessage(GetUpdateStatus().build()), onSuccess, Consumer { onError.run(OCastDeviceSettingsError(it)) }, UpdateStatus::class.java)
     }
 
-    override fun getDeviceID(onSuccess: Consumer<DeviceId>, onError: Consumer<OCastDeviceSettingsError>) {
-        sendCommand(DOMAIN_SETTINGS, DeviceMessage(GetDeviceID().build()), onSuccess, Consumer { onError.run(OCastDeviceSettingsError(it)) }, DeviceId::class.java)
+    override fun getDeviceID(onSuccess: Consumer<DeviceID>, onError: Consumer<OCastDeviceSettingsError>) {
+        sendCommand(DOMAIN_SETTINGS, DeviceMessage(GetDeviceID().build()), onSuccess, Consumer { onError.run(OCastDeviceSettingsError(it)) }, DeviceID::class.java)
     }
 
     //endregion
@@ -345,9 +349,9 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             replyCallbacksBySequenceID[id] = ReplyCallback(replyClass, onSuccess, onError)
             val layerMessage = OCastCommandDeviceLayer(clientUuid, domain, OCastRawDeviceLayer.Type.COMMAND, id, commandMessage).encode()
             sendToWebSocket(id, layerMessage, domain == DOMAIN_BROWSER, onError)
-        } catch (e: Exception) {
+        } catch (exception: Exception) {
             replyCallbacksBySequenceID.remove(id)
-            onError.wrapRun(OCastError("Unable to get string from data"))
+            onError.wrapRun(OCastError("Unable to get string from data", exception))
         }
     }
 
@@ -369,27 +373,6 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 onError.wrapRun(it)
             })
         }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    protected fun <T> ReplyCallback<*>.wrapOnSuccess(params: T) {
-        try {
-            (this as ReplyCallback<T>).onSuccess.wrapRun(params)
-        } catch (ex: Exception) {
-            onError.wrapRun(OCastError("Unable to decode reply"))
-        }
-    }
-
-    protected fun ReplyCallback<*>.wrapOnError(throwable: OCastError) {
-        onError.wrapRun(throwable)
-    }
-
-    protected fun <T> Consumer<T>.wrapRun(param: T) {
-        callbackWrapper.wrap(this).run(param)
-    }
-
-    protected fun Runnable.wrapRun() {
-        callbackWrapper.wrap(this).run()
     }
 
     protected fun generateSequenceID(): Long {

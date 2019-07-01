@@ -59,7 +59,7 @@ internal open class UpnpClient {
                 .url(location)
                 .build()
         } catch (exception: Exception) {
-            OCastLog.error("Could not build device description request ", exception)
+            OCastLog.error(exception) { "Could not build device description request " }
             null
         }
 
@@ -107,7 +107,7 @@ internal open class UpnpClient {
                 }
             }
         } catch (exception: Exception) {
-            OCastLog.error("Parse device description response failed", exception)
+            OCastLog.error(exception) { "Parse device description response failed" }
         }
 
         return if (udn != null && applicationURL != null && friendlyName != null && manufacturer != null && modelName != null) {

@@ -16,23 +16,27 @@
 
 package org.ocast.core;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
+import org.ocast.core.wrapper.CallbackWrapper;
+import org.ocast.core.wrapper.CallbackWrapperOwner;
 import org.ocast.core.models.*;
-import org.ocast.core.utils.SimpleCallbackWrapper;
+import org.ocast.core.wrapper.SimpleCallbackWrapper;
 import org.ocast.discovery.models.UpnpDevice;
 
 import java.net.URL;
 
-public abstract class Device {
+public abstract class Device implements CallbackWrapperOwner {
 
     @NotNull private final UpnpDevice upnpDevice;
     @Nullable private String applicationName;
     @Nullable private DeviceListener deviceListener;
     @Nullable private EventListener eventListener;
     @NotNull private CallbackWrapper callbackWrapper = new SimpleCallbackWrapper();
-    @Nullable private SSLConfiguration sslConfiguration;
+    @Nullable protected SSLConfiguration sslConfiguration;
 
     Device(@NotNull UpnpDevice upnpDevice) {
         this.upnpDevice = upnpDevice;
@@ -131,7 +135,7 @@ public abstract class Device {
 
     // Settings device commands
     public abstract void getUpdateStatus(@NotNull Consumer<UpdateStatus> onSuccess, @NotNull Consumer<OCastDeviceSettingsError> onError);
-    public abstract void getDeviceID(@NotNull Consumer<DeviceId> onSuccess, @NotNull Consumer<OCastDeviceSettingsError> onError);
+    public abstract void getDeviceID(@NotNull Consumer<DeviceID> onSuccess, @NotNull Consumer<OCastDeviceSettingsError> onError);
 
     // Settings input commands
     public abstract void sendKeyPressed(@NotNull KeyPressed keyPressed, @NotNull Runnable onSuccess, @NotNull Consumer<OCastInputSettingsError> onError);
@@ -141,4 +145,31 @@ public abstract class Device {
     // Custom commands
     public abstract void sendCustomCommand(@NotNull String name, @NotNull String service, @NotNull JSONObject params, @Nullable JSONObject options, @NotNull Consumer<CustomReply> onSuccess, @NotNull Consumer<OCastError> onError);
     public abstract void sendCustomCommand(@NotNull String name, @NotNull String service, @NotNull JSONObject params, @Nullable JSONObject options, @NotNull Runnable onSuccess, @NotNull Consumer<OCastError> onError);
+
+    //region CallbackWrapperOwner
+
+    // Methods from CallbackWrapperOwner must be implemented
+    // Otherwise code compiles but crashes at runtime because default implementations of these methods are not found
+
+    @Override
+    public <T> void wrapInvoke(@NotNull Function1<? super T, Unit> function, T param) {
+        CallbackWrapperOwner.DefaultImpls.wrapInvoke(this, function, param);
+    }
+
+    @Override
+    public void wrapRun(@NotNull Runnable runnable) {
+        CallbackWrapperOwner.DefaultImpls.wrapRun(this, runnable);
+    }
+
+    @Override
+    public <T> void wrapRun(@NotNull Consumer<T> consumer, T param) {
+        CallbackWrapperOwner.DefaultImpls.wrapRun(this, consumer, param);
+    }
+
+    @Override
+    public <T> void wrapForEach(@NotNull Iterable<? extends T> iterable, @NotNull Function1<? super T, Unit> action) {
+        CallbackWrapperOwner.DefaultImpls.wrapForEach(this, iterable, action);
+    }
+
+    //endregion
 }
