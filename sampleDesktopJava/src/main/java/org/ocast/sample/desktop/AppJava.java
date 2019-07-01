@@ -70,7 +70,7 @@ public class AppJava implements EventListener, DeviceListener {
     private void startApplication(Device device) {
         device.setApplicationName("Orange-DefaultReceiver-DEV");
         device.startApplication(
-            () -> prepareMedia(device), oCastError -> logger.log(Level.WARNING, "startApplication error:", oCastError.getErrorMessage())
+            () -> prepareMedia(device), oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getErrorMessage())
         );
     }
 
@@ -84,16 +84,13 @@ public class AppJava implements EventListener, DeviceListener {
             Media.TransferMode.STREAMED,
             true,
             null,
-            () -> {}, oCastError -> logger.log(Level.WARNING, "prepareMedia error:", oCastError.getStatus())
+            () -> {}, oCastError -> logger.log(Level.WARNING, "prepareMedia error: " + oCastError.getStatus())
         );
     }
 
     @Override
     public void onPlaybackStatus(@NotNull Device device, @NotNull PlaybackStatusEvent status) {
         logger.log(Level.INFO, "[" + device.getFriendlyName() + "]" + "onPlaybackStatus: progress=" + status.getPosition());
-        if (status.getState() == Media.PlayerState.IDLE) {
-            latch.countDown();
-        }
     }
 
     @Override

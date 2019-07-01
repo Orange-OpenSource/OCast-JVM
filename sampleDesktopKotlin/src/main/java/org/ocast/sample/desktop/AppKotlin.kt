@@ -89,15 +89,12 @@ class AppKotlin : EventListener, DeviceListener {
             null, {
                 // ok
             }, {
-                oCastError -> logger.log(Level.WARNING, "prepareMedia error", oCastError.status)
+                oCastError -> logger.log(Level.WARNING, "prepareMedia error: ${oCastError.errorMessage}")
             })
     }
 
     override fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {
         logger.log(Level.INFO, "[{${device.friendlyName}}] onPlaybackStatus: progress=${status.position} volume=${status.volume}")
-        if (status.state === Media.PlayerState.IDLE) {
-            latch.countDown()
-        }
     }
 
     override fun onMetadataChanged(device: Device, metadata: MetadataChangedEvent) {
@@ -110,12 +107,15 @@ class AppKotlin : EventListener, DeviceListener {
     }
 
     override fun onDeviceDisconnected(device: Device, error: Throwable?) {
+        logger.log(Level.WARNING, "onDeviceDisconnected error", error)
     }
 
     override fun onDeviceAdded(device: Device) {
+        logger.log(Level.INFO, "onDeviceAdded: ${device.friendlyName}")
         startApplication(device)
     }
 
     override fun onDeviceRemoved(device: Device) {
+        logger.log(Level.INFO, "onDeviceRemoved: ${device.friendlyName}")
     }
 }
