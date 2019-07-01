@@ -64,8 +64,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     protected var clientUuid = UUID.randomUUID().toString()
     protected var isApplicationRunning = false
     protected var webSocket: WebSocketProvider? = null
-    protected var onConnected: Runnable? = null
-    protected var onDisconnected: Consumer<OCastError>? = null
+    protected var connectCallback: RunnableCallback? = null
     private val webSocketURL: String
         get() {
             val protocol = if (sslConfiguration != null) "wss" else "ws"
@@ -119,15 +118,10 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             State.CONNECTED -> onSuccess.wrapRun()
             State.DISCONNECTING -> onError.wrapRun(OCastError("Device is disconnecting"))
             State.DISCONNECTED -> {
-                try {
-                    webSocket = WebSocketProvider(webSocketURL, sslConfiguration, this)
-                    state = State.CONNECTING
-                    onConnected = onSuccess
-                    onDisconnected = onError
-                    webSocket?.connect()
-                } catch (exception: Exception) {
-                    onError.wrapRun(OCastError("Unable to init SocketProvider", exception))
-                }
+                webSocket = WebSocketProvider(webSocketURL, sslConfiguration, this)
+                state = State.CONNECTING
+                connectCallback = RunnableCallback(onSuccess, onError)
+                webSocket?.connect()
             }
         }
     }
@@ -135,8 +129,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     override fun disconnect() {
         if (state != State.DISCONNECTING && state != State.DISCONNECTED) {
             state = State.DISCONNECTING
-            onConnected = null
-            onDisconnected = null
+            connectCallback = null
             webSocket?.disconnect()
         }
     }
@@ -155,21 +148,19 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 }
                 replyCallbacksBySequenceID.clear()
             }
-            if (onDisconnected != null) {
-                onDisconnected?.wrapRun(OCastError("Socket has been disconnected", error))
-            } else {
+            connectCallback?.also { connectCallback ->
+                connectCallback.onError.wrapRun(OCastError("Socket has been disconnected", error))
+            } ?: run {
                 deviceListener?.onDeviceDisconnected(this, error)
             }
-            onConnected = null
-            onDisconnected = null
+            connectCallback = null
         }
     }
 
     override fun onConnected(webSocketProvider: WebSocketProvider, url: String) {
         state = State.CONNECTED
-        onConnected?.wrapRun()
-        onConnected = null
-        onDisconnected = null
+        connectCallback?.onSuccess?.wrapRun()
+        connectCallback = null
     }
 
     override fun onDataReceived(webSocketProvider: WebSocketProvider, data: String) {
