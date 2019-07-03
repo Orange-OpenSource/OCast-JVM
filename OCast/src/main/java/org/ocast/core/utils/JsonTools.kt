@@ -48,6 +48,6 @@ class RawJsonDeserializer : JsonDeserializer<String>() {
     override fun deserialize(parser: JsonParser?, context: DeserializationContext?): String {
         val mapper = parser?.codec as? ObjectMapper?
         val node = mapper?.readTree<TreeNode>(parser)
-        return mapper?.writeValueAsString(node) ?: ""
+        return mapper?.writeValueAsString(node).orEmpty()
     }
 }

@@ -17,6 +17,8 @@
 package org.ocast.core
 
 import org.json.JSONObject
+import org.ocast.common.ifNotNull
+import org.ocast.common.orElse
 import org.ocast.core.models.* // ktlint-disable no-wildcard-imports
 import org.ocast.core.utils.OCastLog
 import org.ocast.dial.DialClient
@@ -94,16 +96,15 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     //region RemoteDevice
 
     override fun startApplication(onSuccess: Runnable, onError: Consumer<OCastError>) {
-        val applicationName = applicationName
-        if (applicationName == null) {
-            onError.wrapRun(OCastError("Property applicationName is not defined"))
-        } else {
+        applicationName?.ifNotNull { applicationName ->
             when (state) {
                 State.CONNECTING -> onError.wrapRun(OCastError("Device is connecting, start cannot be processed yet"))
                 State.CONNECTED -> startApplication(applicationName, onSuccess, onError)
                 State.DISCONNECTING -> onError.wrapRun(OCastError("Device is connecting, start cannot be processed."))
                 State.DISCONNECTED -> onError.wrapRun(OCastError("Device is disconnected, start cannot be processed."))
             }
+        }.orElse {
+            onError.wrapRun(OCastError("Property applicationName is not defined"))
         }
     }
 
@@ -142,10 +143,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     }
 
     override fun stopApplication(onSuccess: Runnable, onError: Consumer<OCastError>) {
-        val applicationName = applicationName
-        if (applicationName == null) {
-            onError.wrapRun(OCastError("Property applicationName is not defined"))
-        } else {
+        applicationName?.ifNotNull { applicationName ->
             dialClient.stopApplication(applicationName) { result ->
                 result
                     .onFailure {
@@ -156,6 +154,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                         onSuccess.wrapRun()
                     }
             }
+        }.orElse {
+            onError.wrapRun(OCastError("Property applicationName is not defined"))
         }
     }
 
@@ -195,9 +195,9 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 }
                 replyCallbacksBySequenceID.clear()
             }
-            connectCallback?.also { connectCallback ->
+            connectCallback?.ifNotNull { connectCallback ->
                 connectCallback.onError.wrapRun(OCastError("Socket has been disconnected", error))
-            } ?: run {
+            }.orElse {
                 deviceListener?.onDeviceDisconnected(this, error)
             }
             connectCallback = null

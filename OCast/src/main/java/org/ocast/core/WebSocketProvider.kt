@@ -21,6 +21,7 @@ import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import org.ocast.common.orFalse
 import org.ocast.core.models.SSLConfiguration
 import org.ocast.core.utils.OCastLog
 import java.util.concurrent.TimeUnit
@@ -111,7 +112,7 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
         return if (state == State.CONNECTED) {
             OCastLog.debug { "Socket: send $message" }
             if (message.length <= MAX_PAYLOAD_SIZE) {
-                webSocket?.send(message) ?: false
+                webSocket?.send(message).orFalse()
             } else {
                 false
             }
