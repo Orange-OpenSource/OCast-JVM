@@ -126,11 +126,11 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                                 }
                                 .onSuccess {
                                     applicationSemaphore = Semaphore(0)
-                                    if (applicationSemaphore?.tryAcquire(60, TimeUnit.SECONDS) == true
+                                    if (applicationSemaphore?.tryAcquire(60, TimeUnit.SECONDS) == true &&
                                         // Semaphore is released when state or application name changes
                                         // In these cases onError must be called
-                                        && applicationName == name
-                                        && state == State.CONNECTED) {
+                                        applicationName == name &&
+                                        state == State.CONNECTED) {
                                         onSuccess.wrapRun()
                                     } else {
                                         onError.wrapRun(OCastError("Failed to start $name, the WebAppConnectedStatus event was not received"))

@@ -19,13 +19,13 @@ package org.ocast.common
 /**
  * Returns the boolean if it is not null, or true otherwise.
  */
-fun Boolean?.orTrue() : Boolean {
+fun Boolean?.orTrue(): Boolean {
     return this ?: true
 }
 
 /**
  * Returns the boolean if it is not null, or false otherwise.
  */
-fun Boolean?.orFalse() : Boolean {
+fun Boolean?.orFalse(): Boolean {
     return this ?: false
 }
