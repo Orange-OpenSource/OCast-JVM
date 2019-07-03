@@ -111,8 +111,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     private fun startApplication(name: String, onSuccess: Runnable, onError: Consumer<OCastError>) {
         dialClient.getApplication(name) { result ->
             result
-                .onFailure {
-                    onError.wrapRun(OCastError(""))
+                .onFailure { throwable ->
+                    onError.wrapRun(OCastError("Failed to start $name, there was an error with the DIAL application information request", throwable))
                 }
                 .onSuccess { application ->
                     isApplicationRunning.set(application.state == DialApplication.State.Running)
@@ -121,8 +121,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                     } else {
                         dialClient.startApplication(name) { result ->
                             result
-                                .onFailure {
-                                    onError.wrapRun(OCastError(""))
+                                .onFailure { throwable ->
+                                    onError.wrapRun(OCastError("Failed to start $name, there was an error with the DIAL request", throwable))
                                 }
                                 .onSuccess {
                                     applicationSemaphore = Semaphore(0)
@@ -133,7 +133,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                                         && state == State.CONNECTED) {
                                         onSuccess.wrapRun()
                                     } else {
-                                        onError.wrapRun(OCastError(""))
+                                        onError.wrapRun(OCastError("Failed to start $name, the WebAppConnectedStatus event was not received"))
                                     }
                                 }
                         }
@@ -146,8 +146,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         applicationName?.ifNotNull { applicationName ->
             dialClient.stopApplication(applicationName) { result ->
                 result
-                    .onFailure {
-                        onError.wrapRun(OCastError(""))
+                    .onFailure { throwable ->
+                        onError.wrapRun(OCastError("Failed to stop $applicationName, there was an error with the DIAL request", throwable))
                     }
                     .onSuccess {
                         isApplicationRunning.set(false)
