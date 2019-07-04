@@ -21,6 +21,7 @@ import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.ocast.core.ReferenceDevice
+import org.ocast.core.utils.JsonTools
 
 /**
  * Unit tests for the OCast model.
@@ -50,9 +51,9 @@ class OCastTest {
         """.trimIndent()
 
         // When
-        val deviceLayer = OCastRawDeviceLayer.decode(data)
-        val ocastData = OCastRawDataLayer.decode(deviceLayer.message.data)
-        val webAppConnectedStatus = OCastDataLayer.decode<WebAppConnectedStatus>(ocastData.params)
+        val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
+        val ocastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
+        val webAppConnectedStatus = JsonTools.decode<WebAppConnectedStatus>(ocastData.params)
 
         // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
@@ -103,9 +104,9 @@ class OCastTest {
         """.trimIndent()
 
         // When
-        val deviceLayer = OCastRawDeviceLayer.decode(data)
-        val ocastData = OCastRawDataLayer.decode(deviceLayer.message.data)
-        val metadataChanged = OCastDataLayer.decode<MetadataChangedEvent>(ocastData.params)
+        val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
+        val ocastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
+        val metadataChanged = JsonTools.decode<MetadataChangedEvent>(ocastData.params)
 
         // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
@@ -163,10 +164,10 @@ class OCastTest {
         """.trimIndent()
 
         // When
-        val deviceLayer = OCastRawDeviceLayer.decode(data)
-        val ocastData = OCastRawDataLayer.decode(deviceLayer.message.data)
-        val replyData = OCastDataLayer.decode<OCastReplyParams>(deviceLayer.message.data)
-        val playbackStatus = OCastDataLayer.decode<PlaybackStatus>(ocastData.params)
+        val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
+        val ocastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
+        val replyData = JsonTools.decode<OCastReplyParams>(deviceLayer.message.data)
+        val playbackStatus = JsonTools.decode<PlaybackStatus>(ocastData.params)
 
         // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
