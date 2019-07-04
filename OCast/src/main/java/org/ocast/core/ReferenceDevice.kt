@@ -18,6 +18,7 @@ package org.ocast.core
 
 import org.json.JSONObject
 import org.ocast.core.models.* // ktlint-disable no-wildcard-imports
+import org.ocast.core.utils.JsonTools
 import org.ocast.core.utils.OCastLog
 import org.ocast.discovery.models.UpnpDevice
 import java.util.Collections
@@ -166,18 +167,18 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     override fun onDataReceived(webSocketProvider: WebSocketProvider, data: String) {
         var deviceLayer: OCastRawDeviceLayer? = null
         try {
-            deviceLayer = OCastRawDeviceLayer.decode(data)
+            deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
             when (deviceLayer.type) {
                 OCastRawDeviceLayer.Type.EVENT -> analyzeEvent(deviceLayer)
                 OCastRawDeviceLayer.Type.REPLY -> {
                     val event = replyCallbacksBySequenceID[deviceLayer.identifier]
                     event?.let {
                         if (deviceLayer.status == OCastRawDeviceLayer.Status.OK) {
-                            val replyData = OCastReplyDataLayer.decode(deviceLayer.message.data)
+                            val replyData = JsonTools.decode<OCastReplyDataLayer>(deviceLayer.message.data)
                             if (replyData.params.code == OCastError.Status.SUCCESS.code) {
-                                val oCastData = OCastRawDataLayer.decode(deviceLayer.message.data)
+                                val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
                                 val reply = if (event.replyClass != Unit::class.java) {
-                                    OCastDataLayer.decode(oCastData.params, event.replyClass)
+                                    JsonTools.decode(oCastData.params, event.replyClass)
                                 } else {
                                     Unit
                                 }
@@ -209,10 +210,10 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
 
     @Throws(Exception::class)
     private fun analyzeEvent(deviceLayer: OCastRawDeviceLayer) {
-        val oCastData = OCastRawDataLayer.decode(deviceLayer.message.data)
+        val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
         when (deviceLayer.message.service) {
             SERVICE_APPLICATION -> {
-                when (OCastDataLayer.decode<WebAppConnectedStatus>(oCastData.params).status) {
+                when (JsonTools.decode<WebAppConnectedStatus>(oCastData.params).status) {
                     WebAppStatus.CONNECTED -> {
                         // TODO a finir
                     }
@@ -223,11 +224,11 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             SERVICE_MEDIA -> {
                 when (oCastData.name) {
                     EVENT_MEDIA_PLAYBACK_STATUS -> {
-                        val playbackStatus = OCastDataLayer.decode<PlaybackStatusEvent>(oCastData.params)
+                        val playbackStatus = JsonTools.decode<PlaybackStatusEvent>(oCastData.params)
                         eventListener?.onPlaybackStatus(this, playbackStatus)
                     }
                     EVENT_MEDIA_METADATA_CHANGED -> {
-                        val metadataChanged = OCastDataLayer.decode<MetadataChangedEvent>(oCastData.params)
+                        val metadataChanged = JsonTools.decode<MetadataChangedEvent>(oCastData.params)
                         eventListener?.onMetadataChanged(this, metadataChanged)
                     }
                 }
@@ -235,14 +236,14 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             SERVICE_SETTINGS_DEVICE -> {
                 when (oCastData.name) {
                     EVENT_DEVICE_UPDATE_STATUS -> {
-                        val updateStatus = OCastDataLayer.decode<UpdateStatusEvent>(oCastData.params)
+                        val updateStatus = JsonTools.decode<UpdateStatusEvent>(oCastData.params)
                         eventListener?.onUpdateStatus(this, updateStatus)
                     }
                 }
             }
             else -> {
                 // Custom event
-                val params = OCastDataLayer.decode<JSONObject>(oCastData.params)
+                val params = JsonTools.decode<JSONObject>(oCastData.params)
                 val customEvent = CustomEvent(oCastData.name, params)
                 eventListener?.onCustomEvent(this, customEvent)
             }

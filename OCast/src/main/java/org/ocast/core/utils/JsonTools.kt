@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 
 object JsonTools {
 
@@ -39,6 +40,16 @@ object JsonTools {
         objectMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
         objectMapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+    }
+
+    @Throws(Exception::class)
+    inline fun <reified T> decode(json: String): T {
+        return objectMapper.readValue(json)
+    }
+
+    @Throws(Exception::class)
+    fun <T> decode(json: String, clazz: Class<T>): T {
+        return objectMapper.readValue(json, clazz)
     }
 }
 
