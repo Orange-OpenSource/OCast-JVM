@@ -16,8 +16,10 @@
 
 package org.ocast.core.models;
 
+import org.jetbrains.annotations.NotNull;
+
 @FunctionalInterface
 public interface Consumer<T> {
 
-    void run(T t);
+    void run(@NotNull T t);
 }
