@@ -24,6 +24,7 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.SocketPolicy
+import org.junit.Assert
 import org.junit.Test
 import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
@@ -240,6 +241,66 @@ internal class UpnpClientTest {
             verify(callback, times(2)).invoke(resultCaptor.capture())
             assertNull(resultCaptor.firstValue.getOrNull())
             assertNull(resultCaptor.secondValue.getOrNull())
+        }
+
+        @Test
+        fun extractUuidFromUSNSucceeds() {
+            // Given
+            val usn = "uuid:device-UUID"
+
+            // When
+            val uuid = UpnpClient.extractUuid(usn)
+
+            // Then
+            Assert.assertEquals("device-UUID", uuid)
+        }
+
+        @Test
+        fun extractUuidFromRootDeviceUSNSucceeds() {
+            // Given
+            val usn = "uuid:device-UUID::upnp:rootdevice"
+
+            // When
+            val uuid = UpnpClient.extractUuid(usn)
+
+            // Then
+            Assert.assertEquals("device-UUID", uuid)
+        }
+
+        @Test
+        fun extractUuidFromDeviceTypeUSNSucceeds() {
+            // Given
+            val usn = "uuid:device-UUID::urn:domain-name:device:deviceType:ver"
+
+            // When
+            val uuid = UpnpClient.extractUuid(usn)
+
+            // Then
+            Assert.assertEquals("device-UUID", uuid)
+        }
+
+        @Test
+        fun extractUuidFromServiceTypeUSNSucceeds() {
+            // Given
+            val usn = "uuid:device-UUID::urn:domain-name:service:serviceType:ver"
+
+            // When
+            val uuid = UpnpClient.extractUuid(usn)
+
+            // Then
+            Assert.assertEquals("device-UUID", uuid)
+        }
+
+        @Test
+        fun extractUuidFromMalformedUSNFails() {
+            // Given
+            val usn = "id:device-UUID"
+
+            // When
+            val uuid = UpnpClient.extractUuid(usn)
+
+            // Then
+            Assert.assertNull(uuid)
         }
     }
 

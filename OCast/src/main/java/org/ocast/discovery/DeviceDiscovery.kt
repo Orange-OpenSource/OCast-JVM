@@ -18,7 +18,6 @@ package org.ocast.discovery
 
 import org.ocast.core.utils.OCastLog
 import org.ocast.discovery.models.UpnpDevice
-import org.ocast.discovery.utils.UpnpTools
 import java.io.IOException
 import java.util.Collections.synchronizedMap
 import java.util.Date
@@ -279,7 +278,7 @@ internal class DeviceDiscovery constructor(
      */
     private fun handleSsdpMSearchResponse(response: SsdpMSearchResponse) {
         if (!socket.isClosed) {
-            val uuid = UpnpTools.extractUuid(response.usn)
+            val uuid = UpnpClient.extractUuid(response.usn)
             if (uuid != null) {
                 ssdpDatesByUuid[uuid] = Date()
                 if (devicesByUuid[uuid] == null) {

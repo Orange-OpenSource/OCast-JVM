@@ -31,6 +31,24 @@ import java.util.TimeZone
  */
 internal open class UpnpClient {
 
+    companion object {
+
+        /**
+         * The regex used to extract a device UUID from a string.
+         */
+        private val UUID_REGEX = "^uuid:([^:]*)".toRegex()
+
+        /**
+         * Extracts the UUID of a device from a string.
+         *
+         * @param string The string to extract the UUID from. This is typically a Unique Service Name or a Unique Device Name.
+         * @return The extracted UUID, or null is the UUID could not be extracted.
+         */
+        fun extractUuid(string: String): String? {
+            return UUID_REGEX.find(string)?.groupValues?.elementAtOrNull(1)
+        }
+    }
+
     /** The OkHttp client which will send device description requests. */
     private val client = OkHttpClient()
 

@@ -17,7 +17,7 @@
 package org.ocast.discovery.models
 
 import org.ocast.common.utils.XMLParser
-import org.ocast.discovery.utils.UpnpTools
+import org.ocast.discovery.UpnpClient
 import java.net.URL
 
 /**
@@ -103,7 +103,7 @@ class UpnpDevice(
             val rootXMLElement = XMLParser.parse(xml)
             val deviceXMLElement = rootXMLElement[XML_ROOT_ELEMENT_NAME][XML_DEVICE_ELEMENT_NAME]
             val udn = deviceXMLElement[XML_UDN_ELEMENT_NAME].value
-            val uuid = UpnpTools.extractUuid(udn) ?: udn
+            val uuid = UpnpClient.extractUuid(udn) ?: udn
             val friendlyName = deviceXMLElement[XML_FRIENDLY_NAME_ELEMENT_NAME].value
             val manufacturer = deviceXMLElement[XML_MANUFACTURER_ELEMENT_NAME].value
             val modelName = deviceXMLElement[XML_MODEL_NAME_ELEMENT_NAME].value
