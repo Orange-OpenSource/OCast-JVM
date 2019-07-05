@@ -52,6 +52,6 @@ fun Call.enqueue(onComplete: (Result<Response>) -> Unit) {
  *
  * @return The map of headers, where values are indexed by their names. Multiple values for a given name are separated by commas.
  */
-fun Headers.toMap() : Map<String, String> {
+fun Headers.toMap(): Map<String, String> {
     return names().associateWith { values(it).joinToString(",") }
 }
