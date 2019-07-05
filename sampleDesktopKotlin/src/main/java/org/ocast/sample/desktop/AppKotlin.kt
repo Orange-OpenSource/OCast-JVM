@@ -70,10 +70,14 @@ class AppKotlin : EventListener, DeviceListener {
 
     private fun startApplication(device: Device) {
         device.applicationName = "Orange-DefaultReceiver-DEV"
-        device.startApplication({
-            prepareMedia(device)
-        }, {
-            oCastError -> logger.log(Level.WARNING, "startApplication error: ${oCastError.errorMessage}")
+        device.connect({
+            device.startApplication({
+                prepareMedia(device)
+            }, { oCastError ->
+                logger.log(Level.WARNING, "startApplication error: ${oCastError.errorMessage}")
+            })
+        }, { oCastError ->
+            logger.log(Level.WARNING, "startApplication error: ${oCastError.errorMessage}")
         })
     }
 

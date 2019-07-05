@@ -16,6 +16,7 @@
 
 package org.ocast.discovery
 
+import org.ocast.common.extensions.orTrue
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.InetAddress
@@ -50,7 +51,7 @@ internal open class SocketProvider(private val port: Short = 0) {
 
     /** Indicates if the socket is closed. */
     val isClosed: Boolean
-        get() = socket?.isClosed ?: true
+        get() = socket?.isClosed.orTrue()
 
     /**
      * Opens the socket.
