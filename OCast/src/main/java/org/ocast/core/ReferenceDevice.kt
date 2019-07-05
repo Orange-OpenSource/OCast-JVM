@@ -135,6 +135,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                                     } else {
                                         onError.wrapRun(OCastError("Failed to start $name, the WebAppConnectedStatus event was not received"))
                                     }
+                                    applicationSemaphore = null
                                 }
                         }
                     }
