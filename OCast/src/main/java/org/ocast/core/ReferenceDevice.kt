@@ -110,50 +110,45 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
 
     private fun startApplication(name: String, onSuccess: Runnable, onError: Consumer<OCastError>) {
         dialClient.getApplication(name) { result ->
-            result
-                .onFailure { throwable ->
-                    onError.wrapRun(OCastError("Failed to start $name, there was an error with the DIAL application information request", throwable))
-                }
-                .onSuccess { application ->
-                    isApplicationRunning.set(application.state == DialApplication.State.Running)
-                    if (isApplicationRunning.get()) {
-                        onSuccess.wrapRun()
-                    } else {
-                        dialClient.startApplication(name) { result ->
-                            result
-                                .onFailure { throwable ->
-                                    onError.wrapRun(OCastError("Failed to start $name, there was an error with the DIAL request", throwable))
-                                }
-                                .onSuccess {
-                                    applicationSemaphore = Semaphore(0)
-                                    if (applicationSemaphore?.tryAcquire(60, TimeUnit.SECONDS) == true &&
-                                        // Semaphore is released when state or application name changes
-                                        // In these cases onError must be called
-                                        applicationName == name &&
-                                        state == State.CONNECTED) {
-                                        onSuccess.wrapRun()
-                                    } else {
-                                        onError.wrapRun(OCastError("Failed to start $name, the WebAppConnectedStatus event was not received"))
-                                    }
-                                    applicationSemaphore = null
-                                }
+            result.onFailure { throwable ->
+                onError.wrapRun(OCastError("Failed to start $name, there was an error with the DIAL application information request", throwable))
+            }
+            result.onSuccess { application ->
+                isApplicationRunning.set(application.state == DialApplication.State.Running)
+                if (isApplicationRunning.get()) {
+                    onSuccess.wrapRun()
+                } else {
+                    dialClient.startApplication(name) { result ->
+                        result.onFailure { throwable ->
+                            onError.wrapRun(OCastError("Failed to start $name, there was an error with the DIAL request", throwable))
+                        }
+                        result.onSuccess {
+                            applicationSemaphore = Semaphore(0)
+                            // Semaphore is released when state or application name changes
+                            // In these cases onError must be called
+                            if (applicationSemaphore?.tryAcquire(60, TimeUnit.SECONDS) == true && applicationName == name && state == State.CONNECTED) {
+                                onSuccess.wrapRun()
+                            } else {
+                                onError.wrapRun(OCastError("Failed to start $name, the WebAppConnectedStatus event was not received"))
+                            }
+                            applicationSemaphore = null
                         }
                     }
                 }
+            }
         }
     }
 
     override fun stopApplication(onSuccess: Runnable, onError: Consumer<OCastError>) {
         applicationName?.ifNotNull { applicationName ->
             dialClient.stopApplication(applicationName) { result ->
-                result
-                    .onFailure { throwable ->
-                        onError.wrapRun(OCastError("Failed to stop $applicationName, there was an error with the DIAL request", throwable))
-                    }
-                    .onSuccess {
-                        isApplicationRunning.set(false)
-                        onSuccess.wrapRun()
-                    }
+                result.onFailure { throwable ->
+                    onError.wrapRun(OCastError("Failed to stop $applicationName, there was an error with the DIAL request", throwable))
+                }
+                result.onSuccess {
+                    isApplicationRunning.set(false)
+                    onSuccess.wrapRun()
+                }
             }
         }.orElse {
             onError.wrapRun(OCastError("Property applicationName is not defined"))
@@ -397,6 +392,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         try {
             replyCallbacksBySequenceID[id] = ReplyCallback(replyClass, onSuccess, onError)
             val layerMessage = OCastCommandDeviceLayer(clientUuid, domain, OCastRawDeviceLayer.Type.COMMAND, id, commandMessage).encode()
+            // Do not start application when sending settings commands
             sendToWebSocket(id, layerMessage, domain == DOMAIN_BROWSER, onError)
         } catch (exception: Exception) {
             replyCallbacksBySequenceID.remove(id)
@@ -412,7 +408,6 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             }
         }
 
-        // Ne pas lancer la webApp si c'est des settings
         if (!startApplicationIfNeeded || isApplicationRunning.get()) {
             send()
         } else {
