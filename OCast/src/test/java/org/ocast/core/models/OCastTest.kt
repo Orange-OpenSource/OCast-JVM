@@ -21,6 +21,7 @@ import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.ocast.core.ReferenceDevice
+import org.ocast.core.utils.JsonTools
 
 /**
  * Unit tests for the OCast model.
@@ -50,9 +51,9 @@ class OCastTest {
         """.trimIndent()
 
         // When
-        val deviceLayer = OCastRawDeviceLayer.decode(data)
-        val ocastData = OCastRawDataLayer.decode(deviceLayer.message.data)
-        val webAppConnectedStatus = OCastDataLayer.decode<WebAppConnectedStatus>(ocastData.params)
+        val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
+        val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
+        val webAppConnectedStatus = JsonTools.decode<WebAppConnectedStatus>(oCastData.params)
 
         // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
@@ -62,7 +63,7 @@ class OCastTest {
         assertEquals(666L, deviceLayer.identifier)
         assertEquals(ReferenceDevice.SERVICE_APPLICATION, deviceLayer.message.service)
 
-        assertEquals("connectedStatus", ocastData.name)
+        assertEquals("connectedStatus", oCastData.name)
 
         assertEquals(WebAppStatus.CONNECTED, webAppConnectedStatus.status)
     }
@@ -103,9 +104,9 @@ class OCastTest {
         """.trimIndent()
 
         // When
-        val deviceLayer = OCastRawDeviceLayer.decode(data)
-        val ocastData = OCastRawDataLayer.decode(deviceLayer.message.data)
-        val metadataChanged = OCastDataLayer.decode<MetadataChangedEvent>(ocastData.params)
+        val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
+        val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
+        val metadataChanged = JsonTools.decode<MetadataChangedEvent>(oCastData.params)
 
         // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
@@ -115,7 +116,7 @@ class OCastTest {
         assertEquals(666L, deviceLayer.identifier)
         assertEquals(ReferenceDevice.SERVICE_MEDIA, deviceLayer.message.service)
 
-        assertEquals("metadataChanged", ocastData.name)
+        assertEquals("metadataChanged", oCastData.name)
 
         assertNull(metadataChanged.logo)
         assertEquals("La_cité_de_la_peur", metadataChanged.title)
@@ -163,10 +164,10 @@ class OCastTest {
         """.trimIndent()
 
         // When
-        val deviceLayer = OCastRawDeviceLayer.decode(data)
-        val ocastData = OCastRawDataLayer.decode(deviceLayer.message.data)
-        val replyData = OCastDataLayer.decode<OCastReplyParams>(deviceLayer.message.data)
-        val playbackStatus = OCastDataLayer.decode<PlaybackStatus>(ocastData.params)
+        val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
+        val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
+        val replyData = JsonTools.decode<OCastReplyParams>(deviceLayer.message.data)
+        val playbackStatus = JsonTools.decode<PlaybackStatus>(oCastData.params)
 
         // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
@@ -176,7 +177,7 @@ class OCastTest {
         assertEquals(666L, deviceLayer.identifier)
         assertEquals(ReferenceDevice.SERVICE_MEDIA, deviceLayer.message.service)
 
-        assertEquals("playbackStatus", ocastData.name)
+        assertEquals("playbackStatus", oCastData.name)
 
         assertEquals(OCastMediaError.Status.SUCCESS.code, playbackStatus.code)
         assertEquals(OCastMediaError.Status.SUCCESS.code, replyData.code)
@@ -210,7 +211,7 @@ class OCastTest {
         val layerMessage = OCastCommandDeviceLayer(uuid, ReferenceDevice.DOMAIN_BROWSER, OCastRawDeviceLayer.Type.COMMAND, identifier, prepareMessage).encode()
 
         // Then
-        val ocastMessage = """
+        val oCastMessage = """
             {
               "src": "89cf41b8-ef40-48d9-99c3-2a1951abcde5",
               "dst": "browser",
@@ -241,7 +242,7 @@ class OCastTest {
                 it.trim().replace("\": ", "\":")
             }
 
-        assertEquals(ocastMessage, layerMessage)
+        assertEquals(oCastMessage, layerMessage)
     }
 
     @Test
@@ -260,7 +261,7 @@ class OCastTest {
         val layerMessage = OCastCommandDeviceLayer(uuid, "my destination", OCastRawDeviceLayer.Type.COMMAND, identifier, customMessage).encode()
 
         // Then
-        val ocastMessage = """
+        val oCastMessage = """
             {
               "src": "89cf41b8-ef40-48d9-99c3-2a1951abcde5",
               "dst": "my destination",
@@ -285,6 +286,6 @@ class OCastTest {
                 it.trim().replace("\": ", "\":")
             }
 
-        assertEquals(ocastMessage, layerMessage)
+        assertEquals(oCastMessage, layerMessage)
     }
 }

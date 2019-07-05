@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-package org.ocast.core.models;
+package org.ocast.common.extensions
 
-import org.jetbrains.annotations.NotNull;
+/**
+ * Returns the boolean if it is not null, or true otherwise.
+ */
+fun Boolean?.orTrue(): Boolean {
+    return this ?: true
+}
 
-@FunctionalInterface
-public interface Consumer<T> {
-
-    void run(@NotNull T t);
+/**
+ * Returns the boolean if it is not null, or false otherwise.
+ */
+fun Boolean?.orFalse(): Boolean {
+    return this ?: false
 }

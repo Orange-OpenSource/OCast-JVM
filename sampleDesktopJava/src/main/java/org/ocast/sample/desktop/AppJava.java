@@ -23,11 +23,7 @@ import org.ocast.core.DeviceListener;
 import org.ocast.core.OCastCenter;
 import org.ocast.core.EventListener;
 import org.ocast.core.ReferenceDevice;
-import org.ocast.core.models.CustomEvent;
-import org.ocast.core.models.Media;
-import org.ocast.core.models.MetadataChangedEvent;
-import org.ocast.core.models.PlaybackStatusEvent;
-import org.ocast.core.models.UpdateStatusEvent;
+import org.ocast.core.models.*;
 import org.ocast.core.utils.OCastLog;
 
 import java.util.concurrent.CountDownLatch;
@@ -69,9 +65,12 @@ public class AppJava implements EventListener, DeviceListener {
 
     private void startApplication(Device device) {
         device.setApplicationName("Orange-DefaultReceiver-DEV");
-        device.startApplication(
-            () -> prepareMedia(device), oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getErrorMessage())
-        );
+        device.connect(
+                () -> device.startApplication(
+                        () -> prepareMedia(device),
+                        oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getErrorMessage())
+                ),
+                oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getErrorMessage()));
     }
 
     private void prepareMedia(Device device) {

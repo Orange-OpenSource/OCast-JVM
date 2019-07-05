@@ -61,7 +61,7 @@ internal data class DialApplication(
      */
     fun getInstanceURL(baseURL: URL): URL? {
         return runCatching { URL(instancePath) }
-            .recoverCatching { URL(baseURL, instancePath ?: "run") }
+            .recoverCatching { URL("$baseURL/$name/${instancePath ?: "run"}") }
             .getOrNull()
     }
 

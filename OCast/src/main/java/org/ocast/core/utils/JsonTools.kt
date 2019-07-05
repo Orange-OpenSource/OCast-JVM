@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 
 object JsonTools {
 
@@ -40,6 +41,16 @@ object JsonTools {
         objectMapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
     }
+
+    @Throws(Exception::class)
+    inline fun <reified T> decode(json: String): T {
+        return objectMapper.readValue(json)
+    }
+
+    @Throws(Exception::class)
+    fun <T> decode(json: String, clazz: Class<T>): T {
+        return objectMapper.readValue(json, clazz)
+    }
 }
 
 class RawJsonDeserializer : JsonDeserializer<String>() {
@@ -48,6 +59,6 @@ class RawJsonDeserializer : JsonDeserializer<String>() {
     override fun deserialize(parser: JsonParser?, context: DeserializationContext?): String {
         val mapper = parser?.codec as? ObjectMapper?
         val node = mapper?.readTree<TreeNode>(parser)
-        return mapper?.writeValueAsString(node) ?: ""
+        return mapper?.writeValueAsString(node).orEmpty()
     }
 }

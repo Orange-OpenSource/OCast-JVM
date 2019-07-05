@@ -109,19 +109,23 @@ class MainActivity : AppCompatActivity(), EventListener {
     }
 
     private fun prepareMedia(device: Device) {
-        device.prepareMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
-            1,
-            "Big Buck Bunny",
-            "sampleAppKotlin",
-            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
-            Media.Type.VIDEO,
-            Media.TransferMode.STREAMED,
-            true,
-            null, {
-                mainViewModel.deviceConnected.updateValue(true)
-            }, {
-                oCastError -> Log.e(TAG, "prepareMedia error $oCastError.status")
-            })
+        device.connect({
+            device.prepareMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
+                1,
+                "Big Buck Bunny",
+                "sampleAppKotlin",
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+                Media.Type.VIDEO,
+                Media.TransferMode.STREAMED,
+                true,
+                null, {
+                    mainViewModel.deviceConnected.updateValue(true)
+                }, {
+                    oCastError -> Log.e(TAG, "prepareMedia error $oCastError.status")
+                })
+        }, {
+            oCastError -> Log.e(TAG, "connect error ${oCastError.errorMessage}")
+        })
     }
 
     override fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {

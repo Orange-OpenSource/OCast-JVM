@@ -17,16 +17,25 @@
 package org.ocast.core
 
 import org.json.JSONObject
+import org.ocast.common.extensions.ifNotNull
+import org.ocast.common.extensions.orElse
 import org.ocast.core.models.* // ktlint-disable no-wildcard-imports
+import org.ocast.core.utils.JsonTools
 import org.ocast.core.utils.OCastLog
+import org.ocast.dial.DialClient
+import org.ocast.dial.models.DialApplication
 import org.ocast.discovery.models.UpnpDevice
 import java.util.Collections
 import java.util.UUID
+import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
 open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSocketProvider.Listener {
 
     companion object {
+
         internal const val SERVICE_SETTINGS_DEVICE = "org.ocast.settings.device"
         internal const val SERVICE_SETTINGS_INPUT = "org.ocast.settings.input"
         internal const val SERVICE_MEDIA = "org.ocast.media"
@@ -42,6 +51,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     }
 
     protected enum class State {
+
         CONNECTING,
         CONNECTED,
         DISCONNECTING,
@@ -52,17 +62,24 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     override fun getManufacturer() = "Orange SA"
 
     override fun setApplicationName(applicationName: String?) {
-        // Reset state if application is modified
+        // Reset application state if application name is modified
         if (this.applicationName != applicationName) {
-            isApplicationRunning = false
+            isApplicationRunning.set(false)
+            applicationSemaphore?.release()
         }
         super.setApplicationName(applicationName)
     }
 
     protected var state = State.DISCONNECTED
-    private val sequenceID: AtomicLong = AtomicLong(0)
+        set(value) {
+            if (field != value) {
+                field = value
+                isApplicationRunning.set(false)
+                applicationSemaphore?.release()
+            }
+        }
+    private val sequenceID = AtomicLong(0)
     protected var clientUuid = UUID.randomUUID().toString()
-    protected var isApplicationRunning = false
     protected var webSocket: WebSocketProvider? = null
     protected var connectCallback: RunnableCallback? = null
     private val webSocketURL: String
@@ -72,44 +89,71 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             return "$protocol://${applicationURL.host}:$port/ocast"
         }
 
-    protected val replyCallbacksBySequenceID: MutableMap<Long, ReplyCallback<*>> = Collections.synchronizedMap(mutableMapOf())
+    protected val replyCallbacksBySequenceID = Collections.synchronizedMap<Long, ReplyCallback<*>>(mutableMapOf())
+    private val dialClient = DialClient(applicationURL)
+    protected var isApplicationRunning = AtomicBoolean(false)
+    private var applicationSemaphore: Semaphore? = null
 
     //region RemoteDevice
 
     override fun startApplication(onSuccess: Runnable, onError: Consumer<OCastError>) {
-        if (applicationName == null) {
+        applicationName?.ifNotNull { applicationName ->
+            when (state) {
+                State.CONNECTING -> onError.wrapRun(OCastError("Device is connecting, start cannot be processed yet"))
+                State.CONNECTED -> startApplication(applicationName, onSuccess, onError)
+                State.DISCONNECTING -> onError.wrapRun(OCastError("Device is connecting, start cannot be processed."))
+                State.DISCONNECTED -> onError.wrapRun(OCastError("Device is disconnected, start cannot be processed."))
+            }
+        }.orElse {
             onError.wrapRun(OCastError("Property applicationName is not defined"))
-            return
         }
+    }
 
-        when (state) {
-            State.CONNECTING -> onError.wrapRun(OCastError("Device is connecting, start cannot be processed yet"))
-            State.CONNECTED -> startDialApp(onSuccess, onError)
-            State.DISCONNECTING -> onError.wrapRun(OCastError("Device is connecting, start cannot be processed."))
-            State.DISCONNECTED -> {
-                connect({
-                    startDialApp(onSuccess, onError)
-                }, {
-                    onError.wrapRun(it)
-                })
+    private fun startApplication(name: String, onSuccess: Runnable, onError: Consumer<OCastError>) {
+        dialClient.getApplication(name) { result ->
+            result.onFailure { throwable ->
+                onError.wrapRun(OCastError("Failed to start $name, there was an error with the DIAL application information request", throwable))
+            }
+            result.onSuccess { application ->
+                isApplicationRunning.set(application.state == DialApplication.State.Running)
+                if (isApplicationRunning.get()) {
+                    onSuccess.wrapRun()
+                } else {
+                    dialClient.startApplication(name) { result ->
+                        result.onFailure { throwable ->
+                            onError.wrapRun(OCastError("Failed to start $name, there was an error with the DIAL request", throwable))
+                        }
+                        result.onSuccess {
+                            applicationSemaphore = Semaphore(0)
+                            // Semaphore is released when state or application name changes
+                            // In these cases onError must be called
+                            if (applicationSemaphore?.tryAcquire(60, TimeUnit.SECONDS) == true && applicationName == name && state == State.CONNECTED) {
+                                onSuccess.wrapRun()
+                            } else {
+                                onError.wrapRun(OCastError("Failed to start $name, the WebAppConnectedStatus event was not received"))
+                            }
+                            applicationSemaphore = null
+                        }
+                    }
+                }
             }
         }
     }
 
-    private fun startDialApp(onSuccess: Runnable, onError: Consumer<OCastError>) {
-        // TODO a faire et set isApplicationRunning sur success
-
-        isApplicationRunning = true
-    }
-
     override fun stopApplication(onSuccess: Runnable, onError: Consumer<OCastError>) {
-        if (applicationName == null) {
+        applicationName?.ifNotNull { applicationName ->
+            dialClient.stopApplication(applicationName) { result ->
+                result.onFailure { throwable ->
+                    onError.wrapRun(OCastError("Failed to stop $applicationName, there was an error with the DIAL request", throwable))
+                }
+                result.onSuccess {
+                    isApplicationRunning.set(false)
+                    onSuccess.wrapRun()
+                }
+            }
+        }.orElse {
             onError.wrapRun(OCastError("Property applicationName is not defined"))
-            return
         }
-        isApplicationRunning = false
-
-        // TODO a faire -> Stop DIAL APP ?
     }
 
     override fun connect(onSuccess: Runnable, onError: Consumer<OCastError>) {
@@ -148,9 +192,9 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 }
                 replyCallbacksBySequenceID.clear()
             }
-            connectCallback?.also { connectCallback ->
+            connectCallback?.ifNotNull { connectCallback ->
                 connectCallback.onError.wrapRun(OCastError("Socket has been disconnected", error))
-            } ?: run {
+            }.orElse {
                 deviceListener?.onDeviceDisconnected(this, error)
             }
             connectCallback = null
@@ -166,18 +210,18 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     override fun onDataReceived(webSocketProvider: WebSocketProvider, data: String) {
         var deviceLayer: OCastRawDeviceLayer? = null
         try {
-            deviceLayer = OCastRawDeviceLayer.decode(data)
+            deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
             when (deviceLayer.type) {
                 OCastRawDeviceLayer.Type.EVENT -> analyzeEvent(deviceLayer)
                 OCastRawDeviceLayer.Type.REPLY -> {
                     val event = replyCallbacksBySequenceID[deviceLayer.identifier]
                     event?.let {
                         if (deviceLayer.status == OCastRawDeviceLayer.Status.OK) {
-                            val replyData = OCastReplyDataLayer.decode(deviceLayer.message.data)
+                            val replyData = JsonTools.decode<OCastReplyDataLayer>(deviceLayer.message.data)
                             if (replyData.params.code == OCastError.Status.SUCCESS.code) {
-                                val oCastData = OCastRawDataLayer.decode(deviceLayer.message.data)
+                                val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
                                 val reply = if (event.replyClass != Unit::class.java) {
-                                    OCastDataLayer.decode(oCastData.params, event.replyClass)
+                                    JsonTools.decode(oCastData.params, event.replyClass)
                                 } else {
                                     Unit
                                 }
@@ -209,25 +253,26 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
 
     @Throws(Exception::class)
     private fun analyzeEvent(deviceLayer: OCastRawDeviceLayer) {
-        val oCastData = OCastRawDataLayer.decode(deviceLayer.message.data)
+        val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
         when (deviceLayer.message.service) {
             SERVICE_APPLICATION -> {
-                when (OCastDataLayer.decode<WebAppConnectedStatus>(oCastData.params).status) {
+                when (JsonTools.decode<WebAppConnectedStatus>(oCastData.params).status) {
                     WebAppStatus.CONNECTED -> {
-                        // TODO a finir
+                        isApplicationRunning.set(true)
+                        applicationSemaphore?.release()
                     }
-                    WebAppStatus.DISCONNECTED -> isApplicationRunning = false
+                    WebAppStatus.DISCONNECTED -> isApplicationRunning.set(false)
                     else -> {}
                 }
             }
             SERVICE_MEDIA -> {
                 when (oCastData.name) {
                     EVENT_MEDIA_PLAYBACK_STATUS -> {
-                        val playbackStatus = OCastDataLayer.decode<PlaybackStatusEvent>(oCastData.params)
+                        val playbackStatus = JsonTools.decode<PlaybackStatusEvent>(oCastData.params)
                         eventListener?.onPlaybackStatus(this, playbackStatus)
                     }
                     EVENT_MEDIA_METADATA_CHANGED -> {
-                        val metadataChanged = OCastDataLayer.decode<MetadataChangedEvent>(oCastData.params)
+                        val metadataChanged = JsonTools.decode<MetadataChangedEvent>(oCastData.params)
                         eventListener?.onMetadataChanged(this, metadataChanged)
                     }
                 }
@@ -235,14 +280,14 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             SERVICE_SETTINGS_DEVICE -> {
                 when (oCastData.name) {
                     EVENT_DEVICE_UPDATE_STATUS -> {
-                        val updateStatus = OCastDataLayer.decode<UpdateStatusEvent>(oCastData.params)
+                        val updateStatus = JsonTools.decode<UpdateStatusEvent>(oCastData.params)
                         eventListener?.onUpdateStatus(this, updateStatus)
                     }
                 }
             }
             else -> {
                 // Custom event
-                val params = OCastDataLayer.decode<JSONObject>(oCastData.params)
+                val params = JsonTools.decode<JSONObject>(oCastData.params)
                 val customEvent = CustomEvent(oCastData.name, params)
                 eventListener?.onCustomEvent(this, customEvent)
             }
@@ -348,6 +393,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         try {
             replyCallbacksBySequenceID[id] = ReplyCallback(replyClass, onSuccess, onError)
             val layerMessage = OCastCommandDeviceLayer(clientUuid, domain, OCastRawDeviceLayer.Type.COMMAND, id, commandMessage).encode()
+            // Do not start application when sending settings commands
             sendToWebSocket(id, layerMessage, domain == DOMAIN_BROWSER, onError)
         } catch (exception: Exception) {
             replyCallbacksBySequenceID.remove(id)
@@ -363,8 +409,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             }
         }
 
-        // Ne pas lancer la webApp si c'est des settings
-        if (!startApplicationIfNeeded || isApplicationRunning) {
+        if (!startApplicationIfNeeded || isApplicationRunning.get()) {
             send()
         } else {
             startApplication({
