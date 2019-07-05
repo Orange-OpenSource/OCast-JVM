@@ -16,7 +16,7 @@
 
 package org.ocast.discovery
 
-import org.ocast.common.orTrue
+import org.ocast.common.extensions.orTrue
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.InetAddress

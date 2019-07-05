@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ocast.common
+package org.ocast.common.extensions
 
 /**
  * Returns the boolean if it is not null, or true otherwise.

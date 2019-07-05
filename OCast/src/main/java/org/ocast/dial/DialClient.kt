@@ -19,7 +19,7 @@ package org.ocast.dial
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
-import org.ocast.common.enqueue
+import org.ocast.common.extensions.enqueue
 import org.ocast.dial.models.DialApplication
 import org.ocast.dial.models.DialError
 import java.net.URL

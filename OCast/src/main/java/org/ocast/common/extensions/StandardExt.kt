@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ocast.common
+package org.ocast.common.extensions
 
 /**
  * Calls the specified function [block] if [this] is not null.

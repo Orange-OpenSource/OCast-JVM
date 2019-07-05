@@ -17,8 +17,8 @@
 package org.ocast.core
 
 import org.json.JSONObject
-import org.ocast.common.ifNotNull
-import org.ocast.common.orElse
+import org.ocast.common.extensions.ifNotNull
+import org.ocast.common.extensions.orElse
 import org.ocast.core.models.* // ktlint-disable no-wildcard-imports
 import org.ocast.core.utils.OCastLog
 import org.ocast.dial.DialClient

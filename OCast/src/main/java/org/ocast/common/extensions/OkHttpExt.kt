@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ocast.common
+package org.ocast.common.extensions
 
 import okhttp3.Call
 import okhttp3.Callback
