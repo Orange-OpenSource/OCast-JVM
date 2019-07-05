@@ -27,21 +27,9 @@ class OCastError(val code: Int, val errorMessage: String, val throwable: Throwab
     }
 }
 
-class OCastDeviceSettingsError(val errorMessage: String, val status: Status) {
+class OCastDeviceSettingsError(val errorMessage: String, val status: Status, val throwable: Throwable? = null) {
 
-    constructor(error: OCastError) : this(error.errorMessage, Status.values().firstOrNull { it.code == error.code } ?: Status.UNKNOWN_ERROR)
-
-    enum class Status(val code: Int) {
-        SUCCESS(0),
-        UNKNOWN_ERROR(-1),
-        CLIENT_ERROR(-2),
-        DEVICE_LAYER_ERROR(-3)
-    }
-}
-
-class OCastInputSettingsError(val errorMessage: String, val status: Status) {
-
-    constructor(error: OCastError) : this(error.errorMessage, Status.values().firstOrNull { it.code == error.code } ?: Status.UNKNOWN_ERROR)
+    constructor(error: OCastError) : this(error.errorMessage, Status.values().firstOrNull { it.code == error.code } ?: Status.UNKNOWN_ERROR, error.throwable)
 
     enum class Status(val code: Int) {
         SUCCESS(0),
@@ -51,9 +39,21 @@ class OCastInputSettingsError(val errorMessage: String, val status: Status) {
     }
 }
 
-class OCastMediaError(val errorMessage: String, val status: Status) {
+class OCastInputSettingsError(val errorMessage: String, val status: Status, val throwable: Throwable? = null) {
 
-    constructor(error: OCastError) : this(error.errorMessage, Status.values().firstOrNull { it.code == error.code } ?: Status.UNKNOWN_ERROR)
+    constructor(error: OCastError) : this(error.errorMessage, Status.values().firstOrNull { it.code == error.code } ?: Status.UNKNOWN_ERROR, error.throwable)
+
+    enum class Status(val code: Int) {
+        SUCCESS(0),
+        UNKNOWN_ERROR(-1),
+        CLIENT_ERROR(-2),
+        DEVICE_LAYER_ERROR(-3)
+    }
+}
+
+class OCastMediaError(val errorMessage: String, val status: Status, val throwable: Throwable? = null) {
+
+    constructor(error: OCastError) : this(error.errorMessage, Status.values().firstOrNull { it.code == error.code } ?: Status.UNKNOWN_ERROR, error.throwable)
 
     /**
      * Media controller error codes
