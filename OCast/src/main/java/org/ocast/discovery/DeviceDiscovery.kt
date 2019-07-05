@@ -284,12 +284,14 @@ internal class DeviceDiscovery constructor(
                 ssdpDatesByUuid[uuid] = Date()
                 if (devicesByUuid[uuid] == null) {
                     // Launch a UPnP device description request to retrieve info about the device that responded
-                    upnpClient.getDevice(response.location) { device ->
-                        synchronized(devicesByUuid) {
-                            // Check that this device has not already been added because M-SEARCH requests are sent twice
-                            if (device != null && devicesByUuid[uuid] == null) {
-                                devicesByUuid[uuid] = device
-                                listener?.onDevicesAdded(listOf(device))
+                    upnpClient.getDevice(response.location) { result ->
+                        result.onSuccess { device ->
+                            synchronized(devicesByUuid) {
+                                // Check that this device has not already been added because M-SEARCH requests are sent twice
+                                if (devicesByUuid[uuid] == null) {
+                                    devicesByUuid[uuid] = device
+                                    listener?.onDevicesAdded(listOf(device))
+                                }
                             }
                         }
                     }
