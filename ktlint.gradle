@@ -6,12 +6,6 @@ configurations {
     ktlint
 }
 
-buildscript {
-    ext {
-        ktlint_version = '0.33.0'
-    }
-}
-
 dependencies {
     ktlint "com.pinterest:ktlint:$ktlint_version"
 }
