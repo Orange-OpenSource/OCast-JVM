@@ -96,7 +96,7 @@ internal data class DialApplication(
     /**
      * This object decodes instances of [DialApplication] from XML strings.
      */
-    internal object Decoder {
+    private object Decoder {
 
         const val XML_SERVICE_ELEMENT_NAME = "service"
         const val XML_NAME_ELEMENT_NAME = "name"
