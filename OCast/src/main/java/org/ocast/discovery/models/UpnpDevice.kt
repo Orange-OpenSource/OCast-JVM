@@ -94,7 +94,7 @@ class UpnpDevice(
          * @param xml The XML body of the HTTP response.
          * @param headers The headers of the HTTP response.
          * @return The decoded device.
-         * @throws Exception If an error occurs while decoding the DIAL application.
+         * @throws Exception If an error occurs while decoding the device.
          */
         @Throws(Exception::class)
         fun decode(xml: String, headers: Map<String, String>): UpnpDevice {
