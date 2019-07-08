@@ -16,6 +16,7 @@
 
 package org.ocast.core
 
+import org.ocast.common.extensions.ifNotNull
 import org.ocast.core.wrapper.CallbackWrapperOwner
 import org.ocast.core.wrapper.CallbackWrapper
 import org.ocast.core.models.CustomEvent
@@ -122,7 +123,7 @@ open class OCastCenter : CallbackWrapperOwner {
     private val deviceDiscoveryListener = object : DeviceDiscovery.Listener {
         override fun onDevicesAdded(devices: List<UpnpDevice>) {
             devices.forEach { upnpDevice ->
-                createDevice(upnpDevice)?.let { device ->
+                createDevice(upnpDevice)?.ifNotNull { device ->
                     this@OCastCenter.deviceListener.onDeviceAdded(device)
                 }
             }
@@ -131,7 +132,7 @@ open class OCastCenter : CallbackWrapperOwner {
         override fun onDevicesRemoved(devices: List<UpnpDevice>) {
             devices.forEach { device ->
                 synchronized(detectedDevices) {
-                    detectedDevices.firstOrNull { device.uuid == it.uuid }?.let {
+                    detectedDevices.firstOrNull { device.uuid == it.uuid }?.ifNotNull {
                         this@OCastCenter.deviceListener.onDeviceRemoved(it)
                         removeDevice(it)
                     }

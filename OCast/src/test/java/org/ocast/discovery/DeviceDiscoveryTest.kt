@@ -471,8 +471,8 @@ class DeviceDiscoveryTest {
         devicesByLocation.forEach { (location, device) ->
             whenever(upnpClient.getDevice(eq(location), any())).doAnswer {
                 // Directly invoke the callback with the desired device
-                val callback = it.getArgument<(UpnpDevice) -> Unit>(1)
-                callback.invoke(device)
+                val callback = it.getArgument<(Result<UpnpDevice>) -> Unit>(1)
+                callback.invoke(Result.success(device))
             }
         }
     }
