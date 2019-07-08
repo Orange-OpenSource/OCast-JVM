@@ -214,14 +214,14 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             when (deviceLayer.type) {
                 OCastRawDeviceLayer.Type.EVENT -> analyzeEvent(deviceLayer)
                 OCastRawDeviceLayer.Type.REPLY -> {
-                    val event = replyCallbacksBySequenceID[deviceLayer.identifier]
-                    event?.let {
+                    val replyCallback = replyCallbacksBySequenceID[deviceLayer.identifier]
+                    replyCallback?.ifNotNull {
                         if (deviceLayer.status == OCastRawDeviceLayer.Status.OK) {
                             val replyData = JsonTools.decode<OCastReplyDataLayer>(deviceLayer.message.data)
                             if (replyData.params.code == OCastError.Status.SUCCESS.code) {
                                 val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-                                val reply = if (event.replyClass != Unit::class.java) {
-                                    JsonTools.decode(oCastData.params, event.replyClass)
+                                val reply = if (replyCallback.replyClass != Unit::class.java) {
+                                    JsonTools.decode(oCastData.params, replyCallback.replyClass)
                                 } else {
                                     Unit
                                 }
@@ -240,7 +240,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         } catch (e: Exception) {
             OCastLog.error(e) { "Receive a bad formatted message: $data" }
         } finally {
-            deviceLayer?.let {
+            deviceLayer?.ifNotNull {
                 // Remove callback
                 replyCallbacksBySequenceID.remove(it.identifier)
             }
