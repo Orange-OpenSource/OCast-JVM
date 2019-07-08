@@ -89,7 +89,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             return "$protocol://${applicationURL.host}:$port/ocast"
         }
 
-    protected val replyCallbacksBySequenceID = Collections.synchronizedMap<Long, ReplyCallback<*>>(mutableMapOf())
+    protected val replyCallbacksBySequenceID: MutableMap<Long, ReplyCallback<*>> = Collections.synchronizedMap(mutableMapOf())
     private val dialClient = DialClient(applicationURL)
     protected var isApplicationRunning = AtomicBoolean(false)
     private var applicationSemaphore: Semaphore? = null
