@@ -74,10 +74,10 @@ class AppKotlin : EventListener, DeviceListener {
             device.startApplication({
                 prepareMedia(device)
             }, { oCastError ->
-                logger.log(Level.WARNING, "startApplication error: ${oCastError.errorMessage}")
+                logger.log(Level.WARNING, "startApplication error: ${oCastError.message}")
             })
         }, { oCastError ->
-            logger.log(Level.WARNING, "startApplication error: ${oCastError.errorMessage}")
+            logger.log(Level.WARNING, "startApplication error: ${oCastError.message}")
         })
     }
 
@@ -93,7 +93,7 @@ class AppKotlin : EventListener, DeviceListener {
             null, {
                 // ok
             }, {
-                oCastError -> logger.log(Level.WARNING, "prepareMedia error: ${oCastError.errorMessage}")
+                oCastError -> logger.log(Level.WARNING, "prepareMedia error: ${oCastError.message}")
             })
     }
 
