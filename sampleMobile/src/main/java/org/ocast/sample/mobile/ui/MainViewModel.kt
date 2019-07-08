@@ -29,8 +29,6 @@ class MainViewModel : ViewModel() {
 
     val selectedDevice = MutableLiveData<Device?>()
 
-    val deviceConnected = MutableLiveData<Boolean>().apply { value = false }
-
     val playbackStatus = MutableLiveData<PlaybackStatusEvent>()
     val mediaDuration: LiveData<Double> = Transformations.map(playbackStatus) { it?.duration }
     val mediaPosition: LiveData<Double> = Transformations.map(playbackStatus) { it?.position }

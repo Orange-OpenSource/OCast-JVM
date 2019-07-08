@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity(), EventListener {
             Media.TransferMode.STREAMED,
             true,
             null, {
-                mainViewModel.deviceConnected.updateValue(true)
+                Log.d(TAG, "prepareMedia OK")
             }, {
                 oCastError -> Log.e(TAG, "prepareMedia error ${oCastError.status}")
             })
@@ -126,6 +126,7 @@ class MainActivity : AppCompatActivity(), EventListener {
 
     override fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {
         if (mainViewModel.selectedDevice.value == device) {
+            Log.d(TAG, "onPlaybackStatus status=${status.state} position=${status.position}")
             mainViewModel.playbackStatus.updateValue(status)
         }
     }
@@ -156,7 +157,6 @@ class MainActivity : AppCompatActivity(), EventListener {
             OCastMediaRouteHelper.getDeviceFromRoute(route)?.apply {
                 Log.d(TAG, "OCast device unselected")
                 stopApplication({}, {})
-                mainViewModel.deviceConnected.updateValue(false)
             }
         }
 
