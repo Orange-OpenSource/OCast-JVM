@@ -99,33 +99,29 @@ class MainActivity : AppCompatActivity(), EventListener {
         return true
     }
 
-    private fun startApplication(device: Device) {
+    private fun connect(device: Device) {
         device.applicationName = "Orange-DefaultReceiver-DEV"
-        device.startApplication({
+        device.connect({
             prepareMedia(device)
         }, {
-            oCastError -> Log.e(TAG, "startApplication error $oCastError.errorMessage")
+            oCastError -> Log.e(TAG, "connect error ${oCastError.errorMessage}")
         })
     }
 
     private fun prepareMedia(device: Device) {
-        device.connect({
-            device.prepareMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
-                1,
-                "Big Buck Bunny",
-                "sampleAppKotlin",
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
-                Media.Type.VIDEO,
-                Media.TransferMode.STREAMED,
-                true,
-                null, {
-                    mainViewModel.deviceConnected.updateValue(true)
-                }, {
-                    oCastError -> Log.e(TAG, "prepareMedia error $oCastError.status")
-                })
-        }, {
-            oCastError -> Log.e(TAG, "connect error ${oCastError.errorMessage}")
-        })
+        device.prepareMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
+            1,
+            "Big Buck Bunny",
+            "sampleAppKotlin",
+            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+            Media.Type.VIDEO,
+            Media.TransferMode.STREAMED,
+            true,
+            null, {
+                mainViewModel.deviceConnected.updateValue(true)
+            }, {
+                oCastError -> Log.e(TAG, "prepareMedia error ${oCastError.status}")
+            })
     }
 
     override fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {
@@ -152,7 +148,7 @@ class MainActivity : AppCompatActivity(), EventListener {
             OCastMediaRouteHelper.getDeviceFromRoute(route)?.apply {
                 Log.d(TAG, "OCast device selected: $friendlyName")
                 mainViewModel.selectedDevice.updateValue(this)
-                startApplication(this)
+                connect(this)
             }
         }
 

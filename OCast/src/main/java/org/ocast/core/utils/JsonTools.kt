@@ -43,7 +43,7 @@ object JsonTools {
     }
 
     @Throws(Exception::class)
-    inline fun <reified T> decode(json: String): T {
+    inline fun <reified T: Any> decode(json: String): T {
         return objectMapper.readValue(json)
     }
 
