@@ -16,73 +16,193 @@
 
 package org.ocast.core.models
 
-class OCastError(val code: Int, val errorMessage: String, val throwable: Throwable? = null) {
+import org.ocast.common.extensions.orElse
 
-    constructor(errorMessage: String, throwable: Throwable? = null) : this(Status.CLIENT_ERROR.code, errorMessage, throwable)
+/**
+ * This interface is implemented by all enums which represent OCast error statuses.
+ * An enum class which implements this interface MUST have an UNKNOWN_ERROR value.
+ */
+interface ErrorStatus {
 
-    enum class Status(val code: Int) {
-        SUCCESS(0),
-        CLIENT_ERROR(-2),
-        DEVICE_LAYER_ERROR(-3)
+    /** The status code. */
+    val code: Int
+
+    companion object {
+
+        /**
+         * Returns en ErrorStatus from the given code.
+         */
+        inline fun <reified T> fromCode(code: Int): T where T : Enum<T>, T : ErrorStatus {
+            return enumValues<T>().firstOrNull { it.code == code }.orElse { enumValueOf<T>("UNKNOWN_ERROR") }
+        }
     }
 }
 
-class OCastDeviceSettingsError(val errorMessage: String, val status: Status, val throwable: Throwable? = null) {
-
-    constructor(error: OCastError) : this(error.errorMessage, Status.values().firstOrNull { it.code == error.code } ?: Status.UNKNOWN_ERROR, error.throwable)
-
-    enum class Status(val code: Int) {
-        SUCCESS(0),
-        UNKNOWN_ERROR(-1),
-        CLIENT_ERROR(-2),
-        DEVICE_LAYER_ERROR(-3)
-    }
-}
-
-class OCastInputSettingsError(val errorMessage: String, val status: Status, val throwable: Throwable? = null) {
-
-    constructor(error: OCastError) : this(error.errorMessage, Status.values().firstOrNull { it.code == error.code } ?: Status.UNKNOWN_ERROR, error.throwable)
-
-    enum class Status(val code: Int) {
-        SUCCESS(0),
-        UNKNOWN_ERROR(-1),
-        CLIENT_ERROR(-2),
-        DEVICE_LAYER_ERROR(-3)
-    }
-}
-
-class OCastMediaError(val errorMessage: String, val status: Status, val throwable: Throwable? = null) {
-
-    constructor(error: OCastError) : this(error.errorMessage, Status.values().firstOrNull { it.code == error.code } ?: Status.UNKNOWN_ERROR, error.throwable)
+/**
+ * Represents a generic OCast error.
+ *
+ * @param code The error code.
+ * @param message The error message.
+ * @param throwable The throwable associated with the error, if any.
+ * @constructor Creates an [OCastError].
+ */
+data class OCastError(val code: Int, val message: String, val throwable: Throwable? = null) {
 
     /**
-     * Media controller error codes
+     * Creates an [OCastError] with a CLIENT_ERROR status.
      *
-     * SUCCESS : No error
-     * NOT_IMPLEMENTED : the command is not yet implemented by the web application
-     * INVALID_SERVICE : the service is not implemented by the web application
-     * MISSING_PARAMETER : a mandatory parameter is missing
-     * INVALID_PLAYER_STATE : the command could not be performed according to the player state
-     * NO_PLAYER_INITIALIZED : the player could not be initialized
-     * INVALID_TRACK : the track ID is not valid
-     * UNKNOWN_MEDIA_TYPE : unknown media type
-     * UNKNOWN_TRANSFERT_MODE : unknown transfer mode
-     * PARAMETERS_ARE_MISSING : Parameter(s) are missing
-     * INTERNAL_ERROR : Internal error
+     * @param message The error message.
+     * @param throwable The throwable associated with the error, if any.
+     */
+    constructor(message: String, throwable: Throwable? = null) : this(OCastError.Status.CLIENT_ERROR.code, message, throwable)
+
+    /**
+     * Represents the status of an [OCastError].
      */
     enum class Status(val code: Int) {
+
+        /** There is no error. */
         SUCCESS(0),
-        NOT_IMPLEMENTED(2400),
-        INVALID_SERVICE(2404),
-        INVALID_PLAYER_STATE(2412),
-        NO_PLAYER_INITIALIZED(2413),
-        INVALID_TRACK(2414),
-        UNKNOWN_MEDIA_TYPE(2415),
-        UNKNOWN_TRANSFER_MODE(2416),
-        MISSING_PARAMETER(2422),
-        INTERNAL_ERROR(2500),
-        UNKNOWN_ERROR(-1),
+
+        /** There was an error in the OCast SDK. */
         CLIENT_ERROR(-2),
+
+        /** There was an error in the received OCast device layer. */
+        DEVICE_LAYER_ERROR(-3)
+    }
+}
+
+/**
+ * Represents an error from the device settings service.
+ *
+ * @param status The error status.
+ * @param message The error message.
+ * @param throwable The throwable associated with the error, if any.
+ * @constructor Creates an [OCastDeviceSettingsError].
+ */
+data class OCastDeviceSettingsError(val status: Status, val message: String, val throwable: Throwable? = null) {
+
+    /**
+     * Creates an [OCastDeviceSettingsError] from a generic [OCastError].
+     *
+     * @param error The generic OCast error.
+     */
+    constructor(error: OCastError) : this(ErrorStatus.fromCode(error.code), error.message, error.throwable)
+
+    /**
+     * Represents the status of an [OCastDeviceSettingsError].
+     */
+    enum class Status(override val code: Int) : ErrorStatus {
+
+        /** There is no error. */
+        SUCCESS(0),
+
+        /** The error is unknown. */
+        UNKNOWN_ERROR(-1),
+
+        /** There was an error in the OCast SDK. */
+        CLIENT_ERROR(-2),
+
+        /** There was an error in the received OCast device layer. */
+        DEVICE_LAYER_ERROR(-3)
+    }
+}
+
+/**
+ * Represents an error from the input settings service.
+ *
+ * @param status The error status.
+ * @param message The error message.
+ * @param throwable The throwable associated with the error, if any.
+ * @constructor Creates an [OCastInputSettingsError].
+ */
+data class OCastInputSettingsError(val status: Status, val message: String, val throwable: Throwable? = null) {
+
+    /**
+     * Creates an [OCastInputSettingsError] from a generic [OCastError].
+     *
+     * @param error The generic OCast error.
+     */
+    constructor(error: OCastError) : this(ErrorStatus.fromCode(error.code), error.message, error.throwable)
+
+    /**
+     * Represents the status of an [OCastInputSettingsError].
+     */
+    enum class Status(override val code: Int) : ErrorStatus {
+
+        /** There is no error. */
+        SUCCESS(0),
+
+        /** The error is unknown. */
+        UNKNOWN_ERROR(-1),
+
+        /** There was an error in the OCast SDK. */
+        CLIENT_ERROR(-2),
+
+        /** There was an error in the received OCast device layer. */
+        DEVICE_LAYER_ERROR(-3)
+    }
+}
+
+/**
+ * Represents an error from the media service.
+ *
+ * @param status The error status.
+ * @param message The error message.
+ * @param throwable The throwable associated with the error, if any.
+ * @constructor Creates an [OCastMediaError].
+ */
+data class OCastMediaError(val status: Status, val message: String, val throwable: Throwable? = null) {
+
+    /**
+     * Creates an [OCastMediaError] from a generic [OCastError].
+     *
+     * @param error The generic OCast error.
+     */
+    constructor(error: OCastError) : this(ErrorStatus.fromCode(error.code), error.message, error.throwable)
+
+    /**
+     * Represents the status of an [OCastMediaError].
+     */
+    enum class Status(override val code: Int) : ErrorStatus {
+
+        /** There is no error. */
+        SUCCESS(0),
+
+        /** The command is not yet implemented by the web application. */
+        NOT_IMPLEMENTED(2400),
+
+        /** The service is not implemented by the web application. */
+        INVALID_SERVICE(2404),
+
+        /** The command could not be performed according to the player state. */
+        INVALID_PLAYER_STATE(2412),
+
+        /** The player could not be initialized. */
+        NO_PLAYER_INITIALIZED(2413),
+
+        /** The track ID is not valid. */
+        INVALID_TRACK(2414),
+
+        /** The media type is unknown. */
+        UNKNOWN_MEDIA_TYPE(2415),
+
+        /** The transfer mode is unknown. */
+        UNKNOWN_TRANSFER_MODE(2416),
+
+        /** A mandatory parameter is missing. */
+        MISSING_PARAMETER(2422),
+
+        /** An internal error, please send details on the tracker. */
+        INTERNAL_ERROR(2500),
+
+        /** The error is unknown. */
+        UNKNOWN_ERROR(-1),
+
+        /** There was an error in the OCast SDK. */
+        CLIENT_ERROR(-2),
+
+        /** There was an error in the received OCast device layer. */
         DEVICE_LAYER_ERROR(-3)
     }
 }
