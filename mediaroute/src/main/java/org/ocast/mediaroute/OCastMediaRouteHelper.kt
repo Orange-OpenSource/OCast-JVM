@@ -42,7 +42,6 @@ object OCastMediaRouteHelper {
         get() = oCastCenter.devices
 
     fun init(context: Context, devices: List<Class<out Device>>) {
-
         if (!initialized) {
             if (Looper.getMainLooper() != Looper.myLooper()) {
                 throw RuntimeException("${this::class.java.simpleName} should be instantiated on the UI thread.")

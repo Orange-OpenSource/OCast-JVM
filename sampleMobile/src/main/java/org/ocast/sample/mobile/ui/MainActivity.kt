@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity(), EventListener {
     private lateinit var binding: ActivityMainBinding
     private lateinit var mainViewModel: MainViewModel
 
-    private var mediaRouterCallback: MediaRouter.Callback = MediaRouterCallback()
+    private var mediaRouterCallback = MediaRouterCallback()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,19 +56,19 @@ class MainActivity : AppCompatActivity(), EventListener {
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
         binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main).apply {
-            this.lifecycleOwner = this@MainActivity
-            this.viewModel = mainViewModel
+            lifecycleOwner = this@MainActivity
+            viewModel = mainViewModel
         }
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
 
         OCastMediaRouteHelper.init(this, listOf(ReferenceDevice::class.java))
-        OCastMediaRouteHelper.addMediaRouterCallback(mediaRouterCallback)
     }
 
     override fun onStart() {
         super.onStart()
 
+        OCastMediaRouteHelper.addMediaRouterCallback(mediaRouterCallback)
         OCastMediaRouteHelper.addEventListener(this)
     }
 
@@ -76,11 +76,6 @@ class MainActivity : AppCompatActivity(), EventListener {
         super.onStop()
 
         OCastMediaRouteHelper.removeEventListener(this)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
         OCastMediaRouteHelper.removeMediaRouterCallback(mediaRouterCallback)
     }
 

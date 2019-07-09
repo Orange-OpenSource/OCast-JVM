@@ -56,7 +56,7 @@ class MainViewModel : ViewModel() {
     }
 
     fun onVolumeChanged(progressValue: Int) {
-        selectedDevice.value?.setMediaVolume((progressValue / 1000f).toDouble(), {}, {})
+        selectedDevice.value?.setMediaVolume((progressValue / 1000.0), {}, {})
     }
 
     fun onSeekChanged(progressValue: Int) {
