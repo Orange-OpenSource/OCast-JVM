@@ -2,7 +2,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
-apply from: "${buildscript.sourceFile.parent}/../ktlint.gradle"
+apply from: project.file("../ktlint.gradle")
+apply from: project.file("../dependencies.gradle")
 
 androidExtensions {
     experimental = true

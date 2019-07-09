@@ -1,6 +1,7 @@
 apply plugin: 'application'
 apply plugin: 'kotlin'
-apply from: "${buildscript.sourceFile.parent}/../ktlint.gradle"
+apply from: project.file("../ktlint.gradle")
+apply from: project.file("../dependencies.gradle")
 
 mainClassName = "org.ocast.sample.desktop.AppKotlin"
 description = "Sample Kotlin desktop application for the OCast SDK"
