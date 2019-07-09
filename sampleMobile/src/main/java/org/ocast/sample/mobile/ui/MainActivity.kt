@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity(), EventListener {
         device.connect({
             prepareMedia(device)
         }, {
-            oCastError -> Log.e(TAG, "connect error ${oCastError.errorMessage}")
+            oCastError -> Log.e(TAG, "connect error ${oCastError.message}")
         })
     }
 
