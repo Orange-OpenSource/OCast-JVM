@@ -95,19 +95,11 @@ class AppKotlin : EventListener, DeviceListener {
     }
 
     override fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {
-        logger.log(Level.INFO, "[{${device.friendlyName}}] onPlaybackStatus: progress=${status.position} volume=${status.volume}")
-    }
-
-    override fun onDeviceDisconnected(device: Device, error: Throwable?) {
-        logger.log(Level.WARNING, "onDeviceDisconnected error", error)
+        logger.log(Level.INFO, "[{${device.friendlyName}}] onPlaybackStatus: progress=${status.position} state=${status.state}")
     }
 
     override fun onDeviceAdded(device: Device) {
         logger.log(Level.INFO, "onDeviceAdded: ${device.friendlyName}")
         startApplication(device)
-    }
-
-    override fun onDeviceRemoved(device: Device) {
-        logger.log(Level.INFO, "onDeviceRemoved: ${device.friendlyName}")
     }
 }
