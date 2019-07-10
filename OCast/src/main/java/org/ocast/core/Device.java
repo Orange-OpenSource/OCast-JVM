@@ -16,8 +16,6 @@
 
 package org.ocast.core;
 
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -145,31 +143,4 @@ public abstract class Device implements CallbackWrapperOwner {
     // Custom commands
     public abstract void sendCustomCommand(@NotNull String name, @NotNull String service, @NotNull JSONObject params, @Nullable JSONObject options, @NotNull Consumer<CustomReply> onSuccess, @NotNull Consumer<OCastError> onError);
     public abstract void sendCustomCommand(@NotNull String name, @NotNull String service, @NotNull JSONObject params, @Nullable JSONObject options, @NotNull Runnable onSuccess, @NotNull Consumer<OCastError> onError);
-
-    //region CallbackWrapperOwner
-
-    // Methods from CallbackWrapperOwner must be implemented
-    // Otherwise code compiles but crashes at runtime because default implementations of these methods are not found
-
-    @Override
-    public <T> void wrapInvoke(@NotNull Function1<? super T, Unit> function, T param) {
-        CallbackWrapperOwner.DefaultImpls.wrapInvoke(this, function, param);
-    }
-
-    @Override
-    public void wrapRun(@NotNull Runnable runnable) {
-        CallbackWrapperOwner.DefaultImpls.wrapRun(this, runnable);
-    }
-
-    @Override
-    public <T> void wrapRun(@NotNull Consumer<T> consumer, T param) {
-        CallbackWrapperOwner.DefaultImpls.wrapRun(this, consumer, param);
-    }
-
-    @Override
-    public <T> void wrapForEach(@NotNull Iterable<? extends T> iterable, @NotNull Function1<? super T, Unit> action) {
-        CallbackWrapperOwner.DefaultImpls.wrapForEach(this, iterable, action);
-    }
-
-    //endregion
 }

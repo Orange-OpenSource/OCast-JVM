@@ -31,6 +31,7 @@ internal interface CallbackWrapperOwner {
      *
      * @param param The parameter passed to the invoked method of the wrapped lambda.
      */
+    @JvmDefault
     fun <T> ((T) -> Unit).wrapInvoke(param: T) {
         callbackWrapper.wrap(Consumer<T> { invoke(it) }).run(param)
     }
@@ -40,6 +41,7 @@ internal interface CallbackWrapperOwner {
      *
      * @param param The parameter passed to the run method of the wrapped [Consumer].
      */
+    @JvmDefault
     fun <T> Consumer<T>.wrapRun(param: T) {
         callbackWrapper.wrap(this).run(param)
     }
@@ -47,6 +49,7 @@ internal interface CallbackWrapperOwner {
     /**
      * Wraps and runs the [Runnable].
      */
+    @JvmDefault
     fun Runnable.wrapRun() {
         callbackWrapper.wrap(this).run()
     }
@@ -56,6 +59,7 @@ internal interface CallbackWrapperOwner {
      *
      * @param action The lambda to wrap and perform.
      */
+    @JvmDefault
     fun <T> Iterable<T>.wrapForEach(action: (T) -> Unit) {
         forEach { action.wrapInvoke(it) }
     }

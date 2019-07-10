@@ -67,10 +67,10 @@ public class AppJava implements EventListener, DeviceListener {
         device.setApplicationName("Orange-DefaultReceiver-DEV");
         device.connect(
                 () -> device.startApplication(
-                        () -> prepareMedia(device),
-                        oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getMessage())
+                    () -> prepareMedia(device),
+                    oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getMessage())
                 ),
-                oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getMessage()));
+                oCastError -> logger.log(Level.WARNING, "connect error: " + oCastError.getMessage()));
     }
 
     private void prepareMedia(Device device) {
@@ -89,31 +89,12 @@ public class AppJava implements EventListener, DeviceListener {
 
     @Override
     public void onPlaybackStatus(@NotNull Device device, @NotNull PlaybackStatusEvent status) {
-        logger.log(Level.INFO, "[" + device.getFriendlyName() + "]" + "onPlaybackStatus: progress=" + status.getPosition());
-    }
-
-    @Override
-    public void onMetadataChanged(@NotNull Device device, @NotNull MetadataChangedEvent metadata) {
-    }
-
-    @Override
-    public void onUpdateStatus(@NotNull Device device, @NotNull UpdateStatusEvent updateStatus) {
-    }
-
-    @Override
-    public void onCustomEvent(@NotNull Device device, @NotNull CustomEvent customEvent) {
-    }
-
-    @Override
-    public void onDeviceDisconnected(@NotNull Device device, @Nullable Throwable error) {
+        logger.log(Level.INFO, "[" + device.getFriendlyName() + "]" + "onPlaybackStatus: progress=" + status.getPosition() + " state=" + status.getState());
     }
 
     @Override
     public void onDeviceAdded(@NotNull Device device) {
+        logger.log(Level.INFO, "onDeviceAdded: " + device.getFriendlyName() + "]");
         startApplication(device);
-    }
-
-    @Override
-    public void onDeviceRemoved(@NotNull Device device) {
     }
 }

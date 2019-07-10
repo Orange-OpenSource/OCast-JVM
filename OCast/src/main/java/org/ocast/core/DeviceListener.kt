@@ -18,9 +18,15 @@ package org.ocast.core
 
 interface DeviceListener {
 
-    fun onDeviceDisconnected(device: Device, error: Throwable?)
+    @JvmDefault
+    fun onDeviceDisconnected(device: Device, error: Throwable?) {
+    }
 
-    fun onDeviceAdded(device: Device)
+    @JvmDefault
+    fun onDeviceAdded(device: Device) {
+    }
 
-    fun onDeviceRemoved(device: Device)
+    @JvmDefault
+    fun onDeviceRemoved(device: Device) {
+    }
 }

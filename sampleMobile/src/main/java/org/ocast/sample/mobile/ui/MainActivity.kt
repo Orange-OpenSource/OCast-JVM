@@ -29,11 +29,9 @@ import android.view.Menu
 import org.ocast.core.Device
 import org.ocast.core.EventListener
 import org.ocast.core.ReferenceDevice
-import org.ocast.core.models.CustomEvent
 import org.ocast.core.models.Media
 import org.ocast.core.models.MetadataChangedEvent
 import org.ocast.core.models.PlaybackStatusEvent
-import org.ocast.core.models.UpdateStatusEvent
 import org.ocast.mediaroute.OCastMediaRouteHelper
 import org.ocast.sample.mobile.R
 import org.ocast.sample.mobile.databinding.ActivityMainBinding
@@ -130,12 +128,6 @@ class MainActivity : AppCompatActivity(), EventListener {
         if (mainViewModel.selectedDevice.value == device) {
             mainViewModel.mediaMetadata.updateValue(metadata)
         }
-    }
-
-    override fun onUpdateStatus(device: Device, updateStatus: UpdateStatusEvent) {
-    }
-
-    override fun onCustomEvent(device: Device, customEvent: CustomEvent) {
     }
 
     private inner class MediaRouterCallback : MediaRouter.Callback() {
