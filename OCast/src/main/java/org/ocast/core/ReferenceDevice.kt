@@ -392,7 +392,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         val id = generateSequenceID()
         try {
             replyCallbacksBySequenceID[id] = ReplyCallback(replyClass, onSuccess, onError)
-            val layerMessage = OCastCommandDeviceLayer(clientUuid, domain, OCastRawDeviceLayer.Type.COMMAND, id, commandMessage).encode()
+            val deviceLayer = OCastCommandDeviceLayer(clientUuid, domain, OCastRawDeviceLayer.Type.COMMAND, id, commandMessage)
+            val layerMessage = JsonTools.encode(deviceLayer)
             // Do not start application when sending settings commands
             sendToWebSocket(id, layerMessage, domain == DOMAIN_BROWSER, onError)
         } catch (exception: Exception) {

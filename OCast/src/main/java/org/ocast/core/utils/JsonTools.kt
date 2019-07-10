@@ -31,7 +31,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 
 object JsonTools {
 
-    val objectMapper = jacksonObjectMapper()
+    @PublishedApi
+    internal val objectMapper = jacksonObjectMapper()
 
     init {
         objectMapper.registerModule(KotlinModule())
@@ -50,6 +51,11 @@ object JsonTools {
     @Throws(Exception::class)
     fun <T> decode(json: String, clazz: Class<T>): T {
         return objectMapper.readValue(json, clazz)
+    }
+
+    @Throws(Exception::class)
+    fun encode(value: Any): String {
+        return objectMapper.writeValueAsString(value)
     }
 }
 

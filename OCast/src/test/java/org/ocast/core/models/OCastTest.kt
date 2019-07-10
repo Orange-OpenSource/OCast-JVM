@@ -206,9 +206,10 @@ class OCastTest {
         ).options(options).build())
         val uuid = "89cf41b8-ef40-48d9-99c3-2a1951abcde5"
         val identifier = 666L
+        val deviceLayer = OCastCommandDeviceLayer(uuid, ReferenceDevice.DOMAIN_BROWSER, OCastRawDeviceLayer.Type.COMMAND, identifier, prepareMessage)
 
         // When
-        val layerMessage = OCastCommandDeviceLayer(uuid, ReferenceDevice.DOMAIN_BROWSER, OCastRawDeviceLayer.Type.COMMAND, identifier, prepareMessage).encode()
+        val layerMessage = JsonTools.encode(deviceLayer)
 
         // Then
         val oCastMessage = """
@@ -256,9 +257,10 @@ class OCastTest {
 
         val uuid = "89cf41b8-ef40-48d9-99c3-2a1951abcde5"
         val identifier = 666L
+        val deviceLayer = OCastCommandDeviceLayer(uuid, "my destination", OCastRawDeviceLayer.Type.COMMAND, identifier, customMessage)
 
         // When
-        val layerMessage = OCastCommandDeviceLayer(uuid, "my destination", OCastRawDeviceLayer.Type.COMMAND, identifier, customMessage).encode()
+        val layerMessage = JsonTools.encode(deviceLayer)
 
         // Then
         val oCastMessage = """

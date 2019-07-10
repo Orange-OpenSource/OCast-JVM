@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import org.json.JSONObject
-import org.ocast.core.utils.JsonTools
 import org.ocast.core.utils.RawJsonDeserializer
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLSocketFactory
@@ -99,13 +98,7 @@ class OCastCommandDeviceLayer<T>(
     @JsonProperty("type") val type: OCastRawDeviceLayer.Type,
     @JsonProperty("id") val identifier: Long,
     @JsonProperty("message") val message: OCastApplicationLayer<T>
-) {
-
-    @Throws(Exception::class)
-    fun encode(): String {
-        return JsonTools.objectMapper.writeValueAsString(this)
-    }
-}
+)
 
 //endregion
 
