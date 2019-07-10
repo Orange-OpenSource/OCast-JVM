@@ -74,7 +74,7 @@ class AppKotlin : EventListener, DeviceListener {
                 logger.log(Level.WARNING, "startApplication error: ${oCastError.message}")
             })
         }, { oCastError ->
-            logger.log(Level.WARNING, "startApplication error: ${oCastError.message}")
+            logger.log(Level.WARNING, "connect error: ${oCastError.message}")
         })
     }
 

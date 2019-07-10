@@ -70,7 +70,7 @@ public class AppJava implements EventListener, DeviceListener {
                         () -> prepareMedia(device),
                         oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getMessage())
                 ),
-                oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getMessage()));
+                oCastError -> logger.log(Level.WARNING, "connect error: " + oCastError.getMessage()));
     }
 
     private void prepareMedia(Device device) {
