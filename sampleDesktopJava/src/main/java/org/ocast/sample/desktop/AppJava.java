@@ -93,27 +93,7 @@ public class AppJava implements EventListener, DeviceListener {
     }
 
     @Override
-    public void onMetadataChanged(@NotNull Device device, @NotNull MetadataChangedEvent metadata) {
-    }
-
-    @Override
-    public void onUpdateStatus(@NotNull Device device, @NotNull UpdateStatusEvent updateStatus) {
-    }
-
-    @Override
-    public void onCustomEvent(@NotNull Device device, @NotNull CustomEvent customEvent) {
-    }
-
-    @Override
-    public void onDeviceDisconnected(@NotNull Device device, @Nullable Throwable error) {
-    }
-
-    @Override
     public void onDeviceAdded(@NotNull Device device) {
         startApplication(device);
-    }
-
-    @Override
-    public void onDeviceRemoved(@NotNull Device device) {
     }
 }

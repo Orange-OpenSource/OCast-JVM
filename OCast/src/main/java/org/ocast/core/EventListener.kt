@@ -23,13 +23,31 @@ import org.ocast.core.models.UpdateStatusEvent
 
 interface EventListener {
 
-    // Media event
-    fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent)
-    fun onMetadataChanged(device: Device, metadata: MetadataChangedEvent)
+    /**
+     * Playback Status of the player, sent at a rate defined by the frequency parameter of the prepare method.
+     */
+    @JvmDefault
+    fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {
+    }
 
-    // Settings device event
-    fun onUpdateStatus(device: Device, updateStatus: UpdateStatusEvent)
+    /**
+     * Metadata sent each time is changed on the current playback.
+     */
+    @JvmDefault
+    fun onMetadataChanged(device: Device, metadata: MetadataChangedEvent) {
+    }
 
-    // Custom event
-    fun onCustomEvent(device: Device, customEvent: CustomEvent)
+    /**
+     * Firmware update status of the device, sent each seconds for downloading, otherwise when state changes.
+     */
+    @JvmDefault
+    fun onUpdateStatus(device: Device, updateStatus: UpdateStatusEvent) {
+    }
+
+    /**
+     * Receive custom event sent from web application
+     */
+    @JvmDefault
+    fun onCustomEvent(device: Device, customEvent: CustomEvent) {
+    }
 }

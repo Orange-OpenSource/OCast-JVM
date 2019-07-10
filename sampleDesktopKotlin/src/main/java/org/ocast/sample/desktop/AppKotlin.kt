@@ -21,11 +21,8 @@ import org.ocast.core.DeviceListener
 import org.ocast.core.OCastCenter
 import org.ocast.core.EventListener
 import org.ocast.core.ReferenceDevice
-import org.ocast.core.models.CustomEvent
 import org.ocast.core.models.Media
-import org.ocast.core.models.MetadataChangedEvent
 import org.ocast.core.models.PlaybackStatusEvent
-import org.ocast.core.models.UpdateStatusEvent
 import org.ocast.core.utils.OCastLog
 import java.util.concurrent.CountDownLatch
 import java.util.logging.Level
@@ -99,15 +96,6 @@ class AppKotlin : EventListener, DeviceListener {
 
     override fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {
         logger.log(Level.INFO, "[{${device.friendlyName}}] onPlaybackStatus: progress=${status.position} volume=${status.volume}")
-    }
-
-    override fun onMetadataChanged(device: Device, metadata: MetadataChangedEvent) {
-    }
-
-    override fun onUpdateStatus(device: Device, updateStatus: UpdateStatusEvent) {
-    }
-
-    override fun onCustomEvent(device: Device, customEvent: CustomEvent) {
     }
 
     override fun onDeviceDisconnected(device: Device, error: Throwable?) {
