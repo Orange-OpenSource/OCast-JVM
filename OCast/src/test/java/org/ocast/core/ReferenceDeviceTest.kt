@@ -23,8 +23,8 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import org.junit.Before
 import org.junit.Test
-import org.ocast.core.models.UpdateStatusEvent
 import junit.framework.TestCase.assertEquals
+import org.ocast.core.models.UpdateStatus
 import org.ocast.discovery.models.UpnpDevice
 
 class ReferenceDeviceTest {
@@ -68,7 +68,7 @@ class ReferenceDeviceTest {
         referenceDevice.onDataReceived(webSocketProvider, data)
 
         // Then
-        val updateStatusEvent = argumentCaptor<UpdateStatusEvent>()
+        val updateStatusEvent = argumentCaptor<UpdateStatus>()
         verify(eventListener, times(1)).onUpdateStatus(eq(referenceDevice), updateStatusEvent.capture())
         assertEquals(updateStatusEvent.firstValue.state, "downloading")
         assertEquals(updateStatusEvent.firstValue.progress, 50)

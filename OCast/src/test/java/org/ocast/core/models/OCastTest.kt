@@ -106,7 +106,7 @@ class OCastTest {
         // When
         val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
         val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-        val metadataChanged = JsonTools.decode<MetadataChangedEvent>(oCastData.params)
+        val metadataChanged = JsonTools.decode<Metadata>(oCastData.params)
 
         // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
@@ -218,7 +218,6 @@ class OCastTest {
               "type": "command",
               "id": 666,
               "message": {
-                "service": "org.ocast.media",
                 "data": {
                   "name": "prepare",
                   "params": {
@@ -233,7 +232,8 @@ class OCastTest {
                   "options": {
                     "auth_cookie": "azertyuiop1234"
                   }
-                }
+                },
+                "service": "org.ocast.media"
               }
             }
         """.trimIndent()
