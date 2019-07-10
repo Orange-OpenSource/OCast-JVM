@@ -100,6 +100,7 @@ internal class OCastMediaRouteProvider(context: Context, private val oCastCenter
                 context.registerReceiver(wifiMonitorReceiver, wifiMonitorIntentFilter)
             }
             val activeNetwork = (context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetworkInfo
+            @Suppress("DEPRECATION")
             val isWifiConnected = activeNetwork?.isConnectedOrConnecting == true && activeNetwork.type == ConnectivityManager.TYPE_WIFI
             if (isWifiConnected) {
                 oCastCenter.resumeDiscovery(isActiveScan)

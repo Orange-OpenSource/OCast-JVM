@@ -35,7 +35,6 @@ import java.util.concurrent.TimeUnit
 class OCastMediaRouteHelperTest {
 
     private lateinit var fakeDevice: FakeDeviceMediaRouteProvider
-    private lateinit var oCastMediaRouteHelper: OCastMediaRouteHelper
     private val mainHandler = Handler(Looper.getMainLooper())
     private var mediaRouterCallback = MediaRouterCallback()
     private var mediaRouteDevice: MediaRouteDevice? = null
@@ -49,16 +48,16 @@ class OCastMediaRouteHelperTest {
 
             fakeDevice = FakeDeviceMediaRouteProvider(appContext)
 
-            oCastMediaRouteHelper = OCastMediaRouteHelper(appContext, listOf(ReferenceDevice::class.java))
-            oCastMediaRouteHelper.addMediaRouterCallback(mediaRouterCallback)
-            oCastMediaRouteHelper.addMediaRouteProvider(fakeDevice)
+            OCastMediaRouteHelper.initialize(appContext, listOf(ReferenceDevice::class.java))
+            OCastMediaRouteHelper.addMediaRouterCallback(mediaRouterCallback)
+            OCastMediaRouteHelper.addMediaRouteProvider(fakeDevice)
         }
     }
 
     @After
     fun tearDown() {
-        oCastMediaRouteHelper.removeMediaRouteProvider(fakeDevice)
-        oCastMediaRouteHelper.removeMediaRouterCallback(mediaRouterCallback)
+        OCastMediaRouteHelper.removeMediaRouteProvider(fakeDevice)
+        OCastMediaRouteHelper.removeMediaRouterCallback(mediaRouterCallback)
     }
 
     private val latch = CountDownLatch(1)
