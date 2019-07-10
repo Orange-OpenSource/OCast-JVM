@@ -1,7 +1,7 @@
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
-apply from: project.file("../ktlint.gradle")
-apply from: project.file("../dependencies.gradle")
+apply from: project.file('../ktlint.gradle')
+apply from: project.file('../dependencies.gradle')
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
