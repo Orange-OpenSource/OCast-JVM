@@ -35,7 +35,7 @@ object OCastMediaRouteHelper {
     private var mediaRouter: MediaRouter? = null
     private var initialized = false
 
-    var mediaRouteSelector = MediaRouteSelector.Builder()
+    val mediaRouteSelector = MediaRouteSelector.Builder()
         .addControlCategory(OCastMediaRouteProvider.FILTER_CATEGORY_OCAST)
         .build()
     val devices: List<Device>
@@ -43,13 +43,11 @@ object OCastMediaRouteHelper {
 
     fun init(context: Context, devices: List<Class<out Device>>) {
         if (!initialized) {
-            if (Looper.getMainLooper() != Looper.myLooper()) {
+            if (!isMainThread()) {
                 throw RuntimeException("${this::class.java.simpleName} should be instantiated on the UI thread.")
             }
             initialized = true
-            devices.forEach {
-                oCastCenter.registerDevice(it)
-            }
+            devices.forEach { oCastCenter.registerDevice(it) }
             val oCastProvider = OCastMediaRouteProvider(context.applicationContext, oCastCenter, mainHandler)
             mediaRouter = MediaRouter.getInstance(context.applicationContext)
             mediaRouter?.addProvider(oCastProvider)
@@ -62,8 +60,12 @@ object OCastMediaRouteHelper {
      * @param mediaRouterCallback
      */
     fun addMediaRouterCallback(mediaRouterCallback: MediaRouter.Callback) {
-        mainHandler.post {
-            mediaRouter?.addCallback(mediaRouteSelector, mediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
+        if (initialized) {
+            runOnMainThread {
+                mediaRouter?.addCallback(mediaRouteSelector, mediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
+            }
+        } else {
+            throw RuntimeException("${this::class.java.simpleName} not initialized. Call init with proper configuration")
         }
     }
 
@@ -73,7 +75,7 @@ object OCastMediaRouteHelper {
      * @param mediaRouterCallback
      */
     fun removeMediaRouterCallback(mediaRouterCallback: MediaRouter.Callback) {
-        mainHandler.post {
+        runOnMainThread {
             mediaRouter?.removeCallback(mediaRouterCallback)
         }
     }
@@ -94,14 +96,26 @@ object OCastMediaRouteHelper {
     }
 
     internal fun addMediaRouteProvider(mediaRouteProvider: MediaRouteProvider) {
-        mainHandler.post {
+        runOnMainThread {
             mediaRouter?.addProvider(mediaRouteProvider)
         }
     }
 
     internal fun removeMediaRouteProvider(mediaRouteProvider: MediaRouteProvider) {
-        mainHandler.post {
+        runOnMainThread {
             mediaRouter?.removeProvider(mediaRouteProvider)
+        }
+    }
+
+    private fun isMainThread(): Boolean {
+        return Looper.getMainLooper() == Looper.myLooper()
+    }
+
+    private fun runOnMainThread(block: () -> Unit) {
+        if (isMainThread()) {
+            block()
+        } else {
+            mainHandler.post(block)
         }
     }
 }
