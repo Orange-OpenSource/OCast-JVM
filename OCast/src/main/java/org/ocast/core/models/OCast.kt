@@ -158,17 +158,6 @@ open class OCastRawDataLayer(
     @JsonProperty("options") val options: JSONObject?
 )
 
-/**
- *
- *
- * @param name
- * @param params
- */
-open class OCastReplyDataLayer(
-    @JsonProperty("name") var name: String,
-    @JsonProperty("params") val params: OCastReplyParams
-)
-
 //endregion
 
 //region Params
