@@ -145,14 +145,6 @@ class GetMetadata : OCastDataLayerParams("getMetadata")
 //region Reply
 
 /**
- *
- * @param code
- */
-open class MediaReplyParams(
-    @JsonProperty("code") open val code: Int
-)
-
-/**
  * Media playback status
  *
  * @param code
@@ -169,7 +161,7 @@ class PlaybackStatus(
     @JsonProperty("state") val state: Media.PlayerState,
     @JsonProperty("volume") val volume: Double,
     @get:JsonIgnore @field:JsonProperty("mute") val isMuted: Boolean
-) : MediaReplyParams(code)
+) : OCastReplyParams(code)
 
 /**
  *
@@ -192,7 +184,7 @@ class Metadata(
     @JsonProperty("textTracks") val textTracks: List<TrackDescription>?,
     @JsonProperty("audioTracks") val audioTracks: List<TrackDescription>?,
     @JsonProperty("videoTracks") val videoTracks: List<TrackDescription>?
-) : MediaReplyParams(code)
+) : OCastReplyParams(code)
 
 /**
  * Track description
