@@ -210,7 +210,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     override fun onDataReceived(webSocketProvider: WebSocketProvider, data: String) {
         var deviceLayer: OCastRawDeviceLayer? = null
         try {
-            deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
+            deviceLayer = JsonTools.decode(data)
             when (deviceLayer.type) {
                 OCastRawDeviceLayer.Type.EVENT -> analyzeEvent(deviceLayer)
                 OCastRawDeviceLayer.Type.REPLY -> {
