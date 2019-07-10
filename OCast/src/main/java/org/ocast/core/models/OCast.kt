@@ -196,9 +196,9 @@ open class OCastDataLayerParams(
 }
 
 open class OCastDataLayerBuilder<T>(
-    @JsonIgnore protected open var name: String,
-    @JsonIgnore var params: T,
-    @JsonIgnore var options: JSONObject? = null
+    var name: String,
+    var params: T,
+    var options: JSONObject? = null
 ) {
 
     fun build(): OCastDataLayer<T> {
