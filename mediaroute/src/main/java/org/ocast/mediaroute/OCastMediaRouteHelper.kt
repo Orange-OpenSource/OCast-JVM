@@ -41,7 +41,7 @@ object OCastMediaRouteHelper {
     val devices: List<Device>
         get() = oCastCenter.devices
 
-    fun init(context: Context, devices: List<Class<out Device>>) {
+    fun initialize(context: Context, devices: List<Class<out Device>>) {
         if (!initialized) {
             if (!isMainThread()) {
                 throw RuntimeException("${this::class.java.simpleName} should be instantiated on the UI thread.")
@@ -65,7 +65,7 @@ object OCastMediaRouteHelper {
                 mediaRouter?.addCallback(mediaRouteSelector, mediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY)
             }
         } else {
-            throw RuntimeException("${this::class.java.simpleName} not initialized. Call init with proper configuration")
+            throw RuntimeException("${this::class.java.simpleName} not initialized. Call initialize with proper configuration")
         }
     }
 
@@ -96,8 +96,12 @@ object OCastMediaRouteHelper {
     }
 
     internal fun addMediaRouteProvider(mediaRouteProvider: MediaRouteProvider) {
-        runOnMainThread {
-            mediaRouter?.addProvider(mediaRouteProvider)
+        if (initialized) {
+            runOnMainThread {
+                mediaRouter?.addProvider(mediaRouteProvider)
+            }
+        } else {
+            throw RuntimeException("${this::class.java.simpleName} not initialized. Call initialize with proper configuration")
         }
     }
 

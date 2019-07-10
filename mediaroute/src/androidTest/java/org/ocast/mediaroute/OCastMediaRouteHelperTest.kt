@@ -48,7 +48,7 @@ class OCastMediaRouteHelperTest {
 
             fakeDevice = FakeDeviceMediaRouteProvider(appContext)
 
-            OCastMediaRouteHelper.init(appContext, listOf(ReferenceDevice::class.java))
+            OCastMediaRouteHelper.initialize(appContext, listOf(ReferenceDevice::class.java))
             OCastMediaRouteHelper.addMediaRouterCallback(mediaRouterCallback)
             OCastMediaRouteHelper.addMediaRouteProvider(fakeDevice)
         }

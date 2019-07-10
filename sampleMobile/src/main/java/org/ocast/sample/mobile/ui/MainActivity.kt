@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity(), EventListener {
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
 
-        OCastMediaRouteHelper.init(this, listOf(ReferenceDevice::class.java))
+        OCastMediaRouteHelper.initialize(this, listOf(ReferenceDevice::class.java))
     }
 
     override fun onStart() {
