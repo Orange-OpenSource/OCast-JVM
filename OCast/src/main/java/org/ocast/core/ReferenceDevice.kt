@@ -268,11 +268,11 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             SERVICE_MEDIA -> {
                 when (oCastData.name) {
                     EVENT_MEDIA_PLAYBACK_STATUS -> {
-                        val playbackStatus = JsonTools.decode<PlaybackStatusEvent>(oCastData.params)
+                        val playbackStatus = JsonTools.decode<PlaybackStatus>(oCastData.params)
                         eventListener?.onPlaybackStatus(this, playbackStatus)
                     }
                     EVENT_MEDIA_METADATA_CHANGED -> {
-                        val metadataChanged = JsonTools.decode<MetadataChangedEvent>(oCastData.params)
+                        val metadataChanged = JsonTools.decode<Metadata>(oCastData.params)
                         eventListener?.onMetadataChanged(this, metadataChanged)
                     }
                 }
@@ -280,7 +280,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             SERVICE_SETTINGS_DEVICE -> {
                 when (oCastData.name) {
                     EVENT_DEVICE_UPDATE_STATUS -> {
-                        val updateStatus = JsonTools.decode<UpdateStatusEvent>(oCastData.params)
+                        val updateStatus = JsonTools.decode<UpdateStatus>(oCastData.params)
                         eventListener?.onUpdateStatus(this, updateStatus)
                     }
                 }

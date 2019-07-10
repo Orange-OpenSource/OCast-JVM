@@ -18,9 +18,9 @@ package org.ocast.sample.mobile.ui
 
 import android.arch.lifecycle.ViewModelProviders
 import android.databinding.DataBindingUtil
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.view.MenuItemCompat
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.app.AppCompatDelegate
 import android.support.v7.app.MediaRouteActionProvider
 import android.support.v7.media.MediaRouter
@@ -30,8 +30,8 @@ import org.ocast.core.Device
 import org.ocast.core.EventListener
 import org.ocast.core.ReferenceDevice
 import org.ocast.core.models.Media
-import org.ocast.core.models.MetadataChangedEvent
-import org.ocast.core.models.PlaybackStatusEvent
+import org.ocast.core.models.Metadata
+import org.ocast.core.models.PlaybackStatus
 import org.ocast.mediaroute.OCastMediaRouteHelper
 import org.ocast.sample.mobile.R
 import org.ocast.sample.mobile.databinding.ActivityMainBinding
@@ -117,14 +117,14 @@ class MainActivity : AppCompatActivity(), EventListener {
             })
     }
 
-    override fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {
+    override fun onPlaybackStatus(device: Device, playbackStatus: PlaybackStatus) {
         if (mainViewModel.selectedDevice.value == device) {
-            Log.d(TAG, "onPlaybackStatus status=${status.state} position=${status.position}")
-            mainViewModel.playbackStatus.updateValue(status)
+            Log.d(TAG, "onPlaybackStatus status=${playbackStatus.state} position=${playbackStatus.position}")
+            mainViewModel.playbackStatus.updateValue(playbackStatus)
         }
     }
 
-    override fun onMetadataChanged(device: Device, metadata: MetadataChangedEvent) {
+    override fun onMetadataChanged(device: Device, metadata: Metadata) {
         if (mainViewModel.selectedDevice.value == device) {
             mainViewModel.mediaMetadata.updateValue(metadata)
         }

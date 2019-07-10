@@ -155,19 +155,6 @@ class CustomReply(
 
 /**
  *
- *
- * @param state
- * @param version
- * @param progress
- */
-class UpdateStatusEvent(
-    @JsonProperty("state") val state: String,
-    @JsonProperty("version") val version: String,
-    @JsonProperty("progress") val progress: Int
-)
-
-/**
- *
  * @param name
  * @param params
  */

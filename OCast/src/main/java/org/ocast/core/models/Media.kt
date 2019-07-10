@@ -201,48 +201,6 @@ class TrackDescription(
 
 //endregion
 
-//region Event
-
-/**
- *
- *
- * @param position
- * @param duration
- * @param state
- * @param volume
- * @param isMuted
- */
-class PlaybackStatusEvent(
-    @JsonProperty("position") val position: Double,
-    @JsonProperty("duration") val duration: Double,
-    @JsonProperty("state") val state: Media.PlayerState,
-    @JsonProperty("volume") val volume: Double,
-    @get:JsonIgnore @field:JsonProperty("mute") val isMuted: Boolean
-)
-
-/**
- *
- *
- * @param title
- * @param subtitle
- * @param logo
- * @param mediaType
- * @param textTracks
- * @param audioTracks
- * @param videoTracks
- */
-class MetadataChangedEvent(
-    @JsonProperty("title") val title: String,
-    @JsonProperty("mediaType") val mediaType: Media.Type,
-    @JsonProperty("subtitle") val subtitle: String?,
-    @JsonProperty("logo") val logo: String?,
-    @JsonProperty("textTracks") val textTracks: List<TrackDescription>?,
-    @JsonProperty("audioTracks") val audioTracks: List<TrackDescription>?,
-    @JsonProperty("videoTracks") val videoTracks: List<TrackDescription>?
-)
-
-//endregion
-
 //region Enums
 
 class Media {

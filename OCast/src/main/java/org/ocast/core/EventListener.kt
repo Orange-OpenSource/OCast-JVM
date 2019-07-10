@@ -17,9 +17,9 @@
 package org.ocast.core
 
 import org.ocast.core.models.CustomEvent
-import org.ocast.core.models.MetadataChangedEvent
-import org.ocast.core.models.PlaybackStatusEvent
-import org.ocast.core.models.UpdateStatusEvent
+import org.ocast.core.models.Metadata
+import org.ocast.core.models.PlaybackStatus
+import org.ocast.core.models.UpdateStatus
 
 interface EventListener {
 
@@ -27,21 +27,21 @@ interface EventListener {
      * Playback Status of the player, sent at a rate defined by the frequency parameter of the prepare method.
      */
     @JvmDefault
-    fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {
+    fun onPlaybackStatus(device: Device, playbackStatus: PlaybackStatus) {
     }
 
     /**
      * Metadata sent each time is changed on the current playback.
      */
     @JvmDefault
-    fun onMetadataChanged(device: Device, metadata: MetadataChangedEvent) {
+    fun onMetadataChanged(device: Device, metadata: Metadata) {
     }
 
     /**
      * Firmware update status of the device, sent each seconds for downloading, otherwise when state changes.
      */
     @JvmDefault
-    fun onUpdateStatus(device: Device, updateStatus: UpdateStatusEvent) {
+    fun onUpdateStatus(device: Device, updateStatus: UpdateStatus) {
     }
 
     /**
