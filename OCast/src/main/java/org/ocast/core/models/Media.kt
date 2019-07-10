@@ -26,11 +26,9 @@ import org.ocast.core.ReferenceDevice
 /**
  *
  *
- * @param mediaData
+ * @param data
  */
-class MediaMessage<T>(
-    @JsonIgnore val mediaData: OCastDataLayer<T>
-) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_MEDIA, mediaData)
+class MediaMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_MEDIA, data)
 
 //endregion
 
@@ -155,7 +153,7 @@ class GetMetadata : OCastDataLayerParams("getMetadata")
  * @param isMuted
  */
 class PlaybackStatus(
-    @JsonIgnore override val code: Int,
+    code: Int,
     @JsonProperty("position") val position: Double,
     @JsonProperty("duration") val duration: Double,
     @JsonProperty("state") val state: Media.PlayerState,
@@ -176,7 +174,7 @@ class PlaybackStatus(
  * @param videoTracks
  */
 class Metadata(
-    @JsonIgnore override val code: Int,
+    code: Int,
     @JsonProperty("title") val title: String,
     @JsonProperty("subtitle") val subtitle: String?,
     @JsonProperty("logo") val logo: String?,

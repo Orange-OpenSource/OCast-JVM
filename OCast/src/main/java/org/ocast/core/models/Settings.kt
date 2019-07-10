@@ -16,7 +16,6 @@
 
 package org.ocast.core.models
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.json.JSONObject
 import org.ocast.core.ReferenceDevice
@@ -26,20 +25,16 @@ import org.ocast.core.ReferenceDevice
 /**
  *
  *
- * @param inputData
+ * @param data
  */
-class InputMessage<T>(
-    @JsonIgnore val inputData: OCastDataLayer<T>
-) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_SETTINGS_INPUT, inputData)
+class InputMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_SETTINGS_INPUT, data)
 
 /**
  *
  *
- * @param deviceData
+ * @param data
  */
-class DeviceMessage<T>(
-    @JsonIgnore val deviceData: OCastDataLayer<T>
-) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_SETTINGS_DEVICE, deviceData)
+class DeviceMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_SETTINGS_DEVICE, data)
 
 //endregion
 
@@ -126,7 +121,7 @@ class GamepadAxes(
  * @param progress
  */
 class UpdateStatus(
-    @JsonIgnore override val code: Int,
+    code: Int,
     @JsonProperty("state") val state: String,
     @JsonProperty("version") val version: String,
     @JsonProperty("progress") val progress: Int
@@ -139,7 +134,7 @@ class UpdateStatus(
  * @param id
  */
 class DeviceID(
-    @JsonIgnore override val code: Int,
+    code: Int,
     @JsonProperty("id") val id: String
 ) : OCastReplyParams(code)
 
@@ -149,7 +144,7 @@ class DeviceID(
  * @param code
  */
 class CustomReply(
-    @JsonIgnore override val code: Int,
+    code: Int,
     @JsonProperty("name") val name: String,
     @JsonProperty("params") val params: JSONObject
 ) : OCastReplyParams(code)
