@@ -11,6 +11,8 @@ androidExtensions {
 }
 
 buildscript {
+    version = "2.0.0"
+
     repositories {
         jcenter()
     }
@@ -29,8 +31,8 @@ android {
     defaultConfig {
         minSdkVersion min_sdk_version
         targetSdkVersion target_sdk_version
-        versionCode 1
-        versionName "1.0"
+        versionCode 200
+        versionName version
         multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -48,6 +50,12 @@ android {
         }
         debug {
             minifyEnabled false
+        }
+    }
+
+    libraryVariants.all { variant ->
+        variant.outputs.all { output ->
+            outputFileName = "${archivesBaseName}-${version}-${variant.buildType.name}.aar"
         }
     }
 }
