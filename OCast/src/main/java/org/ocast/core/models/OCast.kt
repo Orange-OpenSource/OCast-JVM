@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import org.json.JSONObject
-import org.ocast.core.utils.JsonTools
 import org.ocast.core.utils.RawJsonDeserializer
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLSocketFactory
@@ -99,13 +98,7 @@ class OCastCommandDeviceLayer<T>(
     @JsonProperty("type") val type: OCastRawDeviceLayer.Type,
     @JsonProperty("id") val identifier: Long,
     @JsonProperty("message") val message: OCastApplicationLayer<T>
-) {
-
-    @Throws(Exception::class)
-    fun encode(): String {
-        return JsonTools.objectMapper.writeValueAsString(this)
-    }
-}
+)
 
 //endregion
 
@@ -165,17 +158,6 @@ open class OCastRawDataLayer(
     @JsonProperty("options") val options: JSONObject?
 )
 
-/**
- *
- *
- * @param name
- * @param params
- */
-open class OCastReplyDataLayer(
-    @JsonProperty("name") var name: String,
-    @JsonProperty("params") val params: OCastReplyParams
-)
-
 //endregion
 
 //region Params
@@ -185,17 +167,17 @@ open class OCastReplyDataLayer(
  *
  * @param code
  */
-open class OCastReplyParams(
-    @JsonProperty("code") open val code: Int
+open class OCastReplyEventParams(
+    @JsonProperty("code") internal open val code: Int?
 )
 
-open class OCastDataLayerParams(
+open class OCastCommandParams(
     @JsonIgnore val name: String
 ) {
 
     private val builder by lazy { OCastDataLayerBuilder(name, this) }
 
-    fun build(): OCastDataLayer<OCastDataLayerParams> {
+    fun build(): OCastDataLayer<OCastCommandParams> {
         return builder.build()
     }
 
@@ -203,9 +185,9 @@ open class OCastDataLayerParams(
 }
 
 open class OCastDataLayerBuilder<T>(
-    @JsonIgnore protected open var name: String,
-    @JsonIgnore var params: T,
-    @JsonIgnore var options: JSONObject? = null
+    var name: String,
+    var params: T,
+    var options: JSONObject? = null
 ) {
 
     fun build(): OCastDataLayer<T> {

@@ -22,21 +22,21 @@ import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModel
 import org.ocast.core.Device
 import org.ocast.core.models.Media
-import org.ocast.core.models.MetadataChangedEvent
-import org.ocast.core.models.PlaybackStatusEvent
+import org.ocast.core.models.Metadata
+import org.ocast.core.models.PlaybackStatus
 
 class MainViewModel : ViewModel() {
 
     val selectedDevice = MutableLiveData<Device?>()
 
-    val playbackStatus = MutableLiveData<PlaybackStatusEvent>()
+    val playbackStatus = MutableLiveData<PlaybackStatus>()
     val mediaDuration: LiveData<Double> = Transformations.map(playbackStatus) { it?.duration }
     val mediaPosition: LiveData<Double> = Transformations.map(playbackStatus) { it?.position }
     val mediaVolumeLevel: LiveData<Double> = Transformations.map(playbackStatus) { it?.volume?.let { volume -> volume * 1000 } }
     val mediaIsMute: LiveData<Boolean> = Transformations.map(playbackStatus) { it?.isMuted }
     val mediaState: LiveData<Media.PlayerState> = Transformations.map(playbackStatus) { it?.state }
 
-    val mediaMetadata = MutableLiveData<MetadataChangedEvent>()
+    val mediaMetadata = MutableLiveData<Metadata>()
     val mediaTitle: LiveData<String> = Transformations.map(mediaMetadata) { it?.title }
 
     fun onPlayPauseButtonClick() {

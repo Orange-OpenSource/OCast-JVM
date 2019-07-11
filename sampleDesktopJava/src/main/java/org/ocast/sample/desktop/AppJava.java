@@ -17,7 +17,6 @@
 package org.ocast.sample.desktop;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.ocast.core.Device;
 import org.ocast.core.DeviceListener;
 import org.ocast.core.OCastCenter;
@@ -88,8 +87,8 @@ public class AppJava implements EventListener, DeviceListener {
     }
 
     @Override
-    public void onPlaybackStatus(@NotNull Device device, @NotNull PlaybackStatusEvent status) {
-        logger.log(Level.INFO, "[" + device.getFriendlyName() + "]" + "onPlaybackStatus: progress=" + status.getPosition() + " state=" + status.getState());
+    public void onPlaybackStatus(@NotNull Device device, @NotNull PlaybackStatus playbackStatus) {
+        logger.log(Level.INFO, "[" + device.getFriendlyName() + "]" + "onPlaybackStatus: progress=" + playbackStatus.getPosition() + " state=" + playbackStatus.getState());
     }
 
     @Override

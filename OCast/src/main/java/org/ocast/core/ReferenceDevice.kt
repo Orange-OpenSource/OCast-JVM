@@ -210,14 +210,14 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     override fun onDataReceived(webSocketProvider: WebSocketProvider, data: String) {
         var deviceLayer: OCastRawDeviceLayer? = null
         try {
-            deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
+            deviceLayer = JsonTools.decode(data)
             when (deviceLayer.type) {
                 OCastRawDeviceLayer.Type.EVENT -> analyzeEvent(deviceLayer)
                 OCastRawDeviceLayer.Type.REPLY -> {
                     val replyCallback = replyCallbacksBySequenceID[deviceLayer.identifier]
                     replyCallback?.ifNotNull {
                         if (deviceLayer.status == OCastRawDeviceLayer.Status.OK) {
-                            val replyData = JsonTools.decode<OCastReplyDataLayer>(deviceLayer.message.data)
+                            val replyData = JsonTools.decode<OCastDataLayer<OCastReplyEventParams>>(deviceLayer.message.data)
                             if (replyData.params.code == OCastError.Status.SUCCESS.code) {
                                 val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
                                 val reply = if (replyCallback.replyClass != Unit::class.java) {
@@ -228,7 +228,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                                 @Suppress("UNCHECKED_CAST")
                                 (it as ReplyCallback<Any?>).onSuccess.wrapRun(reply)
                             } else {
-                                it.onError.wrapRun(OCastError(replyData.params.code, "Command error code ${replyData.params.code}"))
+                                val code = replyData.params.code ?: OCastError.Status.UNKNOWN_ERROR.code
+                                it.onError.wrapRun(OCastError(code, "Command error code ${replyData.params.code}"))
                             }
                         } else {
                             it.onError.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Bad status value ${deviceLayer.status}"))
@@ -268,11 +269,11 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             SERVICE_MEDIA -> {
                 when (oCastData.name) {
                     EVENT_MEDIA_PLAYBACK_STATUS -> {
-                        val playbackStatus = JsonTools.decode<PlaybackStatusEvent>(oCastData.params)
+                        val playbackStatus = JsonTools.decode<PlaybackStatus>(oCastData.params)
                         eventListener?.onPlaybackStatus(this, playbackStatus)
                     }
                     EVENT_MEDIA_METADATA_CHANGED -> {
-                        val metadataChanged = JsonTools.decode<MetadataChangedEvent>(oCastData.params)
+                        val metadataChanged = JsonTools.decode<Metadata>(oCastData.params)
                         eventListener?.onMetadataChanged(this, metadataChanged)
                     }
                 }
@@ -280,7 +281,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             SERVICE_SETTINGS_DEVICE -> {
                 when (oCastData.name) {
                     EVENT_DEVICE_UPDATE_STATUS -> {
-                        val updateStatus = JsonTools.decode<UpdateStatusEvent>(oCastData.params)
+                        val updateStatus = JsonTools.decode<UpdateStatus>(oCastData.params)
                         eventListener?.onUpdateStatus(this, updateStatus)
                     }
                 }
@@ -288,8 +289,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             else -> {
                 // Custom event
                 val params = JsonTools.decode<JSONObject>(oCastData.params)
-                val customEvent = CustomEvent(oCastData.name, params)
-                eventListener?.onCustomEvent(this, customEvent)
+                eventListener?.onCustomEvent(this, oCastData.name, params)
             }
         }
     }
@@ -346,8 +346,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
 
     //region Custom commands
 
-    override fun sendCustomCommand(name: String, service: String, params: JSONObject, options: JSONObject?, onSuccess: Consumer<CustomReply>, onError: Consumer<OCastError>) {
-        sendCommand(DOMAIN_BROWSER, OCastApplicationLayer(service, OCastDataLayerBuilder(name, params, options).build()), onSuccess, onError, CustomReply::class.java)
+    override fun sendCustomCommand(name: String, service: String, params: JSONObject, options: JSONObject?, onSuccess: Consumer<JSONObject>, onError: Consumer<OCastError>) {
+        sendCommand(DOMAIN_BROWSER, OCastApplicationLayer(service, OCastDataLayerBuilder(name, params, options).build()), onSuccess, onError, JSONObject::class.java)
     }
 
     override fun sendCustomCommand(name: String, service: String, params: JSONObject, options: JSONObject?, onSuccess: Runnable, onError: Consumer<OCastError>) {
@@ -392,7 +392,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         val id = generateSequenceID()
         try {
             replyCallbacksBySequenceID[id] = ReplyCallback(replyClass, onSuccess, onError)
-            val layerMessage = OCastCommandDeviceLayer(clientUuid, domain, OCastRawDeviceLayer.Type.COMMAND, id, commandMessage).encode()
+            val deviceLayer = OCastCommandDeviceLayer(clientUuid, domain, OCastRawDeviceLayer.Type.COMMAND, id, commandMessage)
+            val layerMessage = JsonTools.encode(deviceLayer)
             // Do not start application when sending settings commands
             sendToWebSocket(id, layerMessage, domain == DOMAIN_BROWSER, onError)
         } catch (exception: Exception) {

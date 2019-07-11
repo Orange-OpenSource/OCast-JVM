@@ -22,7 +22,7 @@ import org.ocast.core.OCastCenter
 import org.ocast.core.EventListener
 import org.ocast.core.ReferenceDevice
 import org.ocast.core.models.Media
-import org.ocast.core.models.PlaybackStatusEvent
+import org.ocast.core.models.PlaybackStatus
 import org.ocast.core.utils.OCastLog
 import java.util.concurrent.CountDownLatch
 import java.util.logging.Level
@@ -94,8 +94,8 @@ class AppKotlin : EventListener, DeviceListener {
             })
     }
 
-    override fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {
-        logger.log(Level.INFO, "[{${device.friendlyName}}] onPlaybackStatus: progress=${status.position} state=${status.state}")
+    override fun onPlaybackStatus(device: Device, playbackStatus: PlaybackStatus) {
+        logger.log(Level.INFO, "[{${device.friendlyName}}] onPlaybackStatus: progress=${playbackStatus.position} state=${playbackStatus.state}")
     }
 
     override fun onDeviceAdded(device: Device) {

@@ -16,9 +16,7 @@
 
 package org.ocast.core.models
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.json.JSONObject
 import org.ocast.core.ReferenceDevice
 
 //region Message
@@ -26,20 +24,16 @@ import org.ocast.core.ReferenceDevice
 /**
  *
  *
- * @param inputData
+ * @param data
  */
-class InputMessage<T>(
-    @JsonIgnore val inputData: OCastDataLayer<T>
-) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_SETTINGS_INPUT, inputData)
+class InputMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_SETTINGS_INPUT, data)
 
 /**
  *
  *
- * @param deviceData
+ * @param data
  */
-class DeviceMessage<T>(
-    @JsonIgnore val deviceData: OCastDataLayer<T>
-) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_SETTINGS_DEVICE, deviceData)
+class DeviceMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_SETTINGS_DEVICE, data)
 
 //endregion
 
@@ -48,12 +42,12 @@ class DeviceMessage<T>(
 /**
  *
  */
-class GetUpdateStatus : OCastDataLayerParams("getUpdateStatus")
+class GetUpdateStatus : OCastCommandParams("getUpdateStatus")
 
 /**
  *
  */
-class GetDeviceID : OCastDataLayerParams("getDeviceID")
+class GetDeviceID : OCastCommandParams("getDeviceID")
 
 /**
  *
@@ -74,7 +68,7 @@ class KeyPressed(
     @JsonProperty("shift") val shift: Boolean,
     @JsonProperty("meta") val meta: Boolean,
     @JsonProperty("location") val location: Int
-) : OCastDataLayerParams("keyPressed")
+) : OCastCommandParams("keyPressed")
 
 /**
  *
@@ -87,7 +81,7 @@ class MouseEvent(
     @JsonProperty("x") val x: Int,
     @JsonProperty("y") val y: Int,
     @JsonProperty("buttons") val buttons: Int
-) : OCastDataLayerParams("mouseEvent")
+) : OCastCommandParams("mouseEvent")
 
 /**
  *
@@ -98,7 +92,7 @@ class MouseEvent(
 class GamepadEvent(
     @JsonProperty("axes") val axes: List<GamepadAxes>,
     @JsonProperty("buttons") val buttons: Int
-) : OCastDataLayerParams("gamepadEvent")
+) : OCastCommandParams("gamepadEvent")
 
 /**
  *
@@ -121,25 +115,16 @@ class GamepadAxes(
  *
  *
  * @param code
- */
-open class SettingsReplyParams(
-    @JsonProperty("code") open val code: Int
-)
-
-/**
- *
- *
- * @param code
  * @param state
  * @param version
  * @param progress
  */
 class UpdateStatus(
-    @JsonIgnore override val code: Int,
+    code: Int?,
     @JsonProperty("state") val state: String,
     @JsonProperty("version") val version: String,
     @JsonProperty("progress") val progress: Int
-) : SettingsReplyParams(code)
+) : OCastReplyEventParams(code)
 
 /**
  *
@@ -148,46 +133,8 @@ class UpdateStatus(
  * @param id
  */
 class DeviceID(
-    @JsonIgnore override val code: Int,
+    code: Int?,
     @JsonProperty("id") val id: String
-) : SettingsReplyParams(code)
-
-/**
- *
- *
- * @param code
- */
-class CustomReply(
-    @JsonIgnore override val code: Int,
-    @JsonProperty("name") val name: String,
-    @JsonProperty("params") val params: JSONObject
-) : SettingsReplyParams(code)
-
-//endregion
-
-//region Event
-
-/**
- *
- *
- * @param state
- * @param version
- * @param progress
- */
-class UpdateStatusEvent(
-    @JsonProperty("state") val state: String,
-    @JsonProperty("version") val version: String,
-    @JsonProperty("progress") val progress: Int
-)
-
-/**
- *
- * @param name
- * @param params
- */
-class CustomEvent(
-    @JsonProperty("name") val name: String,
-    @JsonProperty("params") val params: JSONObject
-)
+) : OCastReplyEventParams(code)
 
 //endregion

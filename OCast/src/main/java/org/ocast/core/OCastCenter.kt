@@ -16,13 +16,13 @@
 
 package org.ocast.core
 
+import org.json.JSONObject
 import org.ocast.common.extensions.ifNotNull
 import org.ocast.core.wrapper.CallbackWrapperOwner
 import org.ocast.core.wrapper.CallbackWrapper
-import org.ocast.core.models.CustomEvent
-import org.ocast.core.models.MetadataChangedEvent
-import org.ocast.core.models.PlaybackStatusEvent
-import org.ocast.core.models.UpdateStatusEvent
+import org.ocast.core.models.Metadata
+import org.ocast.core.models.PlaybackStatus
+import org.ocast.core.models.UpdateStatus
 import org.ocast.core.wrapper.SimpleCallbackWrapper
 import org.ocast.discovery.DeviceDiscovery
 import org.ocast.discovery.models.UpnpDevice
@@ -151,20 +151,20 @@ open class OCastCenter : CallbackWrapperOwner {
 
     private val eventListener = object : EventListener {
 
-        override fun onPlaybackStatus(device: Device, status: PlaybackStatusEvent) {
-            eventListeners.wrapForEach { it.onPlaybackStatus(device, status) }
+        override fun onPlaybackStatus(device: Device, playbackStatus: PlaybackStatus) {
+            eventListeners.wrapForEach { it.onPlaybackStatus(device, playbackStatus) }
         }
 
-        override fun onMetadataChanged(device: Device, metadata: MetadataChangedEvent) {
+        override fun onMetadataChanged(device: Device, metadata: Metadata) {
             eventListeners.wrapForEach { it.onMetadataChanged(device, metadata) }
         }
 
-        override fun onUpdateStatus(device: Device, updateStatus: UpdateStatusEvent) {
+        override fun onUpdateStatus(device: Device, updateStatus: UpdateStatus) {
             eventListeners.wrapForEach { it.onUpdateStatus(device, updateStatus) }
         }
 
-        override fun onCustomEvent(device: Device, customEvent: CustomEvent) {
-            eventListeners.wrapForEach { it.onCustomEvent(device, customEvent) }
+        override fun onCustomEvent(device: Device, name: String, params: JSONObject) {
+            eventListeners.wrapForEach { it.onCustomEvent(device, name, params) }
         }
     }
 

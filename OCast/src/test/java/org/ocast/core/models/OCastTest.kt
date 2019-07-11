@@ -106,7 +106,7 @@ class OCastTest {
         // When
         val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
         val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-        val metadataChanged = JsonTools.decode<MetadataChangedEvent>(oCastData.params)
+        val metadataChanged = JsonTools.decode<Metadata>(oCastData.params)
 
         // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
@@ -166,7 +166,7 @@ class OCastTest {
         // When
         val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
         val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-        val replyData = JsonTools.decode<OCastReplyParams>(deviceLayer.message.data)
+        val replyData = JsonTools.decode<OCastDataLayer<OCastReplyEventParams>>(deviceLayer.message.data)
         val playbackStatus = JsonTools.decode<PlaybackStatus>(oCastData.params)
 
         // Then
@@ -180,12 +180,12 @@ class OCastTest {
         assertEquals("playbackStatus", oCastData.name)
 
         assertEquals(OCastMediaError.Status.SUCCESS.code, playbackStatus.code)
-        assertEquals(OCastMediaError.Status.SUCCESS.code, replyData.code)
+        assertEquals(OCastMediaError.Status.SUCCESS.code, replyData.params.code)
 
         assertEquals(Media.PlayerState.PLAYING, playbackStatus.state)
         assertEquals(0.45, playbackStatus.volume, 0.00)
         assertEquals(1234.56, playbackStatus.position, 0.00)
-        assertEquals(5678.9, playbackStatus.duration, 0.00)
+        assertEquals(5678.9, playbackStatus.duration)
         assertEquals(true, playbackStatus.isMuted)
     }
 
@@ -206,9 +206,10 @@ class OCastTest {
         ).options(options).build())
         val uuid = "89cf41b8-ef40-48d9-99c3-2a1951abcde5"
         val identifier = 666L
+        val deviceLayer = OCastCommandDeviceLayer(uuid, ReferenceDevice.DOMAIN_BROWSER, OCastRawDeviceLayer.Type.COMMAND, identifier, prepareMessage)
 
         // When
-        val layerMessage = OCastCommandDeviceLayer(uuid, ReferenceDevice.DOMAIN_BROWSER, OCastRawDeviceLayer.Type.COMMAND, identifier, prepareMessage).encode()
+        val layerMessage = JsonTools.encode(deviceLayer)
 
         // Then
         val oCastMessage = """
@@ -218,7 +219,6 @@ class OCastTest {
               "type": "command",
               "id": 666,
               "message": {
-                "service": "org.ocast.media",
                 "data": {
                   "name": "prepare",
                   "params": {
@@ -233,7 +233,8 @@ class OCastTest {
                   "options": {
                     "auth_cookie": "azertyuiop1234"
                   }
-                }
+                },
+                "service": "org.ocast.media"
               }
             }
         """.trimIndent()
@@ -256,9 +257,10 @@ class OCastTest {
 
         val uuid = "89cf41b8-ef40-48d9-99c3-2a1951abcde5"
         val identifier = 666L
+        val deviceLayer = OCastCommandDeviceLayer(uuid, "my destination", OCastRawDeviceLayer.Type.COMMAND, identifier, customMessage)
 
         // When
-        val layerMessage = OCastCommandDeviceLayer(uuid, "my destination", OCastRawDeviceLayer.Type.COMMAND, identifier, customMessage).encode()
+        val layerMessage = JsonTools.encode(deviceLayer)
 
         // Then
         val oCastMessage = """
