@@ -166,7 +166,7 @@ class OCastTest {
         // When
         val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
         val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-        val replyData = JsonTools.decode<OCastReplyEventParams>(deviceLayer.message.data)
+        val replyData = JsonTools.decode<OCastDataLayer<OCastReplyEventParams>>(deviceLayer.message.data)
         val playbackStatus = JsonTools.decode<PlaybackStatus>(oCastData.params)
 
         // Then
@@ -180,7 +180,7 @@ class OCastTest {
         assertEquals("playbackStatus", oCastData.name)
 
         assertEquals(OCastMediaError.Status.SUCCESS.code, playbackStatus.code)
-        assertEquals(OCastMediaError.Status.SUCCESS.code, replyData.code)
+        assertEquals(OCastMediaError.Status.SUCCESS.code, replyData.params.code)
 
         assertEquals(Media.PlayerState.PLAYING, playbackStatus.state)
         assertEquals(0.45, playbackStatus.volume, 0.00)
