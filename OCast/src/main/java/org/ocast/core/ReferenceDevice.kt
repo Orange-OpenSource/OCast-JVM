@@ -289,8 +289,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             else -> {
                 // Custom event
                 val params = JsonTools.decode<JSONObject>(oCastData.params)
-                val customEvent = CustomEvent(oCastData.name, params)
-                eventListener?.onCustomEvent(this, customEvent)
+                eventListener?.onCustomEvent(this, oCastData.name, params)
             }
         }
     }
@@ -347,8 +346,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
 
     //region Custom commands
 
-    override fun sendCustomCommand(name: String, service: String, params: JSONObject, options: JSONObject?, onSuccess: Consumer<CustomReply>, onError: Consumer<OCastError>) {
-        sendCommand(DOMAIN_BROWSER, OCastApplicationLayer(service, OCastDataLayerBuilder(name, params, options).build()), onSuccess, onError, CustomReply::class.java)
+    override fun sendCustomCommand(name: String, service: String, params: JSONObject, options: JSONObject?, onSuccess: Consumer<JSONObject>, onError: Consumer<OCastError>) {
+        sendCommand(DOMAIN_BROWSER, OCastApplicationLayer(service, OCastDataLayerBuilder(name, params, options).build()), onSuccess, onError, JSONObject::class.java)
     }
 
     override fun sendCustomCommand(name: String, service: String, params: JSONObject, options: JSONObject?, onSuccess: Runnable, onError: Consumer<OCastError>) {

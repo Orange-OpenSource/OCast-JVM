@@ -141,6 +141,6 @@ public abstract class Device implements CallbackWrapperOwner {
     public abstract void sendGamepadEvent(@NotNull GamepadEvent gamepadEvent, @NotNull Runnable onSuccess, @NotNull Consumer<OCastInputSettingsError> onError);
 
     // Custom commands
-    public abstract void sendCustomCommand(@NotNull String name, @NotNull String service, @NotNull JSONObject params, @Nullable JSONObject options, @NotNull Consumer<CustomReply> onSuccess, @NotNull Consumer<OCastError> onError);
+    public abstract void sendCustomCommand(@NotNull String name, @NotNull String service, @NotNull JSONObject params, @Nullable JSONObject options, @NotNull Consumer<JSONObject> onSuccess, @NotNull Consumer<OCastError> onError);
     public abstract void sendCustomCommand(@NotNull String name, @NotNull String service, @NotNull JSONObject params, @Nullable JSONObject options, @NotNull Runnable onSuccess, @NotNull Consumer<OCastError> onError);
 }

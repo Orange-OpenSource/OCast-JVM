@@ -16,10 +16,10 @@
 
 package org.ocast.core
 
+import org.json.JSONObject
 import org.ocast.common.extensions.ifNotNull
 import org.ocast.core.wrapper.CallbackWrapperOwner
 import org.ocast.core.wrapper.CallbackWrapper
-import org.ocast.core.models.CustomEvent
 import org.ocast.core.models.Metadata
 import org.ocast.core.models.PlaybackStatus
 import org.ocast.core.models.UpdateStatus
@@ -163,8 +163,8 @@ open class OCastCenter : CallbackWrapperOwner {
             eventListeners.wrapForEach { it.onUpdateStatus(device, updateStatus) }
         }
 
-        override fun onCustomEvent(device: Device, customEvent: CustomEvent) {
-            eventListeners.wrapForEach { it.onCustomEvent(device, customEvent) }
+        override fun onCustomEvent(device: Device, name: String, params: JSONObject) {
+            eventListeners.wrapForEach { it.onCustomEvent(device, name, params) }
         }
     }
 

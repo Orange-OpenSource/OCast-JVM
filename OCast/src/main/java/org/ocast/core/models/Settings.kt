@@ -138,29 +138,4 @@ class DeviceID(
     @JsonProperty("id") val id: String
 ) : OCastReplyEventParams(code)
 
-/**
- *
- *
- * @param code
- */
-class CustomReply(
-    code: Int?,
-    @JsonProperty("name") val name: String,
-    @JsonProperty("params") val params: JSONObject
-) : OCastReplyEventParams(code)
-
-//endregion
-
-//region Event
-
-/**
- *
- * @param name
- * @param params
- */
-class CustomEvent(
-    @JsonProperty("name") val name: String,
-    @JsonProperty("params") val params: JSONObject
-)
-
 //endregion
