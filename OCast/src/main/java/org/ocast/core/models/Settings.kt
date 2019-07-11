@@ -17,7 +17,6 @@
 package org.ocast.core.models
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.json.JSONObject
 import org.ocast.core.ReferenceDevice
 
 //region Message
