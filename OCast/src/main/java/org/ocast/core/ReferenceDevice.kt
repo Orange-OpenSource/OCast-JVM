@@ -228,7 +228,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                                 @Suppress("UNCHECKED_CAST")
                                 (it as ReplyCallback<Any?>).onSuccess.wrapRun(reply)
                             } else {
-                                it.onError.wrapRun(OCastError(replyData.params.code, "Command error code ${replyData.params.code}"))
+                                val code = replyData.params.code ?: OCastError.Status.UNKNOWN_ERROR.code
+                                it.onError.wrapRun(OCastError(code, "Command error code ${replyData.params.code}"))
                             }
                         } else {
                             it.onError.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Bad status value ${deviceLayer.status}"))

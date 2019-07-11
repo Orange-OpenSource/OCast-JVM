@@ -121,7 +121,7 @@ class GamepadAxes(
  * @param progress
  */
 class UpdateStatus(
-    code: Int,
+    code: Int?,
     @JsonProperty("state") val state: String,
     @JsonProperty("version") val version: String,
     @JsonProperty("progress") val progress: Int
@@ -134,7 +134,7 @@ class UpdateStatus(
  * @param id
  */
 class DeviceID(
-    code: Int,
+    code: Int?,
     @JsonProperty("id") val id: String
 ) : OCastReplyParams(code)
 
@@ -144,7 +144,7 @@ class DeviceID(
  * @param code
  */
 class CustomReply(
-    code: Int,
+    code: Int?,
     @JsonProperty("name") val name: String,
     @JsonProperty("params") val params: JSONObject
 ) : OCastReplyParams(code)

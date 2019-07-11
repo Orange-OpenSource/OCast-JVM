@@ -185,7 +185,7 @@ class OCastTest {
         assertEquals(Media.PlayerState.PLAYING, playbackStatus.state)
         assertEquals(0.45, playbackStatus.volume, 0.00)
         assertEquals(1234.56, playbackStatus.position, 0.00)
-        assertEquals(5678.9, playbackStatus.duration, 0.00)
+        assertEquals(5678.9, playbackStatus.duration)
         assertEquals(true, playbackStatus.isMuted)
     }
 

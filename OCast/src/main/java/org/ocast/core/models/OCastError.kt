@@ -59,10 +59,13 @@ data class OCastError(val code: Int, val message: String, val throwable: Throwab
     /**
      * Represents the status of an [OCastError].
      */
-    enum class Status(val code: Int) {
+    enum class Status(override val code: Int) : ErrorStatus {
 
         /** There is no error. */
         SUCCESS(0),
+
+        /** The error is unknown. */
+        UNKNOWN_ERROR(-1),
 
         /** There was an error in the OCast SDK. */
         CLIENT_ERROR(-2),

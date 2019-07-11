@@ -153,9 +153,9 @@ class GetMetadata : OCastDataLayerParams("getMetadata")
  * @param isMuted
  */
 class PlaybackStatus(
-    code: Int,
+    code: Int?,
     @JsonProperty("position") val position: Double,
-    @JsonProperty("duration") val duration: Double,
+    @JsonProperty("duration") val duration: Double?,
     @JsonProperty("state") val state: Media.PlayerState,
     @JsonProperty("volume") val volume: Double,
     @get:JsonIgnore @field:JsonProperty("mute") val isMuted: Boolean
@@ -174,7 +174,7 @@ class PlaybackStatus(
  * @param videoTracks
  */
 class Metadata(
-    code: Int,
+    code: Int?,
     @JsonProperty("title") val title: String,
     @JsonProperty("subtitle") val subtitle: String?,
     @JsonProperty("logo") val logo: String?,

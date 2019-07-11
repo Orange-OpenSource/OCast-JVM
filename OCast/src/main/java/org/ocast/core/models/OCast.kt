@@ -168,7 +168,7 @@ open class OCastRawDataLayer(
  * @param code
  */
 open class OCastReplyParams(
-    @JsonProperty("code") internal open val code: Int
+    @JsonProperty("code") internal open val code: Int?
 )
 
 open class OCastDataLayerParams(
