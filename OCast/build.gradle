@@ -3,9 +3,13 @@ apply plugin: 'kotlin'
 apply from: project.file('../ktlint.gradle')
 apply from: project.file('../dependencies.gradle')
 apply plugin: 'org.jetbrains.dokka'
-apply from: project.file('../dokka.gradle')
+apply from: project.file('../dokka_config.gradle')
+
+description = "OCast SDK"
 
 buildscript {
+    version = "2.0.0"
+
     repositories {
         mavenCentral()
         jcenter()
@@ -14,6 +18,12 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
+    }
+}
+
+jar {
+    manifest {
+        attributes('Implementation-Title': project.name, 'Implementation-Version': project.version)
     }
 }
 
@@ -60,4 +70,14 @@ test {
         events "passed", "skipped", "failed"
         exceptionFormat "full"
     }
+}
+
+task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+    outputFormat = 'javadoc'
+    outputDirectory = "$buildDir/javadoc"
+}
+
+task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
+    classifier = 'javadoc'
+    from "$buildDir/javadoc"
 }

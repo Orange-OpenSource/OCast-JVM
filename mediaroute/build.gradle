@@ -5,7 +5,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'org.jetbrains.dokka-android'
 apply from: project.file('../ktlint.gradle')
 apply from: project.file('../dependencies.gradle')
-apply from: project.file('../dokka.gradle')
+apply from: project.file('../dokka_config.gradle')
 
 androidExtensions {
     experimental = true
@@ -76,4 +76,14 @@ allprojects {
             force("org.objenesis:objenesis:2.6")
         }
     }
+}
+
+task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+    outputFormat = 'javadoc'
+    outputDirectory = "$buildDir/javadoc"
+}
+
+task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
+    classifier = 'javadoc'
+    from "$buildDir/javadoc"
 }
