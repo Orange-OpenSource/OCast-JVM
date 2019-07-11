@@ -17,6 +17,9 @@
 package org.ocast.discovery
 
 import org.ocast.core.utils.OCastLog
+import org.ocast.discovery.models.SsdpMSearchRequest
+import org.ocast.discovery.models.SsdpMSearchResponse
+import org.ocast.discovery.models.SsdpMessage
 import org.ocast.discovery.models.UpnpDevice
 import java.io.IOException
 import java.util.Collections.synchronizedMap

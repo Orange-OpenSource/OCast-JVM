@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ocast.discovery
+package org.ocast.discovery.models
 
 /**
  * The base class for SSDP messages.

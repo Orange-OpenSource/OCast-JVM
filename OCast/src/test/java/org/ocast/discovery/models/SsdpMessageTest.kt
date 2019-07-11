@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ocast.discovery
+package org.ocast.discovery.models
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
