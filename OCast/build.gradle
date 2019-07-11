@@ -77,7 +77,7 @@ task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
     outputDirectory = "$buildDir/javadoc"
 }
 
-task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
+task javadocJar(type: Jar, group: "build", dependsOn: dokkaJavadoc) {
     classifier = 'javadoc'
     from "$buildDir/javadoc"
 }
