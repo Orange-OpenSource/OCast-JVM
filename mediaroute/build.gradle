@@ -2,11 +2,25 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'org.jetbrains.dokka-android'
 apply from: project.file('../ktlint.gradle')
 apply from: project.file('../dependencies.gradle')
+apply from: project.file('../dokka.gradle')
 
 androidExtensions {
     experimental = true
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:${dokka_version}"
+    }
+}
+repositories {
+    jcenter()
 }
 
 android {
