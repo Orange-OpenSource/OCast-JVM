@@ -41,22 +41,22 @@ class MediaMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(Refere
  */
 class Play(
     @JsonProperty("position") val position: Double = 0.0
-) : OCastDataLayerParams("play")
+) : OCastCommandParams("play")
 
 /**
  * Stop the media
  */
-class Stop : OCastDataLayerParams("stop")
+class Stop : OCastCommandParams("stop")
 
 /**
  * Pause the media
  */
-class Pause : OCastDataLayerParams("pause")
+class Pause : OCastCommandParams("pause")
 
 /**
  * Resume the media
  */
-class Resume : OCastDataLayerParams("resume")
+class Resume : OCastCommandParams("resume")
 
 /**
  * Prepare the media
@@ -79,7 +79,7 @@ class Prepare(
     @JsonProperty("mediaType")val mediaType: Media.Type,
     @JsonProperty("transferMode") val transferMode: Media.TransferMode,
     @JsonProperty("autoplay") val autoplay: Boolean = true
-) : OCastDataLayerParams("prepare")
+) : OCastCommandParams("prepare")
 
 /**
  * Change volume
@@ -88,7 +88,7 @@ class Prepare(
  */
 class Volume(
     @JsonProperty("volume") val volume: Double
-) : OCastDataLayerParams("volume")
+) : OCastCommandParams("volume")
 
 /**
  * Change a track of the current playback
@@ -101,7 +101,7 @@ class Track(
     @JsonProperty("type") val type: Type,
     @JsonProperty("trackId") val trackID: String,
     @get:JsonIgnore @field:JsonProperty("enable") val isEnabled: Boolean
-) : OCastDataLayerParams("track") {
+) : OCastCommandParams("track") {
 
     enum class Type {
         @JsonProperty("text") TEXT,
@@ -117,7 +117,7 @@ class Track(
  */
 class Seek(
     @JsonProperty("position") val position: Double
-) : OCastDataLayerParams("seek")
+) : OCastCommandParams("seek")
 
 /**
  * Mute volume
@@ -126,17 +126,17 @@ class Seek(
  */
 class Mute(
     @get:JsonIgnore @field:JsonProperty("mute") val isMuted: Boolean
-) : OCastDataLayerParams("mute")
+) : OCastCommandParams("mute")
 
 /**
  * Get playback status
  */
-class GetPlaybackStatus : OCastDataLayerParams("getPlaybackStatus")
+class GetPlaybackStatus : OCastCommandParams("getPlaybackStatus")
 
 /**
  * Get metadata
  */
-class GetMetadata : OCastDataLayerParams("getMetadata")
+class GetMetadata : OCastCommandParams("getMetadata")
 
 //endregion
 
@@ -159,7 +159,7 @@ class PlaybackStatus(
     @JsonProperty("state") val state: Media.PlayerState,
     @JsonProperty("volume") val volume: Double,
     @get:JsonIgnore @field:JsonProperty("mute") val isMuted: Boolean
-) : OCastReplyParams(code)
+) : OCastReplyEventParams(code)
 
 /**
  *
@@ -182,7 +182,7 @@ class Metadata(
     @JsonProperty("textTracks") val textTracks: List<TrackDescription>?,
     @JsonProperty("audioTracks") val audioTracks: List<TrackDescription>?,
     @JsonProperty("videoTracks") val videoTracks: List<TrackDescription>?
-) : OCastReplyParams(code)
+) : OCastReplyEventParams(code)
 
 /**
  * Track description

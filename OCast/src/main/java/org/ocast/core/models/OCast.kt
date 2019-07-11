@@ -167,17 +167,17 @@ open class OCastRawDataLayer(
  *
  * @param code
  */
-open class OCastReplyParams(
+open class OCastReplyEventParams(
     @JsonProperty("code") internal open val code: Int?
 )
 
-open class OCastDataLayerParams(
+open class OCastCommandParams(
     @JsonIgnore val name: String
 ) {
 
     private val builder by lazy { OCastDataLayerBuilder(name, this) }
 
-    fun build(): OCastDataLayer<OCastDataLayerParams> {
+    fun build(): OCastDataLayer<OCastCommandParams> {
         return builder.build()
     }
 

@@ -166,7 +166,7 @@ class OCastTest {
         // When
         val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
         val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-        val replyData = JsonTools.decode<OCastReplyParams>(deviceLayer.message.data)
+        val replyData = JsonTools.decode<OCastReplyEventParams>(deviceLayer.message.data)
         val playbackStatus = JsonTools.decode<PlaybackStatus>(oCastData.params)
 
         // Then

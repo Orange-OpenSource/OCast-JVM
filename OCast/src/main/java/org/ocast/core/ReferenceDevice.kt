@@ -217,7 +217,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                     val replyCallback = replyCallbacksBySequenceID[deviceLayer.identifier]
                     replyCallback?.ifNotNull {
                         if (deviceLayer.status == OCastRawDeviceLayer.Status.OK) {
-                            val replyData = JsonTools.decode<OCastDataLayer<OCastReplyParams>>(deviceLayer.message.data)
+                            val replyData = JsonTools.decode<OCastDataLayer<OCastReplyEventParams>>(deviceLayer.message.data)
                             if (replyData.params.code == OCastError.Status.SUCCESS.code) {
                                 val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
                                 val reply = if (replyCallback.replyClass != Unit::class.java) {
