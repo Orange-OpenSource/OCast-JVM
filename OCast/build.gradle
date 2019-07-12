@@ -1,18 +1,29 @@
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
+apply plugin: 'org.jetbrains.dokka'
 apply from: project.file('../ktlint.gradle')
 apply from: project.file('../dependencies.gradle')
+apply from: project.file('../dokka.gradle')
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+description = "OCast SDK"
 
 buildscript {
+    version = "2.0.0"
+
     repositories {
         mavenCentral()
+        jcenter()
     }
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
+    }
+}
+
+jar {
+    manifest {
+        attributes('Implementation-Title': project.name, 'Implementation-Version': project.version)
     }
 }
 
@@ -36,6 +47,9 @@ repositories {
     jcenter()
     mavenCentral()
 }
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 compileKotlin {
     kotlinOptions {
