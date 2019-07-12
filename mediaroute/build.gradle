@@ -2,9 +2,10 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'org.jetbrains.dokka-android'
 apply from: project.file('../ktlint.gradle')
 apply from: project.file('../dependencies.gradle')
-apply plugin: 'org.jetbrains.dokka-android'
+apply from: project.file('../dokka.gradle')
 
 androidExtensions {
     experimental = true
@@ -16,6 +17,7 @@ buildscript {
     repositories {
         jcenter()
     }
+
     dependencies {
         classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokka_version"
     }
@@ -84,14 +86,4 @@ allprojects {
             force("org.objenesis:objenesis:2.6")
         }
     }
-}
-
-task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
-    outputFormat = 'javadoc'
-    outputDirectory = "$buildDir/javadoc"
-}
-
-task javadocJar(type: Jar, group: "build", dependsOn: dokkaJavadoc) {
-    classifier = 'javadoc'
-    from "$buildDir/javadoc"
 }

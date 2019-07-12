@@ -1,9 +1,9 @@
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
+apply plugin: 'org.jetbrains.dokka'
 apply from: project.file('../ktlint.gradle')
 apply from: project.file('../dependencies.gradle')
-apply plugin: 'org.jetbrains.dokka'
-apply from: project.file('../dokka_config.gradle')
+apply from: project.file('../dokka.gradle')
 
 description = "OCast SDK"
 
@@ -70,14 +70,4 @@ test {
         events "passed", "skipped", "failed"
         exceptionFormat "full"
     }
-}
-
-task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
-    outputFormat = 'javadoc'
-    outputDirectory = "$buildDir/javadoc"
-}
-
-task javadocJar(type: Jar, group: "build", dependsOn: dokkaJavadoc) {
-    classifier = 'javadoc'
-    from "$buildDir/javadoc"
 }
