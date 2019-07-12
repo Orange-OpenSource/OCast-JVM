@@ -18,9 +18,9 @@ package org.ocast.mediaroute
 
 import android.os.Handler
 import android.os.Looper
-import android.support.test.InstrumentationRegistry
-import android.support.test.runner.AndroidJUnit4
-import android.support.v7.media.MediaRouter
+import androidx.test.InstrumentationRegistry
+import androidx.test.runner.AndroidJUnit4
+import androidx.mediarouter.media.MediaRouter
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before

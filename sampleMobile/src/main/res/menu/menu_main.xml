@@ -3,7 +3,7 @@
     <item
         android:id="@+id/item_all_media_route"
         android:title="@string/all_media_route"
-        app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
+        app:actionProviderClass="androidx.mediarouter.app.MediaRouteActionProvider"
         app:showAsAction="always" />
 
 </menu>

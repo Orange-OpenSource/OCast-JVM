@@ -25,10 +25,10 @@ import android.net.NetworkInfo
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.os.Handler
-import android.support.v7.media.MediaRouteDescriptor
-import android.support.v7.media.MediaRouteDiscoveryRequest
-import android.support.v7.media.MediaRouteProvider
-import android.support.v7.media.MediaRouteProviderDescriptor
+import androidx.mediarouter.media.MediaRouteDescriptor
+import androidx.mediarouter.media.MediaRouteDiscoveryRequest
+import androidx.mediarouter.media.MediaRouteProvider
+import androidx.mediarouter.media.MediaRouteProviderDescriptor
 import android.util.Log
 import org.ocast.mediaroute.models.MediaRouteDevice
 import org.ocast.core.Device

@@ -16,16 +16,16 @@
 
 package org.ocast.sample.mobile.ui
 
-import android.arch.lifecycle.ViewModelProviders
-import android.databinding.DataBindingUtil
 import android.os.Bundle
-import android.support.v4.view.MenuItemCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.app.AppCompatDelegate
-import android.support.v7.app.MediaRouteActionProvider
-import android.support.v7.media.MediaRouter
 import android.util.Log
 import android.view.Menu
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.MenuItemCompat
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProviders
+import androidx.mediarouter.app.MediaRouteActionProvider
+import androidx.mediarouter.media.MediaRouter
 import org.ocast.core.Device
 import org.ocast.core.EventListener
 import org.ocast.core.ReferenceDevice
