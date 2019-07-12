@@ -29,12 +29,12 @@ import kotlin.concurrent.thread
  *
  * @param port The local port of the socket. Specify 0 to bind the socket on a random port.
  */
-internal open class SocketProvider(private val port: Short = 0) {
+internal open class UDPSocket(private val port: Short = 0) {
 
     companion object {
 
         /** The name of the thread to receive datagrams. */
-        private val RECEIVER_THREAD_NAME = "${SocketProvider::class.simpleName} Receiver Thread"
+        private val RECEIVER_THREAD_NAME = "${UDPSocket::class.simpleName} Receiver Thread"
 
         /** The size of the buffer to receive datagrams. */
         private const val RECEIVER_BUFFER_SIZE = 4096
@@ -131,25 +131,25 @@ internal open class SocketProvider(private val port: Short = 0) {
     }
 
     /**
-     * A listener of [SocketProvider] events.
+     * A listener of [UDPSocket] events.
      */
     interface Listener {
 
         /**
          * Callback method called when the socket received data from a host.
          *
-         * @param socketProvider The socket provider which informs the listener.
+         * @param socket The socket which informs the listener.
          * @param data The data.
          * @param host The name of the host which sent the data.
          */
-        fun onDataReceived(socketProvider: SocketProvider, data: ByteArray, host: String)
+        fun onDataReceived(socket: UDPSocket, data: ByteArray, host: String)
 
         /**
          * Callback method called when the socket closed.
          *
-         * @param socketProvider The socket provider which informs the listener.
+         * @param socket The socket which informs the listener.
          * @param error The error, or null if the socket closed normally.
          */
-        fun onSocketClosed(socketProvider: SocketProvider, error: Throwable?)
+        fun onSocketClosed(socket: UDPSocket, error: Throwable?)
     }
 }

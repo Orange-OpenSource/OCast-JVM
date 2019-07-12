@@ -47,8 +47,8 @@ import kotlin.concurrent.schedule
  */
 class DeviceDiscoveryTest {
 
-    /** The mocked socket provider. */
-    private val socketProvider = spy<SocketProvider>()
+    /** The mocked socket. */
+    private val socket = spy<UDPSocket>()
 
     /** The mocked UPnP client. */
     private val upnpClient = mock<UpnpClient>()
@@ -57,7 +57,7 @@ class DeviceDiscoveryTest {
     private val listener = mock<DeviceDiscovery.Listener>()
 
     /** The discovery object. */
-    private val discovery = DeviceDiscovery(socketProvider, upnpClient)
+    private val discovery = DeviceDiscovery(socket, upnpClient)
 
     @Before
     fun setUp() {
@@ -439,8 +439,8 @@ class DeviceDiscoveryTest {
     //endregion
 
     /**
-     * Stubs the M-SEARCH responses received by the socket provider.
-     * Each argument represents the M-SEARCH responses and their associated delay after an M-SEARCH request is sent by the socket provider.
+     * Stubs the M-SEARCH responses received by the socket.
+     * Each argument represents the M-SEARCH responses and their associated delay after an M-SEARCH request is sent by the socket.
      *
      * @param responses The M-SEARCH responses and their associated delay.
      */
@@ -450,7 +450,7 @@ class DeviceDiscoveryTest {
             val answer: (InvocationOnMock) -> Unit = {
                 response.forEach {
                     Timer().schedule(it.second) {
-                        socketProvider.listener?.onDataReceived(socketProvider, it.first.toByteArray(), "127.0.0.1")
+                        socket.listener?.onDataReceived(socket, it.first.toByteArray(), "127.0.0.1")
                     }
                 }
             }
@@ -459,7 +459,7 @@ class DeviceDiscoveryTest {
                 stubbing = if (stubbing == null) Mockito.doAnswer(answer) else stubbing?.doAnswer(answer)
             }
         }
-        stubbing?.whenever(socketProvider)?.send(any(), any(), any())
+        stubbing?.whenever(socket)?.send(any(), any(), any())
     }
 
     /**

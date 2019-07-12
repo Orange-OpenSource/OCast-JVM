@@ -40,9 +40,9 @@ import java.net.InetAddress
 import java.net.MulticastSocket
 
 /**
- * Unit tests for the [SocketProvider] class.
+ * Unit tests for the [UDPSocket] class.
  */
-class SocketProviderTest {
+class UDPSocketTest {
 
     /**
      * This class is used to stub the receive method of a mocked [MulticastSocket].
@@ -68,23 +68,23 @@ class SocketProviderTest {
         }
     }
 
-    /** The socket provider listener. */
-    private val listener = mock<SocketProvider.Listener>()
+    /** The socket listener. */
+    private val listener = mock<UDPSocket.Listener>()
 
     /**
-     * The underlying multicast socket used by an instance of [SocketProvider].
-     * Beware, this variable should be recreated if the open() method of SocketProvider is called more than once, which is not currently the case.
+     * The underlying multicast socket used by an instance of [UDPSocket].
+     * Beware, this variable should be recreated if the open() method of UDPSocket is called more than once, which is not currently the case.
      */
     private val multicastSocket = spy<MulticastSocket>()
 
-    /** The socket provider. */
-    private val socketProvider = object : SocketProvider() {
+    /** The socket. */
+    private val socket = object : UDPSocket() {
         override fun createSocket(port: Short) = multicastSocket
     }
 
     @Before
     fun setUp() {
-        socketProvider.listener = listener
+        socket.listener = listener
     }
 
     @Test
@@ -93,12 +93,12 @@ class SocketProviderTest {
         Mockito.doAnswer(MulticastSocketAnswer("firstData", "secondData")).whenever(multicastSocket).receive(any())
 
         // When
-        socketProvider.open()
+        socket.open()
 
         // Then
         Thread.sleep(1000)
         val response = argumentCaptor<ByteArray>()
-        verify(listener, times(2)).onDataReceived(eq(socketProvider), response.capture(), eq("192.168.1.123"))
+        verify(listener, times(2)).onDataReceived(eq(socket), response.capture(), eq("192.168.1.123"))
         assertEquals(String(response.firstValue), "firstData")
         assertEquals(String(response.secondValue), "secondData")
         verify(listener, never()).onSocketClosed(any(), anyOrNull())
@@ -111,26 +111,26 @@ class SocketProviderTest {
         doThrow(exception).whenever(multicastSocket).receive(any())
 
         // When
-        socketProvider.open()
+        socket.open()
 
         // Then
         Thread.sleep(500)
         verify(listener, never()).onDataReceived(any(), any(), any())
-        verify(listener, times(1)).onSocketClosed(eq(socketProvider), eq(exception))
+        verify(listener, times(1)).onSocketClosed(eq(socket), eq(exception))
     }
 
     @Test
-    fun closeSocketProviderCallsListenerOnSocketClosedWithoutError() {
+    fun closeSocketCallsListenerOnSocketClosedWithoutError() {
         // Given
-        socketProvider.open()
+        socket.open()
 
         // When
-        socketProvider.close()
-        socketProvider.close() // Also test that onSocketClosed is called only once
+        socket.close()
+        socket.close() // Also test that onSocketClosed is called only once
 
         // Then
         Thread.sleep(500)
         verify(listener, never()).onDataReceived(any(), any(), any())
-        verify(listener, times(1)).onSocketClosed(eq(socketProvider), isNull())
+        verify(listener, times(1)).onSocketClosed(eq(socket), isNull())
     }
 }

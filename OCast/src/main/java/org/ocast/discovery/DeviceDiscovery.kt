@@ -37,7 +37,7 @@ import kotlin.math.max
  * @param upnpClient The client which performs UPnP requests.
  */
 internal class DeviceDiscovery constructor(
-    private val socket: SocketProvider = SocketProvider(),
+    private val socket: UDPSocket = UDPSocket(),
     private val upnpClient: UpnpClient = UpnpClient()
 ) {
 
@@ -330,18 +330,18 @@ internal class DeviceDiscovery constructor(
     }
 
     /**
-     * An implementation of the [SocketProvider.Listener] interface for the discovery.
+     * An implementation of the [UDPSocket.Listener] interface for the discovery.
      */
-    private inner class SsdpSocketListener : SocketProvider.Listener {
+    private inner class SsdpSocketListener : UDPSocket.Listener {
 
-        override fun onDataReceived(socketProvider: SocketProvider, data: ByteArray, host: String) {
+        override fun onDataReceived(socket: UDPSocket, data: ByteArray, host: String) {
             val ssdpMSearchResponse = SsdpMessage.fromData(data) as? SsdpMSearchResponse
             if (ssdpMSearchResponse != null) {
                 handleSsdpMSearchResponse(ssdpMSearchResponse)
             }
         }
 
-        override fun onSocketClosed(socketProvider: SocketProvider, error: Throwable?) {
+        override fun onSocketClosed(socket: UDPSocket, error: Throwable?) {
             if (error != null) {
                 stop(true, error)
             }
