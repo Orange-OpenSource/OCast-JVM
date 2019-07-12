@@ -1,13 +1,13 @@
 apply plugin: 'application'
 apply plugin: 'kotlin'
-apply from: project.file('../ktlint.gradle')
-apply from: project.file('../dependencies.gradle')
+apply from: project.file('../../../ktlint.gradle')
+apply from: project.file('../../../dependencies.gradle')
 
 mainClassName = "org.ocast.sample.desktop.AppKotlin"
 description = "Sample Kotlin desktop application for the OCast SDK"
 
 dependencies {
-    implementation project(':OCast')
+    implementation project(':ocast.sdk')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.json:json:$json_version"
 }

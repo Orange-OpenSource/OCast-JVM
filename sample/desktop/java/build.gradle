@@ -1,11 +1,11 @@
 apply plugin: 'application'
-apply from: project.file('../dependencies.gradle')
+apply from: project.file('../../../dependencies.gradle')
 
 mainClassName = "org.ocast.sample.desktop.AppJava"
 description = "Sample Java desktop application for the OCast SDK"
 
 dependencies {
-    implementation project(':OCast')
+    implementation project(':ocast.sdk')
     implementation "org.json:json:$json_version"
     implementation "com.intellij:annotations:$annotations_version"
 }

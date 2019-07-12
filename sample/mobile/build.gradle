@@ -2,8 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
-apply from: project.file('../ktlint.gradle')
-apply from: project.file('../dependencies.gradle')
+apply from: project.file('../../ktlint.gradle')
+apply from: project.file('../../dependencies.gradle')
 
 android {
     compileSdkVersion compile_sdk_version
@@ -44,8 +44,8 @@ android {
 }
 
 dependencies {
-    implementation project(':OCast')
-    implementation project(':mediaroute')
+    implementation project(':ocast.sdk')
+    implementation project(':ocast.mediaroute')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "androidx.mediarouter:mediarouter:$media_router_version"
     implementation "androidx.legacy:legacy-support-v4:$legacy_support_version"
