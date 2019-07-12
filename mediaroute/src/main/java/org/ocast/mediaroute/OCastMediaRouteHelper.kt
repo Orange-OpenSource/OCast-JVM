@@ -23,10 +23,10 @@ import androidx.mediarouter.media.MediaRouteProvider
 import androidx.mediarouter.media.MediaRouteSelector
 import androidx.mediarouter.media.MediaRouter
 import org.ocast.mediaroute.models.MediaRouteDevice
-import org.ocast.core.Device
-import org.ocast.core.OCastCenter
-import org.ocast.core.EventListener
 import org.ocast.mediaroute.wrapper.AndroidUIThreadCallbackWrapper
+import org.ocast.sdk.core.Device
+import org.ocast.sdk.core.EventListener
+import org.ocast.sdk.core.OCastCenter
 
 object OCastMediaRouteHelper {
 

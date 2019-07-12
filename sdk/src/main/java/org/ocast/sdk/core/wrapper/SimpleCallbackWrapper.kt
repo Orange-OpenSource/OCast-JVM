@@ -14,27 +14,20 @@
  * limitations under the License.
  */
 
-package org.ocast.mediaroute.wrapper
+package org.ocast.sdk.core.wrapper
 
-import android.os.Handler
-import android.os.Looper
-import org.ocast.sdk.core.wrapper.CallbackWrapper
 import org.ocast.sdk.core.models.Consumer
 
 /**
- * This class is an implementation of [CallbackWrapper] for Android.
- * It wraps [Consumer]s and [Runnable]s to run them on the main thread.
+ * This class is a simple implementation of a [CallbackWrapper].
  */
-class AndroidUIThreadCallbackWrapper : CallbackWrapper {
-
-    /** A handler on the main thread. */
-    private val mainHandler = Handler(Looper.getMainLooper())
+class SimpleCallbackWrapper : CallbackWrapper {
 
     override fun <T> wrap(consumer: Consumer<T>): Consumer<T> {
-        return Consumer { mainHandler.post { consumer.run(it) } }
+        return consumer
     }
 
     override fun wrap(runnable: Runnable): Runnable {
-        return Runnable { mainHandler.post(runnable) }
+        return runnable
     }
 }

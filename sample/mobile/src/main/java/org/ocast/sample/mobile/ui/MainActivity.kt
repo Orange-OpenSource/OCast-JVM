@@ -26,16 +26,16 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
 import androidx.mediarouter.app.MediaRouteActionProvider
 import androidx.mediarouter.media.MediaRouter
-import org.ocast.core.Device
-import org.ocast.core.EventListener
-import org.ocast.core.ReferenceDevice
-import org.ocast.core.models.Media
-import org.ocast.core.models.Metadata
-import org.ocast.core.models.PlaybackStatus
 import org.ocast.mediaroute.OCastMediaRouteHelper
 import org.ocast.sample.mobile.R
 import org.ocast.sample.mobile.databinding.ActivityMainBinding
 import org.ocast.sample.mobile.utils.updateValue
+import org.ocast.sdk.core.Device
+import org.ocast.sdk.core.EventListener
+import org.ocast.sdk.core.ReferenceDevice
+import org.ocast.sdk.core.models.Media
+import org.ocast.sdk.core.models.Metadata
+import org.ocast.sdk.core.models.PlaybackStatus
 
 class MainActivity : AppCompatActivity(), EventListener {
 

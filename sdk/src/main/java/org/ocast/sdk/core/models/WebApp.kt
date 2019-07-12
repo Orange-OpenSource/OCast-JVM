@@ -1,3 +1,5 @@
+// ktlint-disable filename
+
 /*
  * Copyright 2019 Orange
  *
@@ -14,26 +16,23 @@
  * limitations under the License.
  */
 
-package org.ocast.mediaroute.models
+package org.ocast.sdk.core.models
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
-import org.ocast.sdk.core.Device
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
+import com.fasterxml.jackson.annotation.JsonProperty
 
-import java.net.URL
+/**
+ *
+ *
+ * @param status
+ */
+class WebAppConnectedStatus(
+    @JsonProperty("status") val status: WebAppStatus
+)
 
-@Parcelize
-data class MediaRouteDevice(
-    var uuid: String,
-    var friendlyName: String,
-    var manufacturer: String,
-    var modelName: String,
-    var applicationURL: URL
-) : Parcelable {
-
-    companion object {
-        const val EXTRA_DEVICE = "org.ocast.mediaroute.extra.DEVICE"
-    }
-
-    constructor(device: Device) : this(device.uuid, device.friendlyName, device.manufacturer, device.modelName, device.applicationURL)
+enum class WebAppStatus {
+    @JsonProperty("connected") CONNECTED,
+    @JsonProperty("disconnected") DISCONNECTED,
+    @JsonEnumDefaultValue
+    @JsonProperty("unknown") UNKNOWN
 }

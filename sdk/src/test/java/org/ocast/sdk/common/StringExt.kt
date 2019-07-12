@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-package org.ocast.sample.mobile.utils
-
-import android.os.Looper
-import androidx.lifecycle.MutableLiveData
+package org.ocast.sdk.common
 
 /**
- * Posts or sets value of a MutableLiveData according to the current thread
+ * Removes an element from an XML string.
+ *
+ * @param element The element to remove.
+ * @return The modified XML string.
  */
-fun <T> MutableLiveData<T>.updateValue(value: T?) {
-    if (isMainThread()) {
-        // Current thread is main thread
-        this.value = value
-    } else {
-        postValue(value)
-    }
+internal fun String.removeXMLElement(element: String): String {
+    val regularTagRegex = "\\h*<$element(\\s+.*)?>(.|\\R)*</$element>\\h*\\R".toRegex()
+    val selfClosingTagRegex = "\\h*<$element(\\s+.*)?/>\\h*\\R".toRegex()
+
+    return replace(regularTagRegex, "").replace(selfClosingTagRegex, "")
 }
-
-/**
- * @return true if we are in Main Thread, false otherwise
- */
-private fun isMainThread() = Looper.myLooper() == Looper.getMainLooper()

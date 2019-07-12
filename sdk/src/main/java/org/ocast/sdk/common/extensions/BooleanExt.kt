@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-package org.ocast.sample.mobile.utils
-
-import android.os.Looper
-import androidx.lifecycle.MutableLiveData
+package org.ocast.sdk.common.extensions
 
 /**
- * Posts or sets value of a MutableLiveData according to the current thread
+ * Returns the boolean if it is not null, or true otherwise.
  */
-fun <T> MutableLiveData<T>.updateValue(value: T?) {
-    if (isMainThread()) {
-        // Current thread is main thread
-        this.value = value
-    } else {
-        postValue(value)
-    }
+fun Boolean?.orTrue(): Boolean {
+    return this ?: true
 }
 
 /**
- * @return true if we are in Main Thread, false otherwise
+ * Returns the boolean if it is not null, or false otherwise.
  */
-private fun isMainThread() = Looper.myLooper() == Looper.getMainLooper()
+fun Boolean?.orFalse(): Boolean {
+    return this ?: false
+}

@@ -14,26 +14,19 @@
  * limitations under the License.
  */
 
-package org.ocast.mediaroute.models
+package org.ocast.sdk.core
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
-import org.ocast.sdk.core.Device
+interface DeviceListener {
 
-import java.net.URL
-
-@Parcelize
-data class MediaRouteDevice(
-    var uuid: String,
-    var friendlyName: String,
-    var manufacturer: String,
-    var modelName: String,
-    var applicationURL: URL
-) : Parcelable {
-
-    companion object {
-        const val EXTRA_DEVICE = "org.ocast.mediaroute.extra.DEVICE"
+    @JvmDefault
+    fun onDeviceDisconnected(device: Device, error: Throwable?) {
     }
 
-    constructor(device: Device) : this(device.uuid, device.friendlyName, device.manufacturer, device.modelName, device.applicationURL)
+    @JvmDefault
+    fun onDeviceAdded(device: Device) {
+    }
+
+    @JvmDefault
+    fun onDeviceRemoved(device: Device) {
+    }
 }
