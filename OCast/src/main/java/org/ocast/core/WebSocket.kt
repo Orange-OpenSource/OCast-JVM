@@ -19,7 +19,6 @@ package org.ocast.core
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.ocast.common.extensions.orFalse
 import org.ocast.core.models.SSLConfiguration
@@ -32,7 +31,7 @@ import java.util.concurrent.TimeUnit
  * @param webSocketURL
  * @param sslConfiguration
  */
-open class WebSocketProvider(private val webSocketURL: String, private val sslConfiguration: SSLConfiguration?, private val listener: Listener) : WebSocketListener() {
+open class WebSocket(private val webSocketURL: String, private val sslConfiguration: SSLConfiguration?, private val listener: Listener) : WebSocketListener() {
 
     companion object {
         const val MAX_PAYLOAD_SIZE = 4096
@@ -46,7 +45,7 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
         DISCONNECTED
     }
 
-    private var webSocket: WebSocket? = null
+    private var webSocket: okhttp3.WebSocket? = null
 
     var state = State.DISCONNECTED
         private set
@@ -127,7 +126,7 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
      * @param webSocket
      * @param response
      */
-    override fun onOpen(webSocket: WebSocket, response: Response) {
+    override fun onOpen(webSocket: okhttp3.WebSocket, response: Response) {
         if (this.webSocket == webSocket) {
             OCastLog.debug { "Socket: Connected !" }
             state = State.CONNECTED
@@ -141,7 +140,7 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
      * @param webSocket
      * @param text
      */
-    override fun onMessage(webSocket: WebSocket, text: String) {
+    override fun onMessage(webSocket: okhttp3.WebSocket, text: String) {
         if (this.webSocket == webSocket) {
             listener.onDataReceived(this, text)
         }
@@ -155,7 +154,7 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
      * @param code
      * @param reason
      */
-    override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+    override fun onClosed(webSocket: okhttp3.WebSocket, code: Int, reason: String) {
         if (this.webSocket == webSocket) {
             OCastLog.debug { "Socket: Closed !" }
             state = State.DISCONNECTED
@@ -171,7 +170,7 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
      * @param throwable
      * @param response
      */
-    override fun onFailure(webSocket: WebSocket, throwable: Throwable, response: Response?) {
+    override fun onFailure(webSocket: okhttp3.WebSocket, throwable: Throwable, response: Response?) {
         if (this.webSocket == webSocket) {
             OCastLog.debug { "Socket: Failure !" }
             state = State.DISCONNECTED
@@ -180,28 +179,29 @@ open class WebSocketProvider(private val webSocketURL: String, private val sslCo
     }
 
     interface Listener {
+
         /**
-         * Tells the listener that the socket provider has received a message.
+         * Tells the listener that the socket has received a message.
          *
-         * @param webSocketProvider The connected socket provider.
+         * @param webSocket The connected socket.
          * @param data: The data received.
          */
-        fun onDataReceived(webSocketProvider: WebSocketProvider, data: String)
+        fun onDataReceived(webSocket: WebSocket, data: String)
 
         /**
-         * Tells the listener that the socket provider has been disconnected from the device.
+         * Tells the listener that the socket has been disconnected from the device.
          *
-         * @param webSocketProvider The connected socket provider.
+         * @param webSocket The connected socket.
          * @param error The error.
          */
-        fun onDisconnected(webSocketProvider: WebSocketProvider, error: Throwable?)
+        fun onDisconnected(webSocket: WebSocket, error: Throwable?)
 
         /**
-         * Tells the listener that the socket provider is connected to the device.
+         * Tells the listener that the socket is connected to the device.
          *
-         * @param webSocketProvider
+         * @param webSocket
          * @param url The connection URL.
          */
-        fun onConnected(webSocketProvider: WebSocketProvider, url: String)
+        fun onConnected(webSocket: WebSocket, url: String)
     }
 }

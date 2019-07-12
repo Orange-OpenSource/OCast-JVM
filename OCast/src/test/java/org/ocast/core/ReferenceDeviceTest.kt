@@ -32,7 +32,7 @@ class ReferenceDeviceTest {
     private val referenceDevice = ReferenceDevice(UpnpDevice())
 
     private val eventListener = mock<EventListener>()
-    private val webSocketProvider = mock<WebSocketProvider>()
+    private val webSocket = mock<WebSocket>()
 
     @Before
     fun setUp() {
@@ -65,7 +65,7 @@ class ReferenceDeviceTest {
         """.trimIndent()
 
         // When
-        referenceDevice.onDataReceived(webSocketProvider, data)
+        referenceDevice.onDataReceived(webSocket, data)
 
         // Then
         val updateStatusEvent = argumentCaptor<UpdateStatus>()

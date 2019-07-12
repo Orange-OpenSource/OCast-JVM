@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
-open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSocketProvider.Listener {
+open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSocket.Listener {
 
     companion object {
 
@@ -80,7 +80,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         }
     private val sequenceID = AtomicLong(0)
     protected var clientUuid = UUID.randomUUID().toString()
-    protected var webSocket: WebSocketProvider? = null
+    protected var webSocket: WebSocket? = null
     protected var connectCallback: RunnableCallback? = null
     private val webSocketURL: String
         get() {
@@ -162,7 +162,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             State.CONNECTED -> onSuccess.wrapRun()
             State.DISCONNECTING -> onError.wrapRun(OCastError("Device is disconnecting"))
             State.DISCONNECTED -> {
-                webSocket = WebSocketProvider(webSocketURL, sslConfiguration, this)
+                webSocket = WebSocket(webSocketURL, sslConfiguration, this)
                 state = State.CONNECTING
                 connectCallback = RunnableCallback(onSuccess, onError)
                 webSocket?.connect()
@@ -180,9 +180,9 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
 
     //endregion
 
-    //region SocketProviderListener
+    //region WebSocket listener
 
-    override fun onDisconnected(webSocketProvider: WebSocketProvider, error: Throwable?) {
+    override fun onDisconnected(webSocket: WebSocket, error: Throwable?) {
         if (state != State.DISCONNECTED) {
             state = State.DISCONNECTED
             // Send error callback to all waiting commands
@@ -201,13 +201,13 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         }
     }
 
-    override fun onConnected(webSocketProvider: WebSocketProvider, url: String) {
+    override fun onConnected(webSocket: WebSocket, url: String) {
         state = State.CONNECTED
         connectCallback?.onSuccess?.wrapRun()
         connectCallback = null
     }
 
-    override fun onDataReceived(webSocketProvider: WebSocketProvider, data: String) {
+    override fun onDataReceived(webSocket: WebSocket, data: String) {
         var deviceLayer: OCastRawDeviceLayer? = null
         try {
             deviceLayer = JsonTools.decode(data)
