@@ -20,11 +20,11 @@ import android.content.Context
 import android.content.IntentFilter
 import android.media.AudioManager
 import android.os.Bundle
-import android.support.v7.media.MediaRouteDescriptor
-import android.support.v7.media.MediaRouteDiscoveryRequest
-import android.support.v7.media.MediaRouteProvider
-import android.support.v7.media.MediaRouteProviderDescriptor
-import android.support.v7.media.MediaRouter
+import androidx.mediarouter.media.MediaRouteDescriptor
+import androidx.mediarouter.media.MediaRouteDiscoveryRequest
+import androidx.mediarouter.media.MediaRouteProvider
+import androidx.mediarouter.media.MediaRouteProviderDescriptor
+import androidx.mediarouter.media.MediaRouter
 import org.ocast.mediaroute.models.MediaRouteDevice
 import org.ocast.core.ReferenceDevice
 import org.ocast.discovery.models.UpnpDevice

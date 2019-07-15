@@ -17,7 +17,7 @@ android {
 
         vectorDrawables.useSupportLibrary = true
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -47,17 +47,16 @@ dependencies {
     implementation project(':OCast')
     implementation project(':mediaroute')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation "com.android.support:mediarouter-v7:$support_lib_version"
-    implementation "com.android.support:support-v4:$support_lib_version"
-    implementation "com.android.support:appcompat-v7:$support_lib_version"
-    implementation "com.android.support:design:$support_lib_version"
-    implementation "android.arch.lifecycle:extensions:$arch_components_version"
-    implementation "android.arch.lifecycle:viewmodel:$arch_components_version"
-    implementation "com.android.support:appcompat-v7:$support_lib_version"
-    implementation "com.android.support.constraint:constraint-layout:$constraint_layout_version"
+    implementation "androidx.mediarouter:mediarouter:$media_router_version"
+    implementation "androidx.legacy:legacy-support-v4:$legacy_support_version"
+    implementation "androidx.appcompat:appcompat:$app_compat_version"
+    implementation "com.google.android.material:material:$material_version"
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
+    implementation "androidx.constraintlayout:constraintlayout:$constraint_layout_version"
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation "junit:junit:$junit_version"
 
-    androidTestImplementation "com.android.support.test:runner:$runner_version"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$espresso_version"
+    androidTestImplementation "androidx.test:runner:$runner_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
 }

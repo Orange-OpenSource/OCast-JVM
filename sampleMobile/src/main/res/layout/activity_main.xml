@@ -8,7 +8,7 @@
         <variable name="viewModel" type="org.ocast.sample.mobile.ui.MainViewModel" />
     </data>
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:context=".ui.MainActivity">
@@ -36,7 +36,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/seekbar_player"
                 app:layout_constraintTop_toTopOf="@+id/seekbar_player"/>
 
-        <android.support.v7.widget.AppCompatSeekBar
+        <androidx.appcompat.widget.AppCompatSeekBar
                 android:id="@+id/seekbar_player"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -114,7 +114,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/tv_volume_subtitle"
                 tools:ignore="ContentDescription"/>
 
-        <android.support.v7.widget.AppCompatSeekBar
+        <androidx.appcompat.widget.AppCompatSeekBar
                 android:id="@+id/seekbar_volume"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -152,7 +152,7 @@
                 app:layout_constraintTop_toBottomOf="@id/iv_volume_down"
                 app:layout_constraintEnd_toEndOf="parent"/>
 
-        <android.support.v7.widget.SwitchCompat
+        <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/switch_mute"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -165,5 +165,5 @@
                 app:layout_constraintBottom_toBottomOf="@id/tv_mute"
                 app:layout_constraintEnd_toEndOf="parent"/>
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

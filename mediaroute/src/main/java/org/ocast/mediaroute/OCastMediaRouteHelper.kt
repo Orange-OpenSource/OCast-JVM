@@ -19,9 +19,9 @@ package org.ocast.mediaroute
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.support.v7.media.MediaRouteProvider
-import android.support.v7.media.MediaRouteSelector
-import android.support.v7.media.MediaRouter
+import androidx.mediarouter.media.MediaRouteProvider
+import androidx.mediarouter.media.MediaRouteSelector
+import androidx.mediarouter.media.MediaRouter
 import org.ocast.mediaroute.models.MediaRouteDevice
 import org.ocast.core.Device
 import org.ocast.core.OCastCenter

@@ -16,7 +16,7 @@
 
 package org.ocast.sample.mobile.utils
 
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.MutableLiveData
 import android.os.Looper
 
 /**
