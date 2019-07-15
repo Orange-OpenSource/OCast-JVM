@@ -25,15 +25,15 @@ import android.net.NetworkInfo
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import androidx.mediarouter.media.MediaRouteDescriptor
 import androidx.mediarouter.media.MediaRouteDiscoveryRequest
 import androidx.mediarouter.media.MediaRouteProvider
 import androidx.mediarouter.media.MediaRouteProviderDescriptor
-import android.util.Log
 import org.ocast.mediaroute.models.MediaRouteDevice
-import org.ocast.core.Device
-import org.ocast.core.DeviceListener
-import org.ocast.core.OCastCenter
+import org.ocast.sdk.core.Device
+import org.ocast.sdk.core.DeviceListener
+import org.ocast.sdk.core.OCastCenter
 import java.util.Collections
 
 internal class OCastMediaRouteProvider(context: Context, private val oCastCenter: OCastCenter, private val mainHandler: Handler) : MediaRouteProvider(context) {

@@ -26,8 +26,8 @@ import androidx.mediarouter.media.MediaRouteProvider
 import androidx.mediarouter.media.MediaRouteProviderDescriptor
 import androidx.mediarouter.media.MediaRouter
 import org.ocast.mediaroute.models.MediaRouteDevice
-import org.ocast.core.ReferenceDevice
-import org.ocast.discovery.models.UpnpDevice
+import org.ocast.sdk.core.ReferenceDevice
+import org.ocast.sdk.discovery.models.UpnpDevice
 import java.net.URL
 import java.util.ArrayList
 

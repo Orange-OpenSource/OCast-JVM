@@ -18,8 +18,8 @@ package org.ocast.mediaroute.wrapper
 
 import android.os.Handler
 import android.os.Looper
-import org.ocast.core.wrapper.CallbackWrapper
-import org.ocast.core.models.Consumer
+import org.ocast.sdk.core.wrapper.CallbackWrapper
+import org.ocast.sdk.core.models.Consumer
 
 /**
  * This class is an implementation of [CallbackWrapper] for Android.
