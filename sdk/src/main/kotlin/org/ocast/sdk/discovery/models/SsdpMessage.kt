@@ -73,7 +73,7 @@ internal sealed class SsdpMessage(private val startLine: StartLine) {
          * Converts data into an SSDP message.
          *
          * @param data The data to convert.
-         * @return The SSDP message or null if [data] could not be converted.
+         * @return The SSDP message or null if `data` could not be converted.
          */
         fun fromData(data: ByteArray): SsdpMessage? {
             var message: SsdpMessage? = null

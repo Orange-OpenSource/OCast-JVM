@@ -25,7 +25,7 @@ package org.ocast.sdk.core.models
 open class RunnableCallback(val onSuccess: Runnable, val onError: Consumer<OCastError>)
 
 /**
- * Represents a callback for an asynchronous task, with a [Consumer] of [T] as the success lambda.
+ * Represents a callback for an asynchronous task, with a [Consumer] of T as the success lambda.
  *
  * @param onSuccess The success lambda.
  * @param onError The error lambda.

@@ -34,7 +34,7 @@ class OCastLog {
 
         /**
          * The current OCast log level.
-         * Default value is [Level.OFF].
+         * Default value is `Level.OFF`.
          */
         @JvmStatic
         var level = Level.OFF
@@ -61,7 +61,7 @@ class OCastLog {
 
         /**
          * Logs an error message.
-         * Does nothing if [level] is [Level.OFF].
+         * Does nothing if [level] is `Level.OFF`.
          *
          * @param throwable The throwable associated with the error message.
          * @param message A lambda that returns the message to be logged.
@@ -73,7 +73,7 @@ class OCastLog {
 
         /**
          * Logs an info message.
-         * Does nothing if [level] is [Level.OFF] or [Level.ERROR].
+         * Does nothing if [level] is `Level.OFF` or `Level.ERROR`.
          *
          * @param message A lambda that returns the message to be logged.
          */
@@ -84,7 +84,7 @@ class OCastLog {
 
         /**
          * Logs a debug message.
-         * Does nothing if [level] is [Level.OFF], [Level.ERROR] or [Level.INFO].
+         * Does nothing if [level] is `Level.OFF`, `Level.ERROR` or `Level.INFO`.
          *
          * @param message A lambda that returns the message to be logged.
          */

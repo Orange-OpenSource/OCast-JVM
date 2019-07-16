@@ -27,7 +27,7 @@ import org.xml.sax.InputSource
  * For instance:
  * val xml = <foo><bar><baz>BAZ</baz></bar></foo>
  * val rootXMLElement = XMLParser().parse(xml)
- * val bazXMLElement = rootXMLElement["foo"]["bar"]["baz"]
+ * val bazXMLElement = rootXMLElement`["foo"]["bar"]["baz"]`
  */
 object XMLParser {
 
