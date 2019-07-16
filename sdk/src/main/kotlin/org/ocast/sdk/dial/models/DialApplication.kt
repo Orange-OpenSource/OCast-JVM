@@ -24,11 +24,12 @@ import org.ocast.sdk.common.utils.XMLParser
 /**
  * This class represents a DIAL application.
  *
- * @param name The application name.
- * @param isStopAllowed Indicates if the application supports the stop operation.
- * @param state The current state of the application.
- * @param instancePath The application instance path. Used to build the instance URL.
- * @param additionalData The additional data for this application.
+ * @property name The application name.
+ * @property isStopAllowed Indicates if the application supports the stop operation.
+ * @property state The current state of the application.
+ * @property instancePath The application instance path. Used to build the instance URL.
+ * @property additionalData The additional data for this application.
+ * @constructor Creates an instance of [DialApplication].
  */
 internal data class DialApplication(
     val name: String,
@@ -38,6 +39,9 @@ internal data class DialApplication(
     val additionalData: OCastAdditionalData
 ) {
 
+    /**
+     * The companion object.
+     */
     companion object {
 
         /**
@@ -66,18 +70,14 @@ internal data class DialApplication(
     }
 
     /**
-     * This class represents a state of a DIAL application.
+     * This class represents the state of a DIAL application.
      */
     sealed class State {
 
-        /**
-         * Indicates​ ​that​ ​the​ ​application​ ​is​ ​installed​ ​and​ ​either starting​ ​or​ ​running.
-         */
+        /** Indicates​ ​that​ ​the​ ​application​ ​is​ ​installed​ ​and​ ​either starting​ ​or​ ​running. */
         object Running : State()
 
-        /**
-         * ​Indicates​ ​that​ ​the​ ​application​ ​is​ ​installed​ ​and​ ​not running.
-         */
+        /** ​Indicates​ ​that​ ​the​ ​application​ ​is​ ​installed​ ​and​ ​not running. */
         object Stopped : State()
 
         /**
@@ -87,9 +87,7 @@ internal data class DialApplication(
          */
         data class Installable(val url: URL) : State()
 
-        /**
-         * ​Indicates​ ​that​ ​the​ ​application​ ​is​ ​running​ ​but​ ​is​ ​not currently​ ​visible​ ​to​ ​the​ ​user.​
-         */
+        /** ​Indicates​ ​that​ ​the​ ​application​ ​is​ ​running​ ​but​ ​is​ ​not currently​ ​visible​ ​to​ ​the​ ​user. */
         object Hidden : State()
     }
 
@@ -116,18 +114,6 @@ internal data class DialApplication(
 
         /**
          * Decodes an XML string to a [DialApplication].
-         * Below is an XML string example:
-         * <?xml​ ​version="1.0"​ ​encoding="UTF-8"?>
-         * <service​ ​xmlns="urn:dial-multiscreen-org:schemas:dial"​ ​dialVer="1.7">
-         *     <name>Name</name>
-         *     <options allowStop="true"/>
-         *     <state>running</state>
-         *     <link rel="run" href="run"/>
-         *     <additionalData>
-         *         <ocast:X_OCAST_App2AppURL>wss://IP:4433/ocast</ocast:X_OCAST_App2AppURL>
-         *         <ocast:X_OCAST_Version>1.0</ocast:X_OCAST_Version >
-         *     </additionalData>
-         * </service>
          *
          * @param xml The XML string to decode.
          * @return The decoded application.
@@ -135,6 +121,19 @@ internal data class DialApplication(
          */
         @Throws(Exception::class)
         fun decode(xml: String): DialApplication {
+            // Below is an XML string example:
+            //
+            // <?xml​ ​version="1.0"​ ​encoding="UTF-8"?>
+            // <service​ ​xmlns="urn:dial-multiscreen-org:schemas:dial"​ ​dialVer="1.7">
+            //     <name>Name</name>
+            //     <options allowStop="true"/>
+            //     <state>running</state>
+            //     <link rel="run" href="run"/>
+            //     <additionalData>
+            //         <ocast:X_OCAST_App2AppURL>wss://IP:4433/ocast</ocast:X_OCAST_App2AppURL>
+            //         <ocast:X_OCAST_Version>1.0</ocast:X_OCAST_Version >
+            //     </additionalData>
+            // </service>
             val rootXMLElement = XMLParser.parse(xml)
             val serviceXMLElement = rootXMLElement[XML_SERVICE_ELEMENT_NAME]
             val name = serviceXMLElement[XML_NAME_ELEMENT_NAME].value
@@ -193,8 +192,9 @@ internal data class DialApplication(
 /**
  * This class represents the additional data related to OCast when receiving DIAL application information response.
  *
- * @param webSocketURL The OCast web socket URL.
- * @param version The OCast version.
+ * @property webSocketURL The OCast web socket URL.
+ * @property version The OCast version.
+ * @constructor Creates an instance of [OCastAdditionalData].
  */
 internal data class OCastAdditionalData(
     val webSocketURL: URI? = null,
