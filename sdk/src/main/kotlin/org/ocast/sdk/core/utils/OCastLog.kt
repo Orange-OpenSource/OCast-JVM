@@ -23,17 +23,22 @@ import java.util.logging.Logger
  */
 class OCastLog {
 
+    /**
+     * The companion object.
+     */
     companion object {
 
         /**
          * Indicates if debug is enabled.
-         * When false, this constant optimizes bytecode by removing code related to logs.
+         *
+         * When `false`, this constant optimizes bytecode by removing code related to logs.
          */
         @PublishedApi
         internal const val DEBUG = false
 
         /**
          * The current OCast log level.
+         *
          * Default value is `Level.OFF`.
          */
         @JvmStatic
@@ -61,6 +66,7 @@ class OCastLog {
 
         /**
          * Logs an error message.
+         *
          * Does nothing if [level] is `Level.OFF`.
          *
          * @param throwable The throwable associated with the error message.
@@ -73,6 +79,7 @@ class OCastLog {
 
         /**
          * Logs an info message.
+         *
          * Does nothing if [level] is `Level.OFF` or `Level.ERROR`.
          *
          * @param message A lambda that returns the message to be logged.
@@ -84,6 +91,7 @@ class OCastLog {
 
         /**
          * Logs a debug message.
+         *
          * Does nothing if [level] is `Level.OFF`, `Level.ERROR` or `Level.INFO`.
          *
          * @param message A lambda that returns the message to be logged.

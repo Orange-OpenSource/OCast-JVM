@@ -20,31 +20,49 @@ import org.ocast.sdk.core.models.MediaMetadata
 import org.ocast.sdk.core.models.MediaPlaybackStatus
 import org.ocast.sdk.core.models.UpdateStatus
 
+/**
+ * Represents a listener of OCast protocol events.
+ */
 interface EventListener {
 
     /**
-     * Playback Status of the player, sent at a rate defined by the frequency parameter of the prepare method.
+     * Tells the listener that a media playback status event was sent by a device.
+     *
+     * @param device The device that sent the event.
+     * @param mediaPlaybackStatus The playback status of the current media.
      */
     @JvmDefault
     fun onMediaPlaybackStatus(device: Device, mediaPlaybackStatus: MediaPlaybackStatus) {
     }
 
     /**
-     * Metadata sent each time is changed on the current playback.
+     * Tells the listener that a media metadata changed event was sent by a device.
+     *
+     * @param device The device that sent the event.
+     * @param mediaMetadata The changed media metadata.
      */
     @JvmDefault
     fun onMediaMetadataChanged(device: Device, mediaMetadata: MediaMetadata) {
     }
 
     /**
-     * Firmware update status of the device, sent each seconds for downloading, otherwise when state changes.
+     * Tells the listener that a firmware update status event was sent by a device.
+     *
+     * This event is sent each seconds when downloading a new firmware, otherwise when state changes.
+     *
+     * @param device The device that sent the event.
+     * @param updateStatus The firmware update status of the device.
      */
     @JvmDefault
     fun onUpdateStatus(device: Device, updateStatus: UpdateStatus) {
     }
 
     /**
-     * Receive custom event sent from web application
+     * Tells the listener that a custom event from a web application was sent by a device.
+     *
+     * @param device The device that sent the event.
+     * @param name The name of the web application where the event originated.
+     * @param params The parameters of the event.
      */
     @JvmDefault
     fun onCustomEvent(device: Device, name: String, params: String) {

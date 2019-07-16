@@ -16,20 +16,44 @@
 
 package org.ocast.sdk.core
 
+/**
+ * Represents a listener of events related to devices and discovery.
+ */
 interface DeviceListener {
 
+    /**
+     * Tells the listener that a device has been disconnected.
+     *
+     * @param device The disconnected device.
+     * @param error The error that caused the disconnection, or `null` if the disconnection was initiated by the user.
+     */
     @JvmDefault
     fun onDeviceDisconnected(device: Device, error: Throwable?) {
     }
 
+    /**
+     * Tells the listener that one or more devices have been discovered.
+     *
+     * @param devices The discovered devices.
+     */
     @JvmDefault
     fun onDevicesAdded(devices: List<Device>) {
     }
 
+    /**
+     * Tells the listener that one or more devices have been lost.
+     *
+     * @param devices The lost devices.
+     */
     @JvmDefault
     fun onDevicesRemoved(devices: List<Device>) {
     }
 
+    /**
+     * Tells the listener that the device discovery stopped.
+     *
+     * @param error The error, or `null` is the discovery was stopped by the user.
+     */
     @JvmDefault
     fun onDevicesChanged(devices: List<Device>) {
     }

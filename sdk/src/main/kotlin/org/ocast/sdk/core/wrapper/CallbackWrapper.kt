@@ -19,7 +19,8 @@ package org.ocast.sdk.core.wrapper
 import org.ocast.sdk.core.models.Consumer
 
 /**
- * A wrapper for callbacks.
+ * An interface which is implemented by objects that wrap callbacks.
+ *
  * For instance, this interface can be used to run callbacks on the main thread, which depends on the platform OCast is running on.
  */
 interface CallbackWrapper {
@@ -27,6 +28,7 @@ interface CallbackWrapper {
     /**
      * Wraps a [Consumer] into a new one.
      *
+     * @param T The type of the [Consumer] parameter.
      * @param consumer The consumer to wrap.
      * @return The wrapping consumer.
      */
