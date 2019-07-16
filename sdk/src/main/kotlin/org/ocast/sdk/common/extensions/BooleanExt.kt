@@ -17,14 +17,14 @@
 package org.ocast.sdk.common.extensions
 
 /**
- * Returns the boolean if it is not null, or true otherwise.
+ * Returns the boolean if it is not `null`, or `true` otherwise.
  */
 fun Boolean?.orTrue(): Boolean {
     return this ?: true
 }
 
 /**
- * Returns the boolean if it is not null, or false otherwise.
+ * Returns the boolean if it is not `null`, or `false` otherwise.
  */
 fun Boolean?.orFalse(): Boolean {
     return this ?: false
