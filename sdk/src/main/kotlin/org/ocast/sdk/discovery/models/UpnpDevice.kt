@@ -21,13 +21,14 @@ import org.ocast.sdk.common.utils.XMLParser
 import org.ocast.sdk.discovery.UpnpClient
 
 /**
- * This class represents an OCast device.
+ * This class represents an UPnP device.
  *
- * @param id The identifier of the device.
- * @param dialURL The URL of the DIAL service.
- * @param friendlyName The friendly name of the device.
- * @param manufacturer The manufacturer of the device.
- * @param modelName The model name.
+ * @property id The identifier of the device.
+ * @property dialURL The URL of the DIAL service.
+ * @property friendlyName The friendly name of the device.
+ * @property manufacturer The manufacturer of the device.
+ * @property modelName The model name.
+ * @constructor Creates an instance of [UpnpDevice].
  */
 data class UpnpDevice(
     val id: String,
@@ -38,11 +39,13 @@ data class UpnpDevice(
 ) {
 
     /**
-     * A constructor with default values.
-     * For internal use only.
+     * @constructor Creates an instance of [UpnpDevice] with default values. For internal use only.
      */
     internal constructor() : this("", URL("http://"), "", "", "")
 
+    /**
+     * The companion object.
+     */
     companion object {
 
         /**
@@ -74,22 +77,7 @@ data class UpnpDevice(
         const val XML_UDN_ELEMENT_NAME = "UDN"
 
         /**
-         * Decodes an HTTP response to a [UpnpDevice].
-         * Below is an XML string example:
-         * <?xml​ ​version="1.0"​ ​encoding="UTF-8"?>
-         * <root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:r="urn:restful-tv-org:schemas:upnp-dd">
-         *     <specVersion>
-         *         <major>1</major>
-         *         <minor>0</minor>
-         *     </specVersion>
-         *     <device>
-         *         <deviceType>urn:schemas-upnp-org:device:tvdevice:1</deviceType>
-         *         <friendlyName>LaCléTV-32F7</friendlyName>
-         *         <manufacturer>Innopia</manufacturer>
-         *         <modelName>cléTV</modelName>
-         *         <UDN>uuid:b042f955-9ae7-44a8-ba6c-0009743932f7</UDN>
-         *     </device>
-         * </root>
+         * Decodes an HTTP response to an [UpnpDevice].
          *
          * @param xml The XML body of the HTTP response.
          * @param headers The headers of the HTTP response.
@@ -98,6 +86,22 @@ data class UpnpDevice(
          */
         @Throws(Exception::class)
         fun decode(xml: String, headers: Map<String, String>): UpnpDevice {
+            // Below is an XML string example:
+            //
+            // <?xml​ ​version="1.0"​ ​encoding="UTF-8"?>
+            // <root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:r="urn:restful-tv-org:schemas:upnp-dd">
+            //     <specVersion>
+            //         <major>1</major>
+            //         <minor>0</minor>
+            //     </specVersion>
+            //     <device>
+            //         <deviceType>urn:schemas-upnp-org:device:tvdevice:1</deviceType>
+            //         <friendlyName>LaCléTV-32F7</friendlyName>
+            //         <manufacturer>Innopia</manufacturer>
+            //         <modelName>cléTV</modelName>
+            //         <UDN>uuid:b042f955-9ae7-44a8-ba6c-0009743932f7</UDN>
+            //     </device>
+            // </root>
             val applicationURLString = headers[APPLICATION_URL_HEADER_NAME] ?: headers[APPLICATION_URL_ALTERNATE_HEADER_NAME]
             val applicationURL = URL(applicationURLString)
             val rootXMLElement = XMLParser.parse(xml)

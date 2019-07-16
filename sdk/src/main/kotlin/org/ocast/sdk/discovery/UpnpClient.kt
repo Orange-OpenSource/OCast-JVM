@@ -27,10 +27,15 @@ import org.ocast.sdk.common.extensions.toMap
 import org.ocast.sdk.discovery.models.UpnpDevice
 
 /**
- * This class handles the retrieval of OCast devices through the UPnP protocol.
+ * This class handles the retrieval of information about devices through the UPnP protocol.
+ *
+ * @constructor Creates an instance of [UpnpClient].
  */
 internal open class UpnpClient {
 
+    /**
+     * The companion object.
+     */
     companion object {
 
         /**
@@ -42,7 +47,7 @@ internal open class UpnpClient {
          * Extracts the UUID of a device from a string.
          *
          * @param string The string to extract the UUID from. This is typically a Unique Service Name or a Unique Device Name.
-         * @return The extracted UUID, or null is the UUID could not be extracted.
+         * @return The extracted UUID, or `null` if the UUID could not be extracted.
          */
         fun extractUuid(string: String): String? {
             return UUID_REGEX.find(string)?.groupValues?.elementAtOrNull(1)
@@ -59,9 +64,10 @@ internal open class UpnpClient {
 
     /**
      * Retrieves a device.
+     *
      * This method launches a device description request according to the UPnP protocol.
      *
-     * @param location The device location from the SSDP M-SEARCH response.
+     * @param location The device location extracted from the SSDP M-SEARCH response.
      * @param onComplete The lambda that will be called when the request is completed.
      */
     open fun getDevice(location: String, onComplete: (Result<UpnpDevice>) -> Unit) {

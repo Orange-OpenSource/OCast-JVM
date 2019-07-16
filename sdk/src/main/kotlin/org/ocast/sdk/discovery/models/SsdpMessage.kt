@@ -17,9 +17,10 @@
 package org.ocast.sdk.discovery.models
 
 /**
- * The base class for SSDP messages.
+ * This class is the base class for all SSDP messages.
  *
- * @param startLine The start line of the message.
+ * @property startLine The start line of the message.
+ * @constructor Creates an instance of [SsdpMessage].
  */
 internal sealed class SsdpMessage(private val startLine: StartLine) {
 
@@ -45,13 +46,21 @@ internal sealed class SsdpMessage(private val startLine: StartLine) {
         /** The destination host address and port. */
         HOST,
 
-        /** Required by the HTTP Extension Framework. Value shall be ssdp:discover enclosed in double quotes. */
+        /**
+         * Required by the HTTP Extension Framework.
+         *
+         * Value shall be `ssdp:discover` enclosed in double quotes.
+         */
         MAN,
 
         /** The maximum wait time in seconds. */
         MX,
 
-        /** The search target. Describes the devices or the services being searched. */
+        /**
+         * The search target.
+         *
+         * Describes the devices or the services being searched.
+         */
         ST,
 
         /** The URL to the UPnP description of the device. */
@@ -64,6 +73,9 @@ internal sealed class SsdpMessage(private val startLine: StartLine) {
         USN;
     }
 
+    /**
+     * The companion object.
+     */
     companion object {
 
         /** Carriage Return Line Feed characters. */
@@ -73,7 +85,7 @@ internal sealed class SsdpMessage(private val startLine: StartLine) {
          * Converts data into an SSDP message.
          *
          * @param data The data to convert.
-         * @return The SSDP message or null if `data` could not be converted.
+         * @return The SSDP message or `null` if the data could not be converted.
          */
         fun fromData(data: ByteArray): SsdpMessage? {
             var message: SsdpMessage? = null
@@ -121,10 +133,10 @@ internal sealed class SsdpMessage(private val startLine: StartLine) {
         }
     }
 
-    /** The headers of this message. */
+    /** The headers of the message. */
     protected abstract val headers: HashMap<Header, String>
 
-    /** The raw data which represents this message. */
+    /** The raw data which represents the message. */
     val data: ByteArray
         get() {
             return listOf(startLine.value)
@@ -137,9 +149,10 @@ internal sealed class SsdpMessage(private val startLine: StartLine) {
 /**
  * This class represents an M-SEARCH request.
  *
- * @param host The destination host address and port.
- * @param maxTime The maximum wait time in seconds, or null for a unicast request.
- * @param searchTarget The search target.
+ * @property host The destination host address and port.
+ * @property maxTime The maximum wait time in seconds, or `null for a unicast request.
+ * @property searchTarget The search target.
+ * @constructor Creates an instance of [SsdpMSearchRequest].
  */
 internal data class SsdpMSearchRequest(
     val host: String,
@@ -163,10 +176,11 @@ internal data class SsdpMSearchRequest(
 /**
  * This class represents an M-SEARCH response.
  *
- * @param location The URL to the UPnP description of the device.
- * @param server The OS name /version and the product name / version.
- * @param usn The unique service name.
- * @param searchTarget The search target.
+ * @property location The URL to the UPnP description of the device.
+ * @property server The OS name /version and the product name / version.
+ * @property usn The unique ser`vice name.
+ * @property searchTarget The search target.
+ * @constructor Creates an instance of [SsdpMSearchRequest].
  */
 internal data class SsdpMSearchResponse(
     val location: String,

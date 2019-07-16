@@ -31,10 +31,11 @@ import org.ocast.sdk.discovery.models.SsdpMessage
 import org.ocast.sdk.discovery.models.UpnpDevice
 
 /**
- * This class represents the entry point for the discovery of OCast devices.
+ * This class is the entry point for the discovery of OCast devices.
  *
- * @param socket The SSDP socket.
- * @param upnpClient The client which performs UPnP requests.
+ * @property socket The SSDP socket.
+ * @property upnpClient The client which performs UPnP requests.
+ * @constructor Creates an instance of [DeviceDiscovery].
  */
 internal class DeviceDiscovery constructor(
     private val socket: UDPSocket = UDPSocket(),
@@ -46,22 +47,19 @@ internal class DeviceDiscovery constructor(
      */
     private enum class State {
 
-        /**
-         * The discovery is running. M-SEARCH requests are periodically at the specified [interval].
-         */
+        /** The discovery is running. M-SEARCH requests are sent periodically at the specified [interval]. */
         RUNNING,
 
-        /**
-         * The discovery is paused. No M-SEARCH request is sent, but the list of [devices] remains unchanged from when it was running.
-         */
+        /** The discovery is paused. No M-SEARCH request is sent, but the list of [devices] remains unchanged from when it was running. */
         PAUSED,
 
-        /**
-         * The discovery is stopped. No M-SEARCH request is sent and the list of [devices] has been cleared.
-         */
+        /** The discovery is stopped. No M-SEARCH request is sent and the list of [devices] has been cleared. */
         STOPPED
     }
 
+    /**
+     * The companion object.
+     */
     companion object {
 
         /** The default value for the interval. */
@@ -79,10 +77,10 @@ internal class DeviceDiscovery constructor(
         /** The value of the MX header in the M-SEARCH request. */
         private const val MSEARCH_MX_VALUE = 3
 
-        /** The name of the thread associated with the timer which refreshes devices. */
+        /** The name of the thread associated with the timer which refreshes the devices. */
         private val REFRESH_DEVICES_THREAD_NAME = "${DeviceDiscovery::class.simpleName} Refresh Devices Timer Thread"
 
-        /** The name of the thread associated with the timer which removes devices. */
+        /** The name of the thread associated with the timer which removes the devices. */
         private val REMOVE_DEVICES_THREAD_NAME = "${DeviceDiscovery::class.simpleName} Remove Devices Timer Thread"
     }
 
@@ -95,8 +93,9 @@ internal class DeviceDiscovery constructor(
 
     /**
      * The search targets which the searched devices should correspond to.
+     *
      * Setting this property results in sending an SSDP M-SEARCH request immediately if discovery is on-going.
-     * */
+     */
     var searchTargets = emptySet<String>()
         set(value) {
             field = value
@@ -107,8 +106,8 @@ internal class DeviceDiscovery constructor(
 
     /**
      * The interval to refresh the devices, in milliseconds.
-     * Minimum value is 5000 milliseconds.
-     * Setting this property results in sending an SSDP M-SEARCH request immediately if discovery is on-going.
+     *
+     * Minimum value is 5000 milliseconds. Setting this property results in sending an SSDP M-SEARCH request immediately if discovery is on-going.
      */
     var interval = DEFAULT_INTERVAL
         set(value) {
@@ -139,9 +138,10 @@ internal class DeviceDiscovery constructor(
 
     /**
      * Resumes the discovery process.
-     * New initialized instances of [DeviceDiscovery] begin in a paused state, so you need to call this method to start the discovery.
      *
-     * @return true if the discovery was successfully resumed, false if there was an issue or if the discovery was already running.
+     * Newly initialized instances of [DeviceDiscovery] begin in a paused state, so you need to call this method to start the discovery.
+     *
+     * @return `true` if the discovery was successfully resumed, `false` if there was an issue or if the discovery was already running.
      */
     fun resume(): Boolean {
         return if (state != State.RUNNING) {
@@ -160,9 +160,10 @@ internal class DeviceDiscovery constructor(
 
     /**
      * Stops the discovery process.
+     *
      * This clears the list of devices if the discovery was not in a paused state.
      *
-     * @return true if the discovery was successfully stopped, false if the discovery was already stopped.
+     * @return `true` if the discovery was successfully stopped, `false` if the discovery was already stopped.
      */
     fun stop(): Boolean {
         return if (state != State.STOPPED) {
@@ -176,9 +177,10 @@ internal class DeviceDiscovery constructor(
 
     /**
      * Pauses the discovery process.
+     *
      * This does not clear the list of devices.
      *
-     * @return true if the discovery was successfully paused, false if the discovery was not running.
+     * @return `true` if the discovery was successfully paused, `false` if the discovery was not running.
      */
     fun pause(): Boolean {
         return if (state == State.RUNNING) {
@@ -193,7 +195,7 @@ internal class DeviceDiscovery constructor(
     /**
      * Closes the socket and performs all the internal cleanup.
      *
-     * @param clearDevices Set to true to clear the devices, false to keep the devices list as is.
+     * @param clearDevices Set to `true` to clear the devices, `false` to keep the devices list as is.
      * @param error The error, if any.
      */
     private fun stop(clearDevices: Boolean, error: Throwable? = null) {
@@ -216,6 +218,7 @@ internal class DeviceDiscovery constructor(
 
     /**
      * Refreshes the devices.
+     *
      * This method launches an M-SEARCH request immediately and then periodically according to the [interval] property.
      */
     private fun refreshDevices() {
@@ -227,6 +230,7 @@ internal class DeviceDiscovery constructor(
 
     /**
      * Sends an SSDP M-SEARCH request.
+     *
      * Calling this method also schedules a task which will remove devices if they did not respond to the request.
      */
     private fun sendSsdpMSearchRequest() {
@@ -340,13 +344,15 @@ internal class DeviceDiscovery constructor(
         /**
          * Tells the listener that the discovery stopped.
          *
-         * @param error The error if there was an issue, or null if the discovery stopped normally.
+         * @param error The error if there was an issue, or `null` if the discovery stopped normally.
          */
         fun onDiscoveryStopped(error: Throwable?)
     }
 
     /**
      * An implementation of the [UDPSocket.Listener] interface for the discovery.
+     *
+     * @constructor Creates an instance of [SsdpSocketListener].
      */
     private inner class SsdpSocketListener : UDPSocket.Listener {
 
