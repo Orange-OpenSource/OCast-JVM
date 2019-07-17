@@ -21,6 +21,10 @@ buildscript {
     }
 }
 
+sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+}
+
 jar {
     manifest {
         attributes('Implementation-Title': project.name, 'Implementation-Version': project.version)
