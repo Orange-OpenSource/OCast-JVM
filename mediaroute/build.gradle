@@ -4,7 +4,6 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'org.jetbrains.dokka-android'
 apply from: project.file('../ktlint.gradle')
-apply from: project.file('../dependencies.gradle')
 apply from: project.file('../dokka.gradle')
 
 androidExtensions {
@@ -12,6 +11,8 @@ androidExtensions {
 }
 
 buildscript {
+    apply from: project.file('../dependencies.gradle')
+
     version = "2.0.0"
 
     repositories {
