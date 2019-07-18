@@ -29,7 +29,16 @@ import java.net.URL;
 
 public abstract class Device implements CallbackWrapperOwner {
 
+    public enum State {
+        
+        CONNECTING,
+        CONNECTED,
+        DISCONNECTING,
+        DISCONNECTED
+    }
+
     @NotNull private final UpnpDevice upnpDevice;
+    @NotNull private State state = State.DISCONNECTED;
     @Nullable private String applicationName;
     @Nullable private DeviceListener deviceListener;
     @Nullable private EventListener eventListener;
@@ -60,6 +69,15 @@ public abstract class Device implements CallbackWrapperOwner {
     @NotNull
     public String getModelName() {
         return upnpDevice.getModelName();
+    }
+
+    @NotNull
+    public State getState() {
+        return state;
+    }
+
+    protected void setState(@NotNull State state) {
+        this.state = state;
     }
 
     @Nullable

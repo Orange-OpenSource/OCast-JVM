@@ -50,14 +50,6 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         private const val EVENT_DEVICE_UPDATE_STATUS = "updateStatus"
     }
 
-    protected enum class State {
-
-        CONNECTING,
-        CONNECTED,
-        DISCONNECTING,
-        DISCONNECTED
-    }
-
     override fun getSearchTarget() = "urn:cast-ocast-org:service:cast:1"
     override fun getManufacturer() = "Orange SA"
 
@@ -70,14 +62,13 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         super.setApplicationName(applicationName)
     }
 
-    protected var state = State.DISCONNECTED
-        set(value) {
-            if (field != value) {
-                field = value
-                isApplicationRunning.set(false)
-                applicationSemaphore?.release()
-            }
+    override fun setState(state: State) {
+        if (this.state != state) {
+            isApplicationRunning.set(false)
+            applicationSemaphore?.release()
         }
+        super.setState(state)
+    }
     private val sequenceID = AtomicLong(0)
     protected var clientUuid = UUID.randomUUID().toString()
     protected var webSocket: WebSocket? = null
