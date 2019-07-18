@@ -56,6 +56,10 @@ android {
         }
     }
 
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
     libraryVariants.all { variant ->
         variant.outputs.all { output ->
             outputFileName = "${archivesBaseName}-${version}-${variant.buildType.name}.aar"
