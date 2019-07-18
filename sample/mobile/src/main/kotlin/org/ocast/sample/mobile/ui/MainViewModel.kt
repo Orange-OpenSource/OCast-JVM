@@ -21,7 +21,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import org.ocast.sdk.core.Device
-import org.ocast.sdk.core.models.Media
 import org.ocast.sdk.core.models.Metadata
 import org.ocast.sdk.core.models.PlaybackStatus
 
@@ -60,6 +59,6 @@ class MainViewModel : ViewModel() {
     }
 
     fun onSeekChanged(progressValue: Int) {
-        selectedDevice.value?.seekMediaTo(progressValue.toDouble(), {}, {})
+        selectedDevice.value?.seekMedia(progressValue.toDouble(), {}, {})
     }
 }

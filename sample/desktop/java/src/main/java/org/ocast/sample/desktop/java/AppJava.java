@@ -73,16 +73,21 @@ public class AppJava implements EventListener, DeviceListener {
     }
 
     private void prepareMedia(Device device) {
-        device.prepareMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
-            1,
-            "Big Buck Bunny",
-            "sampleAppJava",
-            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
-            Media.Type.VIDEO,
-            Media.TransferMode.STREAMED,
-            true,
-            null,
-            () -> {}, oCastError -> logger.log(Level.WARNING, "prepareMedia error: " + oCastError.getStatus())
+        Prepare params = new Prepare(
+                "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
+                1,
+                "Big Buck Bunny",
+                "sampleAppKotlin",
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+                Media.Type.VIDEO,
+                Media.TransferMode.STREAMED,
+                true
+        );
+        device.prepareMedia(
+                params,
+                null,
+                () -> { },
+                oCastError -> logger.log(Level.WARNING, "prepareMedia error: " + oCastError.getStatus())
         );
     }
 

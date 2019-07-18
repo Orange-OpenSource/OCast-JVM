@@ -36,6 +36,7 @@ import org.ocast.sdk.core.ReferenceDevice
 import org.ocast.sdk.core.models.Media
 import org.ocast.sdk.core.models.Metadata
 import org.ocast.sdk.core.models.PlaybackStatus
+import org.ocast.sdk.core.models.Prepare
 
 class MainActivity : AppCompatActivity(), EventListener {
 
@@ -102,19 +103,24 @@ class MainActivity : AppCompatActivity(), EventListener {
     }
 
     private fun prepareMedia(device: Device) {
-        device.prepareMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
+        val params = Prepare(
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
             1,
             "Big Buck Bunny",
             "sampleAppKotlin",
             "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
             Media.Type.VIDEO,
             Media.TransferMode.STREAMED,
-            true,
+            true
+        )
+        device.prepareMedia(
+            params,
             null, {
                 Log.d(TAG, "prepareMedia OK")
-            }, {
-                oCastError -> Log.e(TAG, "prepareMedia error ${oCastError.status}")
-            })
+            }, { oCastError ->
+                Log.e(TAG, "prepareMedia error ${oCastError.status}")
+            }
+        )
     }
 
     override fun onPlaybackStatus(device: Device, playbackStatus: PlaybackStatus) {

@@ -58,7 +58,7 @@ class OCastTest {
         // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
         assertEquals("89cf41b8-ef40-48d9-99c3-2a1951abcde5", deviceLayer.destination)
-        assertEquals(ReferenceDevice.DOMAIN_BROWSER, deviceLayer.source)
+        assertEquals(OCastDomain.BROWSER.value, deviceLayer.source)
         assertEquals(OCastRawDeviceLayer.Type.EVENT, deviceLayer.type)
         assertEquals(666L, deviceLayer.identifier)
         assertEquals(ReferenceDevice.SERVICE_APPLICATION, deviceLayer.message.service)
@@ -111,7 +111,7 @@ class OCastTest {
         // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
         assertEquals("89cf41b8-ef40-48d9-99c3-2a1951abcde5", deviceLayer.destination)
-        assertEquals(ReferenceDevice.DOMAIN_BROWSER, deviceLayer.source)
+        assertEquals(OCastDomain.BROWSER.value, deviceLayer.source)
         assertEquals(OCastRawDeviceLayer.Type.EVENT, deviceLayer.type)
         assertEquals(666L, deviceLayer.identifier)
         assertEquals(ReferenceDevice.SERVICE_MEDIA, deviceLayer.message.service)
@@ -172,7 +172,7 @@ class OCastTest {
         // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
         assertEquals("89cf41b8-ef40-48d9-99c3-2a1951abcde5", deviceLayer.destination)
-        assertEquals(ReferenceDevice.DOMAIN_BROWSER, deviceLayer.source)
+        assertEquals(OCastDomain.BROWSER.value, deviceLayer.source)
         assertEquals(OCastRawDeviceLayer.Type.REPLY, deviceLayer.type)
         assertEquals(666L, deviceLayer.identifier)
         assertEquals(ReferenceDevice.SERVICE_MEDIA, deviceLayer.message.service)
@@ -206,7 +206,7 @@ class OCastTest {
         ).options(options).build())
         val uuid = "89cf41b8-ef40-48d9-99c3-2a1951abcde5"
         val identifier = 666L
-        val deviceLayer = OCastCommandDeviceLayer(uuid, ReferenceDevice.DOMAIN_BROWSER, OCastRawDeviceLayer.Type.COMMAND, identifier, prepareMessage)
+        val deviceLayer = OCastCommandDeviceLayer(uuid, OCastDomain.BROWSER.value, OCastRawDeviceLayer.Type.COMMAND, identifier, prepareMessage)
 
         // When
         val layerMessage = JsonTools.encode(deviceLayer)

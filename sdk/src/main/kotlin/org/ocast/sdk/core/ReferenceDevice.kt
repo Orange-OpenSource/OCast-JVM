@@ -82,9 +82,6 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
 
         internal const val SERVICE_APPLICATION = "org.ocast.webapp"
 
-        internal const val DOMAIN_BROWSER = "browser"
-        internal const val DOMAIN_SETTINGS = "settings"
-
         private const val EVENT_MEDIA_PLAYBACK_STATUS = "playbackStatus"
         private const val EVENT_MEDIA_METADATA_CHANGED = "metadataChanged"
         private const val EVENT_DEVICE_UPDATE_STATUS = "updateStatus"
@@ -351,59 +348,47 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     //region Media commands
 
     override fun playMedia(position: Double, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        sendCommand(DOMAIN_BROWSER, MediaMessage(Play(position).build()), onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(Play(position).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun stopMedia(onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        sendCommand(DOMAIN_BROWSER, MediaMessage(Stop().build()), onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(Stop().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun pauseMedia(onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        sendCommand(DOMAIN_BROWSER, MediaMessage(Pause().build()), onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(Pause().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun resumeMedia(onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        sendCommand(DOMAIN_BROWSER, MediaMessage(Resume().build()), onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(Resume().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
-    override fun prepareMedia(url: String, updateFrequency: Int, title: String, subtitle: String?, logo: String?, mediaType: Media.Type, transferMode: Media.TransferMode, autoplay: Boolean, options: JSONObject?, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        sendCommand(DOMAIN_BROWSER, MediaMessage(Prepare(url, updateFrequency, title, subtitle, logo, mediaType, transferMode, autoplay).options(options).build()), onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+    override fun prepareMedia(params: Prepare, options: JSONObject?, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
+        send(MediaMessage(params.options(options).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun setMediaVolume(volume: Double, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        sendCommand(DOMAIN_BROWSER, MediaMessage(Volume(volume).build()), onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(Volume(volume).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
-    override fun setMediaTrack(type: Track.Type, trackID: String, enabled: Boolean, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        sendCommand(DOMAIN_BROWSER, MediaMessage(Track(type, trackID, enabled).build()), onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+    override fun setMediaTrack(params: Track, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
+        send(MediaMessage(params.build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
-    override fun seekMediaTo(position: Double, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        sendCommand(DOMAIN_BROWSER, MediaMessage(Seek(position).build()), onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+    override fun seekMedia(position: Double, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
+        send(MediaMessage(Seek(position).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun muteMedia(mute: Boolean, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        sendCommand(DOMAIN_BROWSER, MediaMessage(Mute(mute).build()), onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(Mute(mute).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun getMediaPlaybackStatus(onSuccess: Consumer<PlaybackStatus>, onError: Consumer<OCastMediaError>) {
-        sendCommand(DOMAIN_BROWSER, MediaMessage(GetPlaybackStatus().build()), onSuccess, Consumer { onError.run(OCastMediaError(it)) }, PlaybackStatus::class.java)
+        send(MediaMessage(GetPlaybackStatus().build()), OCastDomain.BROWSER, PlaybackStatus::class.java, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun getMediaMetadata(onSuccess: Consumer<Metadata>, onError: Consumer<OCastMediaError>) {
-        sendCommand(DOMAIN_BROWSER, MediaMessage(GetMetadata().build()), onSuccess, Consumer { onError.run(OCastMediaError(it)) }, Metadata::class.java)
-    }
-
-    //endregion
-
-    //region Custom commands
-
-    override fun sendCustomCommand(name: String, service: String, params: JSONObject, options: JSONObject?, onSuccess: Consumer<JSONObject>, onError: Consumer<OCastError>) {
-        sendCommand(DOMAIN_BROWSER, OCastApplicationLayer(service, OCastDataLayerBuilder(name, params, options).build()), onSuccess, onError, JSONObject::class.java)
-    }
-
-    override fun sendCustomCommand(name: String, service: String, params: JSONObject, options: JSONObject?, onSuccess: Runnable, onError: Consumer<OCastError>) {
-        sendCommand(DOMAIN_BROWSER, OCastApplicationLayer(service, OCastDataLayerBuilder(name, params, options).build()), onSuccess, onError)
+        send(MediaMessage(GetMetadata().build()), OCastDomain.BROWSER, Metadata::class.java, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     //endregion
@@ -411,52 +396,56 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     //region Settings device commands
 
     override fun getUpdateStatus(onSuccess: Consumer<UpdateStatus>, onError: Consumer<OCastDeviceSettingsError>) {
-        sendCommand(DOMAIN_SETTINGS, DeviceMessage(GetUpdateStatus().build()), onSuccess, Consumer { onError.run(OCastDeviceSettingsError(it)) }, UpdateStatus::class.java)
+        send(DeviceMessage(GetUpdateStatus().build()), OCastDomain.SETTINGS, UpdateStatus::class.java, onSuccess, Consumer { onError.run(OCastDeviceSettingsError(it)) })
     }
 
-    override fun getDeviceID(onSuccess: Consumer<DeviceID>, onError: Consumer<OCastDeviceSettingsError>) {
-        sendCommand(DOMAIN_SETTINGS, DeviceMessage(GetDeviceID().build()), onSuccess, Consumer { onError.run(OCastDeviceSettingsError(it)) }, DeviceID::class.java)
+    override fun getDeviceID(onSuccess: Consumer<String>, onError: Consumer<OCastDeviceSettingsError>) {
+        send(DeviceMessage(GetDeviceID().build()), OCastDomain.SETTINGS, DeviceID::class.java, { onSuccess.run(it.id) }, { onError.run(OCastDeviceSettingsError(it)) })
     }
 
     //endregion
 
     //region Settings input commands
 
-    override fun sendKeyPressed(keyPressed: KeyPressed, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
-        sendCommand(DOMAIN_SETTINGS, InputMessage(keyPressed.build()), onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
+    override fun sendKeyEvent(keyPressed: KeyPressed, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
+        send(InputMessage(keyPressed.build()), OCastDomain.SETTINGS, onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
     }
 
     override fun sendMouseEvent(mouseEvent: MouseEvent, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
-        sendCommand(DOMAIN_SETTINGS, InputMessage(mouseEvent.build()), onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
+        send(InputMessage(mouseEvent.build()), OCastDomain.SETTINGS, onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
     }
 
     override fun sendGamepadEvent(gamepadEvent: GamepadEvent, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
-        sendCommand(DOMAIN_SETTINGS, InputMessage(gamepadEvent.build()), onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
+        send(InputMessage(gamepadEvent.build()), OCastDomain.SETTINGS, onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
     }
 
     //endregion
 
-    protected fun <T> sendCommand(domain: String, commandMessage: OCastApplicationLayer<T>, onSuccess: Runnable, onError: Consumer<OCastError>) {
-        sendCommand(domain, commandMessage, Consumer { onSuccess.run() }, onError, Unit::class.java)
+    //region Custom commands
+
+    override fun <T : Any?> send(message: OCastApplicationLayer<T>, domain: OCastDomain, onSuccess: Runnable, onError: Consumer<OCastError>) {
+        send(message, domain, Unit::class.java, Consumer { onSuccess.run() }, onError)
     }
 
-    protected fun <T, U> sendCommand(domain: String, commandMessage: OCastApplicationLayer<T>, onSuccess: Consumer<U>, onError: Consumer<OCastError>, replyClass: Class<U>) {
+    override fun <T : Any?, S : Any?> send(message: OCastApplicationLayer<T>, domain: OCastDomain, replyClass: Class<S>, onSuccess: Consumer<S>, onError: Consumer<OCastError>) {
         val id = generateSequenceID()
         try {
             replyCallbacksBySequenceID[id] = ReplyCallback(replyClass, onSuccess, onError)
-            val deviceLayer = OCastCommandDeviceLayer(clientUuid, domain, OCastRawDeviceLayer.Type.COMMAND, id, commandMessage)
-            val layerMessage = JsonTools.encode(deviceLayer)
+            val deviceLayer = OCastCommandDeviceLayer(clientUuid, domain.value, OCastRawDeviceLayer.Type.COMMAND, id, message)
+            val deviveLayerString = JsonTools.encode(deviceLayer)
             // Do not start application when sending settings commands
-            sendToWebSocket(id, layerMessage, domain == DOMAIN_BROWSER, onError)
+            sendToWebSocket(id, deviveLayerString, domain == OCastDomain.BROWSER, onError)
         } catch (exception: Exception) {
             replyCallbacksBySequenceID.remove(id)
             onError.wrapRun(OCastError("Unable to get string from data", exception))
         }
     }
 
-    protected fun sendToWebSocket(id: Long, layerMessage: String, startApplicationIfNeeded: Boolean, onError: Consumer<OCastError>) {
+    //endregion
+
+    protected fun sendToWebSocket(id: Long, message: String, startApplicationIfNeeded: Boolean, onError: Consumer<OCastError>) {
         val send = {
-            if (webSocket?.send(layerMessage) == false) {
+            if (webSocket?.send(message) == false) {
                 replyCallbacksBySequenceID.remove(id)
                 onError.wrapRun(OCastError("Unable to send message"))
             }

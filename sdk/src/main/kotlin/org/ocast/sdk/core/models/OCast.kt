@@ -35,6 +35,12 @@ import org.ocast.sdk.core.utils.RawJsonDeserializer
  */
 class SSLConfiguration(val trustManager: X509TrustManager, val socketFactory: SSLSocketFactory, val hostnameVerifier: HostnameVerifier)
 
+enum class OCastDomain(val value: String) {
+
+    BROWSER("browser"),
+    SETTINGS("settings")
+}
+
 //region Device layer
 
 /**
@@ -177,11 +183,11 @@ open class OCastCommandParams(
 
     private val builder by lazy { OCastDataLayerBuilder(name, this) }
 
-    fun build(): OCastDataLayer<OCastCommandParams> {
+    internal fun build(): OCastDataLayer<OCastCommandParams> {
         return builder.build()
     }
 
-    fun options(options: JSONObject?) = apply { builder.options(options) }
+    internal fun options(options: JSONObject?) = apply { builder.options(options) }
 }
 
 open class OCastDataLayerBuilder<T>(

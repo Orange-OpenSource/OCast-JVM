@@ -146,24 +146,24 @@ public abstract class Device implements CallbackWrapperOwner {
     public abstract void stopMedia(@NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
     public abstract void pauseMedia(@NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
     public abstract void resumeMedia(@NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
-    public abstract void prepareMedia(@NotNull String url, int updateFrequency, @NotNull String title, @Nullable String subtitle, @Nullable String logo, @NotNull Media.Type mediaType, @NotNull Media.TransferMode transferMode, boolean autoplay, @Nullable JSONObject options, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
+    public abstract void prepareMedia(@NotNull Prepare params, @Nullable JSONObject options, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
     public abstract void setMediaVolume(double volume, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
-    public abstract void setMediaTrack(@NotNull Track.Type type, @NotNull String trackID, boolean enabled, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
-    public abstract void seekMediaTo(double position, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
+    public abstract void setMediaTrack(@NotNull Track params, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
+    public abstract void seekMedia(double position, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
     public abstract void muteMedia(boolean mute, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
     public abstract void getMediaPlaybackStatus(@NotNull Consumer<PlaybackStatus> onSuccess, @NotNull Consumer<OCastMediaError> onError);
     public abstract void getMediaMetadata(@NotNull Consumer<Metadata> onSuccess, @NotNull Consumer<OCastMediaError> onError);
 
     // Settings device commands
     public abstract void getUpdateStatus(@NotNull Consumer<UpdateStatus> onSuccess, @NotNull Consumer<OCastDeviceSettingsError> onError);
-    public abstract void getDeviceID(@NotNull Consumer<DeviceID> onSuccess, @NotNull Consumer<OCastDeviceSettingsError> onError);
+    public abstract void getDeviceID(@NotNull Consumer<String> onSuccess, @NotNull Consumer<OCastDeviceSettingsError> onError);
 
     // Settings input commands
-    public abstract void sendKeyPressed(@NotNull KeyPressed keyPressed, @NotNull Runnable onSuccess, @NotNull Consumer<OCastInputSettingsError> onError);
+    public abstract void sendKeyEvent(@NotNull KeyPressed keyPressed, @NotNull Runnable onSuccess, @NotNull Consumer<OCastInputSettingsError> onError);
     public abstract void sendMouseEvent(@NotNull MouseEvent mouseEvent, @NotNull Runnable onSuccess, @NotNull Consumer<OCastInputSettingsError> onError);
     public abstract void sendGamepadEvent(@NotNull GamepadEvent gamepadEvent, @NotNull Runnable onSuccess, @NotNull Consumer<OCastInputSettingsError> onError);
 
     // Custom commands
-    public abstract void sendCustomCommand(@NotNull String name, @NotNull String service, @NotNull JSONObject params, @Nullable JSONObject options, @NotNull Consumer<JSONObject> onSuccess, @NotNull Consumer<OCastError> onError);
-    public abstract void sendCustomCommand(@NotNull String name, @NotNull String service, @NotNull JSONObject params, @Nullable JSONObject options, @NotNull Runnable onSuccess, @NotNull Consumer<OCastError> onError);
+    public abstract <T> void send(@NotNull OCastApplicationLayer<T> message, @NotNull OCastDomain domain, @NotNull Runnable onSuccess, @NotNull Consumer<OCastError> onError);
+    public abstract <T, S> void send(@NotNull OCastApplicationLayer<T> message, @NotNull OCastDomain domain, @NotNull Class<S> replyClass, @NotNull Consumer<S> onSuccess, @NotNull Consumer<OCastError> onError);
 }
