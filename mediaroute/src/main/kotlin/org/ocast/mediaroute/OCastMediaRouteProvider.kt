@@ -30,13 +30,13 @@ import androidx.mediarouter.media.MediaRouteDescriptor
 import androidx.mediarouter.media.MediaRouteDiscoveryRequest
 import androidx.mediarouter.media.MediaRouteProvider
 import androidx.mediarouter.media.MediaRouteProviderDescriptor
-import java.util.Collections
 import org.ocast.mediaroute.models.MediaRouteDevice
 import org.ocast.sdk.core.Device
+import org.ocast.sdk.core.DeviceCenter
 import org.ocast.sdk.core.DeviceListener
-import org.ocast.sdk.core.OCastCenter
+import java.util.Collections
 
-internal class OCastMediaRouteProvider(context: Context, private val oCastCenter: OCastCenter, private val mainHandler: Handler) : MediaRouteProvider(context) {
+internal class OCastMediaRouteProvider(context: Context, private val deviceCenter: DeviceCenter, private val mainHandler: Handler) : MediaRouteProvider(context) {
 
     internal companion object {
         internal const val FILTER_CATEGORY_OCAST = "org.ocast.CATEGORY_OCAST"
@@ -48,7 +48,7 @@ internal class OCastMediaRouteProvider(context: Context, private val oCastCenter
     private var isActiveScan = false
 
     init {
-        oCastCenter.addDeviceListener(OCastMediaRouteDeviceListener())
+        deviceCenter.addDeviceListener(OCastMediaRouteDeviceListener())
     }
 
     private fun createMediaRouteDescriptor(device: Device): MediaRouteDescriptor {
@@ -83,10 +83,10 @@ internal class OCastMediaRouteProvider(context: Context, private val oCastCenter
             // onConnectionStateChanged(false) is not necessarily called when changing WiFi network
             // This is why stopDiscovery is called here
             // Otherwise the list of devices is not cleared
-            oCastCenter.stopDiscovery()
-            oCastCenter.resumeDiscovery(isActiveScan)
+            deviceCenter.stopDiscovery()
+            deviceCenter.resumeDiscovery(isActiveScan)
         } else {
-            oCastCenter.stopDiscovery()
+            deviceCenter.stopDiscovery()
         }
     }
 
@@ -103,14 +103,14 @@ internal class OCastMediaRouteProvider(context: Context, private val oCastCenter
             @Suppress("DEPRECATION")
             val isWifiConnected = activeNetwork?.isConnectedOrConnecting == true && activeNetwork.type == ConnectivityManager.TYPE_WIFI
             if (isWifiConnected) {
-                oCastCenter.resumeDiscovery(isActiveScan)
+                deviceCenter.resumeDiscovery(isActiveScan)
             }
         } else {
             if (isWifiMonitorReceiverRegistered) {
                 context.unregisterReceiver(wifiMonitorReceiver)
                 isWifiMonitorReceiverRegistered = false
             }
-            oCastCenter.stopDiscovery()
+            deviceCenter.stopDiscovery()
         }
     }
 

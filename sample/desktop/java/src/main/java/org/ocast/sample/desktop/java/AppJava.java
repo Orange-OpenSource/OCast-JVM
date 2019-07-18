@@ -19,7 +19,7 @@ package org.ocast.sample.desktop.java;
 import org.jetbrains.annotations.NotNull;
 import org.ocast.sdk.core.Device;
 import org.ocast.sdk.core.DeviceListener;
-import org.ocast.sdk.core.OCastCenter;
+import org.ocast.sdk.core.DeviceCenter;
 import org.ocast.sdk.core.EventListener;
 import org.ocast.sdk.core.ReferenceDevice;
 import org.ocast.sdk.core.models.*;
@@ -34,7 +34,7 @@ public class AppJava implements EventListener, DeviceListener {
     private final CountDownLatch latch = new CountDownLatch(1);
     private final Logger logger = Logger.getLogger("sampleAppJava");
 
-    private final OCastCenter oCastCenter;
+    private final DeviceCenter deviceCenter;
 
     public static void main(String[] args) {
         AppJava main = new AppJava();
@@ -42,20 +42,20 @@ public class AppJava implements EventListener, DeviceListener {
     }
 
     private AppJava() {
-        oCastCenter = new OCastCenter();
-        oCastCenter.addDeviceListener(this);
-        oCastCenter.addEventListener(this);
-        oCastCenter.registerDevice(ReferenceDevice.class);
+        deviceCenter = new DeviceCenter();
+        deviceCenter.addDeviceListener(this);
+        deviceCenter.addEventListener(this);
+        deviceCenter.registerDevice(ReferenceDevice.class);
         OCastLog.setLevel(OCastLog.Level.ALL);
     }
 
     private void run() {
         try {
             logger.log(Level.INFO, "Application launched");
-            oCastCenter.resumeDiscovery();
+            deviceCenter.resumeDiscovery();
             latch.await();
         } catch (Exception e) {
-            oCastCenter.stopDiscovery();
+            deviceCenter.stopDiscovery();
             logger.log(Level.WARNING, "error:", e);
             Thread.currentThread().interrupt();
         }

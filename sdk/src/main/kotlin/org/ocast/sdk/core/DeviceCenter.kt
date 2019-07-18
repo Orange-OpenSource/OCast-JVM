@@ -28,7 +28,7 @@ import org.ocast.sdk.core.wrapper.SimpleCallbackWrapper
 import org.ocast.sdk.discovery.DeviceDiscovery
 import org.ocast.sdk.discovery.models.UpnpDevice
 
-open class OCastCenter : CallbackWrapperOwner {
+open class DeviceCenter : CallbackWrapperOwner {
 
     override var callbackWrapper: CallbackWrapper = SimpleCallbackWrapper()
         set(value) {
@@ -53,9 +53,9 @@ open class OCastCenter : CallbackWrapperOwner {
             ?.getConstructor(UpnpDevice::class.java)
             ?.newInstance(device)
             ?.apply {
-                deviceListener = this@OCastCenter.deviceListener
-                eventListener = this@OCastCenter.eventListener
-                callbackWrapper = this@OCastCenter.callbackWrapper
+                deviceListener = this@DeviceCenter.deviceListener
+                eventListener = this@DeviceCenter.eventListener
+                callbackWrapper = this@DeviceCenter.callbackWrapper
                 // Custom actions on custom device
                 onCreateDevice(this)
                 detectedDevices.add(this)
@@ -121,10 +121,11 @@ open class OCastCenter : CallbackWrapperOwner {
     //region Discovery listener
 
     private val deviceDiscoveryListener = object : DeviceDiscovery.Listener {
+
         override fun onDevicesAdded(devices: List<UpnpDevice>) {
             devices.forEach { upnpDevice ->
                 createDevice(upnpDevice)?.ifNotNull { device ->
-                    this@OCastCenter.deviceListener.onDeviceAdded(device)
+                    this@DeviceCenter.deviceListener.onDeviceAdded(device)
                 }
             }
         }
@@ -133,7 +134,7 @@ open class OCastCenter : CallbackWrapperOwner {
             devices.forEach { device ->
                 synchronized(detectedDevices) {
                     detectedDevices.firstOrNull { device.uuid == it.uuid }?.ifNotNull {
-                        this@OCastCenter.deviceListener.onDeviceRemoved(it)
+                        this@DeviceCenter.deviceListener.onDeviceRemoved(it)
                         removeDevice(it)
                     }
                 }
