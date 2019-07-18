@@ -133,7 +133,7 @@ open class DeviceCenter : CallbackWrapperOwner {
         override fun onDevicesRemoved(devices: List<UpnpDevice>) {
             devices.forEach { device ->
                 synchronized(detectedDevices) {
-                    detectedDevices.firstOrNull { device.uuid == it.uuid }?.ifNotNull {
+                    detectedDevices.firstOrNull { device.id == it.id }?.ifNotNull {
                         this@DeviceCenter.deviceListener.onDeviceRemoved(it)
                         removeDevice(it)
                     }

@@ -86,11 +86,11 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         get() {
             val protocol = if (sslConfiguration != null) "wss" else "ws"
             val port = if (sslConfiguration != null) "4433" else "4434"
-            return "$protocol://${applicationURL.host}:$port/ocast"
+            return "$protocol://${dialURL.host}:$port/ocast"
         }
 
     protected val replyCallbacksBySequenceID: MutableMap<Long, ReplyCallback<*>> = Collections.synchronizedMap(mutableMapOf())
-    private val dialClient = DialClient(applicationURL)
+    private val dialClient = DialClient(dialURL)
     protected var isApplicationRunning = AtomicBoolean(false)
     private var applicationSemaphore: Semaphore? = null
 

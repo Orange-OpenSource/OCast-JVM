@@ -23,16 +23,15 @@ import org.ocast.sdk.core.Device
 
 @Parcelize
 data class MediaRouteDevice(
-    var uuid: String,
+    var id: String,
     var friendlyName: String,
     var manufacturer: String,
-    var modelName: String,
-    var applicationURL: URL
+    var modelName: String
 ) : Parcelable {
 
     companion object {
         const val EXTRA_DEVICE = "org.ocast.mediaroute.extra.DEVICE"
     }
 
-    constructor(device: Device) : this(device.uuid, device.friendlyName, device.manufacturer, device.modelName, device.applicationURL)
+    constructor(device: Device) : this(device.id, device.friendlyName, device.manufacturer, device.modelName)
 }

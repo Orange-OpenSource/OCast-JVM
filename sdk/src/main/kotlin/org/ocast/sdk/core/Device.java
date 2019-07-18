@@ -43,13 +43,13 @@ public abstract class Device implements CallbackWrapperOwner {
     // Device configuration
 
     @NotNull
-    public String getUuid() {
-        return upnpDevice.getUuid();
+    public String getId() {
+        return upnpDevice.getId();
     }
 
     @NotNull
-    public URL getApplicationURL() {
-        return upnpDevice.getApplicationURL();
+    protected URL getDialURL() {
+        return upnpDevice.getDialURL();
     }
 
     @NotNull

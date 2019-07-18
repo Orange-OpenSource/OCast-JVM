@@ -103,11 +103,11 @@ internal class UpnpClientTest {
             val resultCaptor = argumentCaptor<Result<UpnpDevice>>()
             verify(callback, times(1)).invoke(resultCaptor.capture())
             val device = resultCaptor.firstValue.getOrNull()
-            assertEquals("http://127.0.0.1:8008/apps", device?.applicationURL.toString())
+            assertEquals("http://127.0.0.1:8008/apps", device?.dialURL.toString())
             assertEquals("LaCléTV-32F7", device?.friendlyName)
             assertEquals("Innopia", device?.manufacturer)
             assertEquals("cléTV", device?.modelName)
-            assertEquals("b042f955-9ae7-44a8-ba6c-0009743932f7", device?.uuid)
+            assertEquals("b042f955-9ae7-44a8-ba6c-0009743932f7", device?.id)
         }
 
         @Test

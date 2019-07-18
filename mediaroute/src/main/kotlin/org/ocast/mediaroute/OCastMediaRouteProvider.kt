@@ -61,7 +61,7 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
         val controlFilter = IntentFilter().apply {
             addCategory(FILTER_CATEGORY_OCAST)
         }
-        return MediaRouteDescriptor.Builder(device.uuid, device.friendlyName)
+        return MediaRouteDescriptor.Builder(device.id, device.friendlyName)
             .setDescription(device.modelName)
             .addControlFilter(controlFilter)
             .setExtras(bundledDevice)
@@ -117,7 +117,7 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
     private inner class OCastMediaRouteDeviceListener : DeviceListener {
 
         override fun onDeviceAdded(device: Device) {
-            routeDescriptorsByUuid[device.uuid] = createMediaRouteDescriptor(device)
+            routeDescriptorsByUuid[device.id] = createMediaRouteDescriptor(device)
             publishRoutes()
         }
 
@@ -125,7 +125,7 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
             synchronized(routeDescriptorsByUuid) {
                 routeDescriptorsByUuid
                     .keys
-                    .firstOrNull { it == device.uuid }
+                    .firstOrNull { it == device.id }
                     ?.run { routeDescriptorsByUuid.remove(this) }
             }
             publishRoutes()
