@@ -23,7 +23,7 @@ import org.ocast.sdk.core.Device
 
 @Parcelize
 data class MediaRouteDevice(
-    var id: String,
+    var upnpID: String,
     var friendlyName: String,
     var manufacturer: String,
     var modelName: String
@@ -33,5 +33,5 @@ data class MediaRouteDevice(
         const val EXTRA_DEVICE = "org.ocast.mediaroute.extra.DEVICE"
     }
 
-    constructor(device: Device) : this(device.id, device.friendlyName, device.manufacturer, device.modelName)
+    constructor(device: Device) : this(device.upnpID, device.friendlyName, device.manufacturer, device.modelName)
 }

@@ -16,17 +16,17 @@
 
 package org.ocast.sdk.core
 
-import java.util.Collections
 import org.json.JSONObject
 import org.ocast.sdk.common.extensions.ifNotNull
-import org.ocast.sdk.core.models.Metadata
-import org.ocast.sdk.core.models.PlaybackStatus
+import org.ocast.sdk.core.models.MediaMetadata
+import org.ocast.sdk.core.models.MediaPlaybackStatus
 import org.ocast.sdk.core.models.UpdateStatus
 import org.ocast.sdk.core.wrapper.CallbackWrapper
 import org.ocast.sdk.core.wrapper.CallbackWrapperOwner
 import org.ocast.sdk.core.wrapper.SimpleCallbackWrapper
 import org.ocast.sdk.discovery.DeviceDiscovery
 import org.ocast.sdk.discovery.models.UpnpDevice
+import java.util.Collections
 
 open class DeviceCenter : CallbackWrapperOwner {
 
@@ -154,7 +154,7 @@ open class DeviceCenter : CallbackWrapperOwner {
         override fun onDevicesRemoved(devices: List<UpnpDevice>) {
             devices.forEach { device ->
                 synchronized(detectedDevices) {
-                    detectedDevices.firstOrNull { device.id == it.id }?.ifNotNull {
+                    detectedDevices.firstOrNull { device.id == it.upnpID }?.ifNotNull {
                         this@DeviceCenter.deviceListener.onDeviceRemoved(it)
                         removeDevice(it)
                     }
@@ -173,12 +173,12 @@ open class DeviceCenter : CallbackWrapperOwner {
 
     private val eventListener = object : EventListener {
 
-        override fun onPlaybackStatus(device: Device, playbackStatus: PlaybackStatus) {
-            eventListeners.wrapForEach { it.onPlaybackStatus(device, playbackStatus) }
+        override fun onMediaPlaybackStatus(device: Device, mediaPlaybackStatus: MediaPlaybackStatus) {
+            eventListeners.wrapForEach { it.onMediaPlaybackStatus(device, mediaPlaybackStatus) }
         }
 
-        override fun onMetadataChanged(device: Device, metadata: Metadata) {
-            eventListeners.wrapForEach { it.onMetadataChanged(device, metadata) }
+        override fun onMediaMetadataChanged(device: Device, mediaMetadata: MediaMetadata) {
+            eventListeners.wrapForEach { it.onMediaMetadataChanged(device, mediaMetadata) }
         }
 
         override fun onUpdateStatus(device: Device, updateStatus: UpdateStatus) {

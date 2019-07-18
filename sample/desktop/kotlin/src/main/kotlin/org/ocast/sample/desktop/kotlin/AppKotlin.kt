@@ -22,8 +22,8 @@ import org.ocast.sdk.core.DeviceListener
 import org.ocast.sdk.core.EventListener
 import org.ocast.sdk.core.ReferenceDevice
 import org.ocast.sdk.core.models.Media
-import org.ocast.sdk.core.models.PlaybackStatus
-import org.ocast.sdk.core.models.Prepare
+import org.ocast.sdk.core.models.MediaPlaybackStatus
+import org.ocast.sdk.core.models.MediaPrepareCommandParams
 import org.ocast.sdk.core.utils.OCastLog
 import java.util.concurrent.CountDownLatch
 import java.util.logging.Level
@@ -80,7 +80,7 @@ class AppKotlin : EventListener, DeviceListener {
     }
 
     private fun prepareMedia(device: Device) {
-        val params = Prepare(
+        val params = MediaPrepareCommandParams(
             "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
             1,
             "Big Buck Bunny",
@@ -93,8 +93,8 @@ class AppKotlin : EventListener, DeviceListener {
         device.prepareMedia(params, null, { }, { logger.log(Level.WARNING, "prepareMedia error: ${it.message}") })
     }
 
-    override fun onPlaybackStatus(device: Device, playbackStatus: PlaybackStatus) {
-        logger.log(Level.INFO, "[{${device.friendlyName}}] onPlaybackStatus: progress=${playbackStatus.position} state=${playbackStatus.state}")
+    override fun onMediaPlaybackStatus(device: Device, mediaPlaybackStatus: MediaPlaybackStatus) {
+        logger.log(Level.INFO, "[{${device.friendlyName}}] onMediaPlaybackStatus: progress=${mediaPlaybackStatus.position} state=${mediaPlaybackStatus.state}")
     }
 
     override fun onDeviceAdded(device: Device) {

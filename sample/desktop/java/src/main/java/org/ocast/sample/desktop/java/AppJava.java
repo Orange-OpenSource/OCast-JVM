@@ -73,7 +73,7 @@ public class AppJava implements EventListener, DeviceListener {
     }
 
     private void prepareMedia(Device device) {
-        Prepare params = new Prepare(
+        MediaPrepareCommandParams params = new MediaPrepareCommandParams(
                 "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
                 1,
                 "Big Buck Bunny",
@@ -92,8 +92,8 @@ public class AppJava implements EventListener, DeviceListener {
     }
 
     @Override
-    public void onPlaybackStatus(@NotNull Device device, @NotNull PlaybackStatus playbackStatus) {
-        logger.log(Level.INFO, "[" + device.getFriendlyName() + "]" + "onPlaybackStatus: progress=" + playbackStatus.getPosition() + " state=" + playbackStatus.getState());
+    public void onMediaPlaybackStatus(@NotNull Device device, @NotNull MediaPlaybackStatus mediaPlaybackStatus) {
+        logger.log(Level.INFO, "[" + device.getFriendlyName() + "]" + "onMediaPlaybackStatus: progress=" + mediaPlaybackStatus.getPosition() + " state=" + mediaPlaybackStatus.getState());
     }
 
     @Override

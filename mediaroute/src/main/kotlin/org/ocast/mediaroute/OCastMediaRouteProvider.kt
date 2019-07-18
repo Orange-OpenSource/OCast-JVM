@@ -43,7 +43,7 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
         private const val TAG = "OCastMediaRouteProvider"
     }
 
-    private val routeDescriptorsByUuid = Collections.synchronizedMap(mutableMapOf<String, MediaRouteDescriptor>())
+    private val routeDescriptorsByUpnpID = Collections.synchronizedMap(mutableMapOf<String, MediaRouteDescriptor>())
     private var isWifiMonitorReceiverRegistered = false
 
     init {
@@ -60,7 +60,7 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
         val controlFilter = IntentFilter().apply {
             addCategory(FILTER_CATEGORY_OCAST)
         }
-        return MediaRouteDescriptor.Builder(device.id, device.friendlyName)
+        return MediaRouteDescriptor.Builder(device.upnpID, device.friendlyName)
             .setDescription(device.modelName)
             .addControlFilter(controlFilter)
             .setExtras(bundledDevice)
@@ -69,9 +69,9 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
 
     private fun publishRoutes() {
         mainHandler.post {
-            descriptor = synchronized(routeDescriptorsByUuid) {
+            descriptor = synchronized(routeDescriptorsByUpnpID) {
                 MediaRouteProviderDescriptor.Builder()
-                    .apply { addRoutes(routeDescriptorsByUuid.values) }
+                    .apply { addRoutes(routeDescriptorsByUpnpID.values) }
                     .build()
             }
         }
@@ -116,16 +116,16 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
     private inner class OCastMediaRouteDeviceListener : DeviceListener {
 
         override fun onDeviceAdded(device: Device) {
-            routeDescriptorsByUuid[device.id] = createMediaRouteDescriptor(device)
+            routeDescriptorsByUpnpID[device.upnpID] = createMediaRouteDescriptor(device)
             publishRoutes()
         }
 
         override fun onDeviceRemoved(device: Device) {
-            synchronized(routeDescriptorsByUuid) {
-                routeDescriptorsByUuid
+            synchronized(routeDescriptorsByUpnpID) {
+                routeDescriptorsByUpnpID
                     .keys
-                    .firstOrNull { it == device.id }
-                    ?.run { routeDescriptorsByUuid.remove(this) }
+                    .firstOrNull { it == device.upnpID }
+                    ?.run { routeDescriptorsByUpnpID.remove(this) }
             }
             publishRoutes()
         }

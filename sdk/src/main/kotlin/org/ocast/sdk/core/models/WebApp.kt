@@ -26,7 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
  *
  * @param status
  */
-class WebAppConnectedStatus(
+class WebAppConnectedStatusEvent(
     @JsonProperty("status") val status: WebAppStatus
 )
 

@@ -53,7 +53,7 @@ class OCastTest {
         // When
         val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
         val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-        val webAppConnectedStatus = JsonTools.decode<WebAppConnectedStatus>(oCastData.params)
+        val webAppConnectedStatusEvent = JsonTools.decode<WebAppConnectedStatusEvent>(oCastData.params)
 
         // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
@@ -65,7 +65,7 @@ class OCastTest {
 
         assertEquals("connectedStatus", oCastData.name)
 
-        assertEquals(WebAppStatus.CONNECTED, webAppConnectedStatus.status)
+        assertEquals(WebAppStatus.CONNECTED, webAppConnectedStatusEvent.status)
     }
 
     @Test
@@ -106,7 +106,7 @@ class OCastTest {
         // When
         val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
         val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-        val metadataChanged = JsonTools.decode<Metadata>(oCastData.params)
+        val metadataChanged = JsonTools.decode<MediaMetadata>(oCastData.params)
 
         // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
@@ -130,7 +130,7 @@ class OCastTest {
         assertEquals("Audio DE", audioTrack?.label)
         assertEquals(true, audioTrack?.isEnabled)
 
-        assertEquals(0, metadataChanged.textTracks?.size)
+        assertEquals(0, metadataChanged.subtitleTracks?.size)
 
         assertNull(metadataChanged.videoTracks)
     }
@@ -167,7 +167,7 @@ class OCastTest {
         val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
         val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
         val replyData = JsonTools.decode<OCastDataLayer<OCastReplyEventParams>>(deviceLayer.message.data)
-        val playbackStatus = JsonTools.decode<PlaybackStatus>(oCastData.params)
+        val playbackStatus = JsonTools.decode<MediaPlaybackStatus>(oCastData.params)
 
         // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
@@ -182,7 +182,7 @@ class OCastTest {
         assertEquals(OCastMediaError.Status.SUCCESS.code, playbackStatus.code)
         assertEquals(OCastMediaError.Status.SUCCESS.code, replyData.params.code)
 
-        assertEquals(PlaybackStatus.State.PLAYING, playbackStatus.state)
+        assertEquals(MediaPlaybackStatus.State.PLAYING, playbackStatus.state)
         assertEquals(0.45, playbackStatus.volume, 0.00)
         assertEquals(1234.56, playbackStatus.position, 0.00)
         assertEquals(5678.9, playbackStatus.duration)
@@ -194,7 +194,7 @@ class OCastTest {
 
         // Given
         val options = JSONObject(hashMapOf("auth_cookie" to "azertyuiop1234"))
-        val prepareMessage = MediaMessage(Prepare(
+        val prepareMessage = MediaMessage(MediaPrepareCommandParams(
             "http://localhost",
             4,
             "La cité de la peur",

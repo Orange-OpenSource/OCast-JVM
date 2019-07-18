@@ -34,9 +34,9 @@ import org.ocast.sdk.core.Device
 import org.ocast.sdk.core.EventListener
 import org.ocast.sdk.core.ReferenceDevice
 import org.ocast.sdk.core.models.Media
-import org.ocast.sdk.core.models.Metadata
-import org.ocast.sdk.core.models.PlaybackStatus
-import org.ocast.sdk.core.models.Prepare
+import org.ocast.sdk.core.models.MediaMetadata
+import org.ocast.sdk.core.models.MediaPlaybackStatus
+import org.ocast.sdk.core.models.MediaPrepareCommandParams
 
 class MainActivity : AppCompatActivity(), EventListener {
 
@@ -103,7 +103,7 @@ class MainActivity : AppCompatActivity(), EventListener {
     }
 
     private fun prepareMedia(device: Device) {
-        val params = Prepare(
+        val params = MediaPrepareCommandParams(
             "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
             1,
             "Big Buck Bunny",
@@ -123,16 +123,16 @@ class MainActivity : AppCompatActivity(), EventListener {
         )
     }
 
-    override fun onPlaybackStatus(device: Device, playbackStatus: PlaybackStatus) {
+    override fun onMediaPlaybackStatus(device: Device, mediaPlaybackStatus: MediaPlaybackStatus) {
         if (mainViewModel.selectedDevice.value == device) {
-            Log.d(TAG, "onPlaybackStatus status=${playbackStatus.state} position=${playbackStatus.position}")
-            mainViewModel.playbackStatus.updateValue(playbackStatus)
+            Log.d(TAG, "onMediaPlaybackStatus status=${mediaPlaybackStatus.state} position=${mediaPlaybackStatus.position}")
+            mainViewModel.playbackStatus.updateValue(mediaPlaybackStatus)
         }
     }
 
-    override fun onMetadataChanged(device: Device, metadata: Metadata) {
+    override fun onMediaMetadataChanged(device: Device, mediaMetadata: MediaMetadata) {
         if (mainViewModel.selectedDevice.value == device) {
-            mainViewModel.mediaMetadata.updateValue(metadata)
+            mainViewModel.mediaMetadata.updateValue(mediaMetadata)
         }
     }
 
