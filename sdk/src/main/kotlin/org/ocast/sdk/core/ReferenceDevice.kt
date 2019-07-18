@@ -73,6 +73,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     protected var clientUuid = UUID.randomUUID().toString()
     protected var webSocket: WebSocket? = null
     protected var connectCallback: RunnableCallback? = null
+    protected var disconnectCallback: RunnableCallback? = null
     private val webSocketURL: String
         get() {
             val protocol = if (sslConfiguration != null) "wss" else "ws"
@@ -161,10 +162,10 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         }
     }
 
-    override fun disconnect() {
+    override fun disconnect(onSuccess: Runnable, onError: Consumer<OCastError>) {
         if (state != State.DISCONNECTING && state != State.DISCONNECTED) {
             state = State.DISCONNECTING
-            connectCallback = null
+            disconnectCallback = RunnableCallback(onSuccess, onError)
             webSocket?.disconnect()
         }
     }
@@ -184,11 +185,20 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 replyCallbacksBySequenceID.clear()
             }
             connectCallback?.ifNotNull { connectCallback ->
-                connectCallback.onError.wrapRun(OCastError("Socket has been disconnected", error))
-            }.orElse {
+                connectCallback.onError.wrapRun(OCastError("Socket did not connect", error))
+            }
+            disconnectCallback?.ifNotNull { disconnectCallback ->
+                if (error == null) {
+                    disconnectCallback.onSuccess.wrapRun()
+                } else {
+                    disconnectCallback.onError.wrapRun(OCastError("Socket did not disconnect properly", error))
+                }
+            }
+            if (connectCallback == null && disconnectCallback == null) {
                 deviceListener?.onDeviceDisconnected(this, error)
             }
             connectCallback = null
+            disconnectCallback = null
         }
     }
 

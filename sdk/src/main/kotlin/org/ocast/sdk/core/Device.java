@@ -135,7 +135,7 @@ public abstract class Device implements CallbackWrapperOwner {
 
     // Device commands
     public abstract void connect(@NotNull Runnable onSuccess, @NotNull Consumer<OCastError> onError);
-    public abstract void disconnect();
+    public abstract void disconnect(@NotNull Runnable onSuccess, @NotNull Consumer<OCastError> onError);
 
     // Application
     public abstract void startApplication(@NotNull Runnable onSuccess, @NotNull Consumer<OCastError> onError);
