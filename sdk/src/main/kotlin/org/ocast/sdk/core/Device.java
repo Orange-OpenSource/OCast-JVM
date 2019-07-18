@@ -62,6 +62,11 @@ public abstract class Device implements CallbackWrapperOwner {
     }
 
     @NotNull
+    public String getHost() {
+        return getDialURL().getHost();
+    }
+
+    @NotNull
     public String getFriendlyName() {
         return upnpDevice.getFriendlyName();
     }
@@ -90,20 +95,20 @@ public abstract class Device implements CallbackWrapperOwner {
     }
 
     @Nullable
-    public DeviceListener getDeviceListener() {
+    DeviceListener getDeviceListener() {
         return deviceListener;
     }
 
-    public void setDeviceListener(@Nullable DeviceListener deviceListener) {
+    void setDeviceListener(@Nullable DeviceListener deviceListener) {
         this.deviceListener = deviceListener;
     }
 
     @Nullable
-    public EventListener getEventListener() {
+    EventListener getEventListener() {
         return eventListener;
     }
 
-    public void setEventListener(@Nullable EventListener eventListener) {
+    void setEventListener(@Nullable EventListener eventListener) {
         this.eventListener = eventListener;
     }
 
