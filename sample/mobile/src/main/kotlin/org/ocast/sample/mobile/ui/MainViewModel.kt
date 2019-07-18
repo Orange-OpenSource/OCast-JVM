@@ -34,15 +34,15 @@ class MainViewModel : ViewModel() {
     val mediaPosition: LiveData<Double> = Transformations.map(playbackStatus) { it?.position }
     val mediaVolumeLevel: LiveData<Double> = Transformations.map(playbackStatus) { it?.volume?.let { volume -> volume * 1000 } }
     val mediaIsMute: LiveData<Boolean> = Transformations.map(playbackStatus) { it?.isMuted }
-    val mediaState: LiveData<Media.PlayerState> = Transformations.map(playbackStatus) { it?.state }
+    val mediaState: LiveData<PlaybackStatus.State> = Transformations.map(playbackStatus) { it?.state }
 
     val mediaMetadata = MutableLiveData<Metadata>()
     val mediaTitle: LiveData<String> = Transformations.map(mediaMetadata) { it?.title }
 
     fun onPlayPauseButtonClick() {
         when (mediaState.value) {
-            Media.PlayerState.PLAYING -> selectedDevice.value?.pauseMedia({}, {})
-            Media.PlayerState.PAUSED -> selectedDevice.value?.resumeMedia({}, {})
+            PlaybackStatus.State.PLAYING -> selectedDevice.value?.pauseMedia({}, {})
+            PlaybackStatus.State.PAUSED -> selectedDevice.value?.resumeMedia({}, {})
             else -> selectedDevice.value?.playMedia(0.0, {}, {})
         }
     }

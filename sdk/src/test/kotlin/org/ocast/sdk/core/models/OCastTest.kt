@@ -182,7 +182,7 @@ class OCastTest {
         assertEquals(OCastMediaError.Status.SUCCESS.code, playbackStatus.code)
         assertEquals(OCastMediaError.Status.SUCCESS.code, replyData.params.code)
 
-        assertEquals(Media.PlayerState.PLAYING, playbackStatus.state)
+        assertEquals(PlaybackStatus.State.PLAYING, playbackStatus.state)
         assertEquals(0.45, playbackStatus.volume, 0.00)
         assertEquals(1234.56, playbackStatus.position, 0.00)
         assertEquals(5678.9, playbackStatus.duration)

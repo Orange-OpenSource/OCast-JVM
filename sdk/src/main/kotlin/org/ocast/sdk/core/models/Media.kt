@@ -156,10 +156,23 @@ class PlaybackStatus(
     code: Int?,
     @JsonProperty("position") val position: Double,
     @JsonProperty("duration") val duration: Double?,
-    @JsonProperty("state") val state: Media.PlayerState,
+    @JsonProperty("state") val state: State,
     @JsonProperty("volume") val volume: Double,
     @get:JsonIgnore @field:JsonProperty("mute") val isMuted: Boolean
-) : OCastReplyEventParams(code)
+) : OCastReplyEventParams(code) {
+
+    enum class State(private val state: Int) {
+
+        UNKNOWN(0),
+        IDLE(1),
+        PLAYING(2),
+        PAUSED(3),
+        BUFFERING(4);
+
+        @JsonValue
+        fun toValue() = state
+    }
+}
 
 /**
  *
@@ -214,17 +227,6 @@ class Media {
     enum class TransferMode {
         @JsonProperty("buffered") BUFFERED,
         @JsonProperty("streamed") STREAMED
-    }
-
-    enum class PlayerState(private val state: Int) {
-        UNKNOWN(0),
-        IDLE(1),
-        PLAYING(2),
-        PAUSED(3),
-        BUFFERING(4);
-
-        @JsonValue
-        fun toValue() = state
     }
 }
 
