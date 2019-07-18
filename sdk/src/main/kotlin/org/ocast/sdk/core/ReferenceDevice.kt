@@ -16,21 +16,61 @@
 
 package org.ocast.sdk.core
 
+import org.json.JSONObject
+import org.ocast.sdk.common.extensions.ifNotNull
+import org.ocast.sdk.common.extensions.orElse
+import org.ocast.sdk.core.models.Consumer
+import org.ocast.sdk.core.models.DeviceID
+import org.ocast.sdk.core.models.DeviceMessage
+import org.ocast.sdk.core.models.GamepadEvent
+import org.ocast.sdk.core.models.GetDeviceID
+import org.ocast.sdk.core.models.GetMetadata
+import org.ocast.sdk.core.models.GetPlaybackStatus
+import org.ocast.sdk.core.models.GetUpdateStatus
+import org.ocast.sdk.core.models.InputMessage
+import org.ocast.sdk.core.models.KeyPressed
+import org.ocast.sdk.core.models.Media
+import org.ocast.sdk.core.models.MediaMessage
+import org.ocast.sdk.core.models.Metadata
+import org.ocast.sdk.core.models.MouseEvent
+import org.ocast.sdk.core.models.Mute
+import org.ocast.sdk.core.models.OCastApplicationLayer
+import org.ocast.sdk.core.models.OCastCommandDeviceLayer
+import org.ocast.sdk.core.models.OCastDataLayer
+import org.ocast.sdk.core.models.OCastDataLayerBuilder
+import org.ocast.sdk.core.models.OCastDeviceSettingsError
+import org.ocast.sdk.core.models.OCastError
+import org.ocast.sdk.core.models.OCastInputSettingsError
+import org.ocast.sdk.core.models.OCastMediaError
+import org.ocast.sdk.core.models.OCastRawDataLayer
+import org.ocast.sdk.core.models.OCastRawDeviceLayer
+import org.ocast.sdk.core.models.OCastReplyEventParams
+import org.ocast.sdk.core.models.Pause
+import org.ocast.sdk.core.models.Play
+import org.ocast.sdk.core.models.PlaybackStatus
+import org.ocast.sdk.core.models.Prepare
+import org.ocast.sdk.core.models.ReplyCallback
+import org.ocast.sdk.core.models.Resume
+import org.ocast.sdk.core.models.RunnableCallback
+import org.ocast.sdk.core.models.Seek
+import org.ocast.sdk.core.models.Stop
+import org.ocast.sdk.core.models.Track
+import org.ocast.sdk.core.models.UpdateStatus
+import org.ocast.sdk.core.models.Volume
+import org.ocast.sdk.core.models.WebAppConnectedStatus
+import org.ocast.sdk.core.models.WebAppStatus
+import org.ocast.sdk.core.utils.JsonTools
+import org.ocast.sdk.core.utils.OCastLog
+import org.ocast.sdk.dial.DialClient
+import org.ocast.sdk.dial.models.DialApplication
+import org.ocast.sdk.discovery.models.UpnpDevice
+import java.net.URI
 import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
-import org.json.JSONObject
-import org.ocast.sdk.common.extensions.ifNotNull
-import org.ocast.sdk.common.extensions.orElse
-import org.ocast.sdk.core.models.* // ktlint-disable no-wildcard-imports
-import org.ocast.sdk.core.utils.JsonTools
-import org.ocast.sdk.core.utils.OCastLog
-import org.ocast.sdk.dial.DialClient
-import org.ocast.sdk.dial.models.DialApplication
-import org.ocast.sdk.discovery.models.UpnpDevice
 
 open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSocket.Listener {
 
@@ -74,11 +114,11 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     protected var webSocket: WebSocket? = null
     protected var connectCallback: RunnableCallback? = null
     protected var disconnectCallback: RunnableCallback? = null
-    private val webSocketURL: String
+    private val settingsWebSocketURL: URI
         get() {
             val protocol = if (sslConfiguration != null) "wss" else "ws"
             val port = if (sslConfiguration != null) "4433" else "4434"
-            return "$protocol://${dialURL.host}:$port/ocast"
+            return URI("$protocol://${dialURL.host}:$port/ocast")
         }
 
     protected val replyCallbacksBySequenceID: MutableMap<Long, ReplyCallback<*>> = Collections.synchronizedMap(mutableMapOf())
@@ -154,12 +194,23 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             State.CONNECTED -> onSuccess.wrapRun()
             State.DISCONNECTING -> onError.wrapRun(OCastError("Device is disconnecting"))
             State.DISCONNECTED -> {
-                webSocket = WebSocket(webSocketURL, sslConfiguration, this)
-                state = State.CONNECTING
-                connectCallback = RunnableCallback(onSuccess, onError)
-                webSocket?.connect()
+                applicationName?.ifNotNull { applicationName ->
+                    dialClient.getApplication(applicationName) { result ->
+                        val webSocketURL = result.getOrNull()?.additionalData?.webSocketURL ?: settingsWebSocketURL
+                        connect(webSocketURL, onSuccess, onError)
+                    }
+                }.orElse {
+                    connect(settingsWebSocketURL, onSuccess, onError)
+                }
             }
         }
+    }
+
+    private fun connect(webSocketURL: URI, onSuccess: Runnable, onError: Consumer<OCastError>) {
+        webSocket = WebSocket(webSocketURL.toString(), sslConfiguration, this)
+        state = State.CONNECTING
+        connectCallback = RunnableCallback(onSuccess, onError)
+        webSocket?.connect()
     }
 
     override fun disconnect(onSuccess: Runnable, onError: Consumer<OCastError>) {
