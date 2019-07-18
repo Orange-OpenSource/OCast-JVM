@@ -45,7 +45,6 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
 
     private val routeDescriptorsByUuid = Collections.synchronizedMap(mutableMapOf<String, MediaRouteDescriptor>())
     private var isWifiMonitorReceiverRegistered = false
-    private var isActiveScan = false
 
     init {
         deviceCenter.addDeviceListener(OCastMediaRouteDeviceListener())
@@ -84,7 +83,7 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
             // This is why stopDiscovery is called here
             // Otherwise the list of devices is not cleared
             deviceCenter.stopDiscovery()
-            deviceCenter.resumeDiscovery(isActiveScan)
+            deviceCenter.resumeDiscovery()
         } else {
             deviceCenter.stopDiscovery()
         }
@@ -93,7 +92,7 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
     override fun onDiscoveryRequestChanged(request: MediaRouteDiscoveryRequest?) {
         if (request != null) {
             Log.d(TAG, "onDiscoveryRequest $request")
-            isActiveScan = request.isActiveScan
+            deviceCenter.discoveryInterval = if (request.isActiveScan) DeviceCenter.MINIMUM_DISCOVERY_INTERVAL else DeviceCenter.DEFAULT_DISCOVERY_INTERVAL
             if (!isWifiMonitorReceiverRegistered) {
                 isWifiMonitorReceiverRegistered = true
                 val wifiMonitorIntentFilter = IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION)
@@ -103,7 +102,7 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
             @Suppress("DEPRECATION")
             val isWifiConnected = activeNetwork?.isConnectedOrConnecting == true && activeNetwork.type == ConnectivityManager.TYPE_WIFI
             if (isWifiConnected) {
-                deviceCenter.resumeDiscovery(isActiveScan)
+                deviceCenter.resumeDiscovery()
             }
         } else {
             if (isWifiMonitorReceiverRegistered) {

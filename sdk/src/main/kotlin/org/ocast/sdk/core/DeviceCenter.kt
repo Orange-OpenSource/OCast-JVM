@@ -30,6 +30,15 @@ import org.ocast.sdk.discovery.models.UpnpDevice
 
 open class DeviceCenter : CallbackWrapperOwner {
 
+    companion object {
+
+        /** The default value for the discovery interval. */
+        const val DEFAULT_DISCOVERY_INTERVAL = DeviceDiscovery.DEFAULT_INTERVAL
+
+        /** The minimum value for the discovery interval. */
+        const val MINIMUM_DISCOVERY_INTERVAL = DeviceDiscovery.MINIMUM_INTERVAL
+    }
+
     override var callbackWrapper: CallbackWrapper = SimpleCallbackWrapper()
         set(value) {
             field = value
@@ -47,6 +56,12 @@ open class DeviceCenter : CallbackWrapperOwner {
 
     val devices: List<Device>
         get() = detectedDevices.toList()
+
+    var discoveryInterval: Long
+        get() = deviceDiscovery.interval
+        set(value) {
+            deviceDiscovery.interval = value
+        }
 
     private fun createDevice(device: UpnpDevice): Device? {
         return registeredDevicesByManufacturer[device.manufacturer]
@@ -108,14 +123,20 @@ open class DeviceCenter : CallbackWrapperOwner {
         oCastCenterListeners.remove(oCastCenterListener)
     }
 
-    @JvmOverloads fun resumeDiscovery(isActiveScan: Boolean = false) {
+    fun resumeDiscovery(): Boolean {
         deviceDiscovery.listener = deviceDiscoveryListener
-        deviceDiscovery.resume()
+
+        return deviceDiscovery.resume()
     }
 
-    fun stopDiscovery() {
+    fun stopDiscovery(): Boolean {
         deviceDiscovery.listener = null
-        deviceDiscovery.stop()
+
+        return deviceDiscovery.stop()
+    }
+
+    fun pauseDiscovery(): Boolean {
+        return deviceDiscovery.pause()
     }
 
     //region Discovery listener
