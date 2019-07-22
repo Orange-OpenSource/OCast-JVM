@@ -111,12 +111,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     protected var webSocket: WebSocket? = null
     protected var connectCallback: RunnableCallback? = null
     protected var disconnectCallback: RunnableCallback? = null
-    private val settingsWebSocketURL: URI
-        get() {
-            val protocol = if (sslConfiguration != null) "wss" else "ws"
-            val port = if (sslConfiguration != null) "4433" else "4434"
-            return URI("$protocol://${dialURL.host}:$port/ocast")
-        }
+    private val settingsWebSocketURL = URI("wss://${dialURL.host}:4434/ocast")
 
     protected val replyCallbacksBySequenceID: MutableMap<Long, ReplyCallback<*>> = Collections.synchronizedMap(mutableMapOf())
     private val dialClient = DialClient(dialURL)
@@ -185,7 +180,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         }
     }
 
-    override fun connect(onSuccess: Runnable, onError: Consumer<OCastError>) {
+    override fun connect(sslConfiguration: SSLConfiguration?, onSuccess: Runnable, onError: Consumer<OCastError>) {
         when (state) {
             State.CONNECTING -> onError.wrapRun(OCastError("Device is already connecting"))
             State.CONNECTED -> onSuccess.wrapRun()
@@ -194,16 +189,16 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 applicationName?.ifNotNull { applicationName ->
                     dialClient.getApplication(applicationName) { result ->
                         val webSocketURL = result.getOrNull()?.additionalData?.webSocketURL ?: settingsWebSocketURL
-                        connect(webSocketURL, onSuccess, onError)
+                        connect(webSocketURL, sslConfiguration, onSuccess, onError)
                     }
                 }.orElse {
-                    connect(settingsWebSocketURL, onSuccess, onError)
+                    connect(settingsWebSocketURL, sslConfiguration, onSuccess, onError)
                 }
             }
         }
     }
 
-    private fun connect(webSocketURL: URI, onSuccess: Runnable, onError: Consumer<OCastError>) {
+    private fun connect(webSocketURL: URI, sslConfiguration: SSLConfiguration?, onSuccess: Runnable, onError: Consumer<OCastError>) {
         webSocket = WebSocket(webSocketURL.toString(), sslConfiguration, this)
         state = State.CONNECTING
         connectCallback = RunnableCallback(onSuccess, onError)

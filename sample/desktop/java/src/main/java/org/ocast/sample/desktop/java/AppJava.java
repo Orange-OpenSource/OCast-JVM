@@ -65,11 +65,13 @@ public class AppJava implements EventListener, DeviceListener {
     private void startApplication(Device device) {
         device.setApplicationName("Orange-DefaultReceiver-DEV");
         device.connect(
+                null,
                 () -> device.startApplication(
-                    () -> prepareMedia(device),
-                    oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getMessage())
+                        () -> prepareMedia(device),
+                        oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getMessage())
                 ),
-                oCastError -> logger.log(Level.WARNING, "connect error: " + oCastError.getMessage()));
+                oCastError -> logger.log(Level.WARNING, "connect error: " + oCastError.getMessage())
+        );
     }
 
     private void prepareMedia(Device device) {
@@ -86,7 +88,7 @@ public class AppJava implements EventListener, DeviceListener {
         device.prepareMedia(
                 params,
                 null,
-                () -> { },
+                () -> {},
                 oCastError -> logger.log(Level.WARNING, "prepareMedia error: " + oCastError.getStatus())
         );
     }

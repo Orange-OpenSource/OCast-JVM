@@ -43,7 +43,6 @@ public abstract class Device implements CallbackWrapperOwner {
     @Nullable private DeviceListener deviceListener;
     @Nullable private EventListener eventListener;
     @NotNull private CallbackWrapper callbackWrapper = new SimpleCallbackWrapper();
-    @Nullable protected SSLConfiguration sslConfiguration;
 
     Device(@NotNull UpnpDevice upnpDevice) {
         this.upnpDevice = upnpDevice;
@@ -121,20 +120,11 @@ public abstract class Device implements CallbackWrapperOwner {
         this.callbackWrapper = callbackWrapper;
     }
 
-    @Nullable
-    SSLConfiguration getSSLConfiguration() {
-        return sslConfiguration;
-    }
-
-    public void setSSLConfiguration(@Nullable SSLConfiguration sslConfiguration) {
-        this.sslConfiguration = sslConfiguration;
-    }
-
     public abstract @NotNull String getSearchTarget();
     public abstract @NotNull String getManufacturer();
 
     // Device commands
-    public abstract void connect(@NotNull Runnable onSuccess, @NotNull Consumer<OCastError> onError);
+    public abstract void connect(@Nullable SSLConfiguration sslConfiguration, @NotNull Runnable onSuccess, @NotNull Consumer<OCastError> onError);
     public abstract void disconnect(@NotNull Runnable onSuccess, @NotNull Consumer<OCastError> onError);
 
     // Application

@@ -95,11 +95,11 @@ class MainActivity : AppCompatActivity(), EventListener {
 
     private fun connect(device: Device) {
         device.applicationName = "Orange-DefaultReceiver-DEV"
-        device.connect({
-            prepareMedia(device)
-        }, {
-            oCastError -> Log.e(TAG, "connect error ${oCastError.message}")
-        })
+        device.connect(
+            null,
+            { prepareMedia(device) },
+            { Log.e(TAG, "connect error ${it.message}") }
+        )
     }
 
     private fun prepareMedia(device: Device) {
@@ -115,11 +115,9 @@ class MainActivity : AppCompatActivity(), EventListener {
         )
         device.prepareMedia(
             params,
-            null, {
-                Log.d(TAG, "prepareMedia OK")
-            }, { oCastError ->
-                Log.e(TAG, "prepareMedia error ${oCastError.status}")
-            }
+            null,
+            { Log.d(TAG, "prepareMedia OK") },
+            { Log.e(TAG, "prepareMedia error ${it.status}") }
         )
     }
 

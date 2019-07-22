@@ -68,15 +68,16 @@ class AppKotlin : EventListener, DeviceListener {
 
     private fun startApplication(device: Device) {
         device.applicationName = "Orange-DefaultReceiver-DEV"
-        device.connect({
-            device.startApplication({
-                prepareMedia(device)
+        device.connect(
+            null, {
+                device.startApplication(
+                    { prepareMedia(device) },
+                    { logger.log(Level.WARNING, "startApplication error: ${it.message}") }
+                )
             }, { oCastError ->
-                logger.log(Level.WARNING, "startApplication error: ${oCastError.message}")
-            })
-        }, { oCastError ->
-            logger.log(Level.WARNING, "connect error: ${oCastError.message}")
-        })
+                logger.log(Level.WARNING, "connect error: ${oCastError.message}")
+            }
+        )
     }
 
     private fun prepareMedia(device: Device) {
@@ -90,7 +91,7 @@ class AppKotlin : EventListener, DeviceListener {
             Media.TransferMode.STREAMED,
             true
         )
-        device.prepareMedia(params, null, { }, { logger.log(Level.WARNING, "prepareMedia error: ${it.message}") })
+        device.prepareMedia(params, null, {}, { logger.log(Level.WARNING, "prepareMedia error: ${it.message}") })
     }
 
     override fun onMediaPlaybackStatus(device: Device, mediaPlaybackStatus: MediaPlaybackStatus) {
