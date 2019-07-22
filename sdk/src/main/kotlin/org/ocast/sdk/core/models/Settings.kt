@@ -119,7 +119,6 @@ class GamepadEventCommandParams(
         @JsonProperty("y") val y: Double,
         @JsonProperty("num") val num: Int
     )
-
 }
 
 //endregion

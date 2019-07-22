@@ -70,7 +70,7 @@ class ReferenceDeviceTest {
         // Then
         val updateStatusEvent = argumentCaptor<UpdateStatus>()
         verify(eventListener, times(1)).onUpdateStatus(eq(referenceDevice), updateStatusEvent.capture())
-        assertEquals(updateStatusEvent.firstValue.state, "downloading")
+        assertEquals(updateStatusEvent.firstValue.state, UpdateStatus.State.DOWNLOADING)
         assertEquals(updateStatusEvent.firstValue.progress, 50)
         assertEquals(updateStatusEvent.firstValue.version, "1.0")
     }
