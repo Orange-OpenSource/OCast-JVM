@@ -16,18 +16,18 @@
 
 package org.ocast.sample.desktop.kotlin
 
-import org.ocast.sdk.core.Device
-import org.ocast.sdk.core.DeviceListener
-import org.ocast.sdk.core.OCastCenter
-import org.ocast.sdk.core.EventListener
-import org.ocast.sdk.core.ReferenceDevice
-import org.ocast.sdk.core.models.Media
-import org.ocast.sdk.core.models.PlaybackStatus
-import org.ocast.sdk.core.utils.OCastLog
 import java.util.concurrent.CountDownLatch
 import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.system.exitProcess
+import org.ocast.sdk.core.Device
+import org.ocast.sdk.core.DeviceListener
+import org.ocast.sdk.core.EventListener
+import org.ocast.sdk.core.OCastCenter
+import org.ocast.sdk.core.ReferenceDevice
+import org.ocast.sdk.core.models.Media
+import org.ocast.sdk.core.models.PlaybackStatus
+import org.ocast.sdk.core.utils.OCastLog
 
 class AppKotlin : EventListener, DeviceListener {
 

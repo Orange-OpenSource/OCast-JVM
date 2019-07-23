@@ -16,9 +16,9 @@
 
 package org.ocast.sdk.discovery.models
 
+import java.net.URL
 import org.ocast.sdk.common.utils.XMLParser
 import org.ocast.sdk.discovery.UpnpClient
-import java.net.URL
 
 /**
  * This class represents an OCast device.

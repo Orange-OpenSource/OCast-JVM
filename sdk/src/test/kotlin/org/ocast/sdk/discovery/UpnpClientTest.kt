@@ -20,6 +20,8 @@ import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
+import java.util.Date
+import java.util.concurrent.TimeUnit
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import okhttp3.mockwebserver.MockResponse
@@ -29,16 +31,14 @@ import org.junit.Test
 import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import org.ocast.sdk.common.SynchronizedFunction1
-import org.ocast.sdk.discovery.models.UpnpDevice
-import org.ocast.sdk.common.removeXMLElement
 import org.ocast.sdk.common.HttpClientTest
+import org.ocast.sdk.common.SynchronizedFunction1
+import org.ocast.sdk.common.removeXMLElement
+import org.ocast.sdk.discovery.models.UpnpDevice
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PowerMockIgnore
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
-import java.util.Date
-import java.util.concurrent.TimeUnit
 
 /**
  * Unit tests for the [UpnpClient] class.

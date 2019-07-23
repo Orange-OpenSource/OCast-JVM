@@ -21,6 +21,8 @@ import android.os.Looper
 import androidx.mediarouter.media.MediaRouter
 import androidx.test.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -28,8 +30,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.ocast.mediaroute.models.MediaRouteDevice
 import org.ocast.sdk.core.ReferenceDevice
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class OCastMediaRouteHelperTest {

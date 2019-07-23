@@ -28,6 +28,9 @@ import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import java.net.URL
+import java.util.Timer
+import kotlin.concurrent.schedule
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -38,9 +41,6 @@ import org.mockito.Mockito
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Stubber
 import org.ocast.sdk.discovery.models.UpnpDevice
-import java.net.URL
-import java.util.Timer
-import kotlin.concurrent.schedule
 
 /**
  * Unit tests for the [DeviceDiscovery] class.

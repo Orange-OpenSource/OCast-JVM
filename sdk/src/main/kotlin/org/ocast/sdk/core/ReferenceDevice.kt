@@ -16,6 +16,12 @@
 
 package org.ocast.sdk.core
 
+import java.util.Collections
+import java.util.UUID
+import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import org.json.JSONObject
 import org.ocast.sdk.common.extensions.ifNotNull
 import org.ocast.sdk.common.extensions.orElse
@@ -25,12 +31,6 @@ import org.ocast.sdk.core.utils.OCastLog
 import org.ocast.sdk.dial.DialClient
 import org.ocast.sdk.dial.models.DialApplication
 import org.ocast.sdk.discovery.models.UpnpDevice
-import java.util.Collections
-import java.util.UUID
-import java.util.concurrent.Semaphore
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 
 open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSocket.Listener {
 

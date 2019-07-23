@@ -16,10 +16,10 @@
 
 package org.ocast.sdk.common
 
+import java.net.URL
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Before
-import java.net.URL
 
 /**
  * An abstract class for unit tests of HTTP clients.

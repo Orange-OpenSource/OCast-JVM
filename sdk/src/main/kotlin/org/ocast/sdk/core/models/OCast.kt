@@ -20,11 +20,11 @@ import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import org.json.JSONObject
-import org.ocast.sdk.core.utils.RawJsonDeserializer
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.X509TrustManager
+import org.json.JSONObject
+import org.ocast.sdk.core.utils.RawJsonDeserializer
 
 /**
  * SSL configuration

@@ -16,6 +16,7 @@
 
 package org.ocast.sdk.core
 
+import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -23,7 +24,6 @@ import okhttp3.WebSocketListener
 import org.ocast.sdk.common.extensions.orFalse
 import org.ocast.sdk.core.models.SSLConfiguration
 import org.ocast.sdk.core.utils.OCastLog
-import java.util.concurrent.TimeUnit
 
 /**
  * Class to manage the web socket connection
