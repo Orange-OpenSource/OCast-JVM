@@ -154,7 +154,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                             if (applicationSemaphore?.tryAcquire(60, TimeUnit.SECONDS) == true && applicationName == name && state == State.CONNECTED) {
                                 onSuccess.wrapRun()
                             } else {
-                                onError.wrapRun(OCastError("Failed to start $name, the web app connectedStatus event was not received"))
+                                onError.wrapRun(OCastError("Failed to start $name, the web app connected status event was not received"))
                             }
                             applicationSemaphore = null
                         }
