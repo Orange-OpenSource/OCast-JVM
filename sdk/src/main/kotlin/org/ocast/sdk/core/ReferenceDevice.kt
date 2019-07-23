@@ -111,7 +111,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     protected var webSocket: WebSocket? = null
     protected var connectCallback: RunnableCallback? = null
     protected var disconnectCallback: RunnableCallback? = null
-    private val settingsWebSocketURL = URI("wss://${dialURL.host}:4434/ocast")
+    private val settingsWebSocketURL = URI("wss://${dialURL.host}:4433/ocast")
 
     protected val replyCallbacksBySequenceID: MutableMap<Long, ReplyCallback<*>> = Collections.synchronizedMap(mutableMapOf())
     private val dialClient = DialClient(dialURL)
