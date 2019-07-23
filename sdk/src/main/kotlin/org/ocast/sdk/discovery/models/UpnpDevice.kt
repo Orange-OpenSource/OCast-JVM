@@ -23,15 +23,15 @@ import org.ocast.sdk.discovery.UpnpClient
 /**
  * This class represents an OCast device.
  *
- * @param uuid The Universally Unique IDentifier of the device.
- * @param applicationURL The URL of the Dial service.
+ * @param id The identifier of the device.
+ * @param dialURL The URL of the DIAL service.
  * @param friendlyName The friendly name of the device.
  * @param manufacturer The manufacturer of the device.
  * @param modelName The model name.
  */
 class UpnpDevice(
-    val uuid: String,
-    val applicationURL: URL,
+    val id: String,
+    val dialURL: URL,
     val friendlyName: String,
     val manufacturer: String,
     val modelName: String

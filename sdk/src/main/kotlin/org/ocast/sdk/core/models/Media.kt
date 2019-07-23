@@ -39,24 +39,24 @@ class MediaMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(Refere
  *
  * @param position position (in second)
  */
-class Play(
+class MediaPlayCommandParams(
     @JsonProperty("position") val position: Double = 0.0
 ) : OCastCommandParams("play")
 
 /**
  * Stop the media
  */
-class Stop : OCastCommandParams("stop")
+class MediaStopCommandParams : OCastCommandParams("stop")
 
 /**
  * Pause the media
  */
-class Pause : OCastCommandParams("pause")
+class MediaPauseCommandParams : OCastCommandParams("pause")
 
 /**
  * Resume the media
  */
-class Resume : OCastCommandParams("resume")
+class MediaResumeCommandParams : OCastCommandParams("resume")
 
 /**
  * Prepare the media
@@ -70,7 +70,7 @@ class Resume : OCastCommandParams("resume")
  * @param transferMode
  * @param autoplay
  */
-class Prepare(
+class MediaPrepareCommandParams(
     @JsonProperty("url")val url: String,
     @JsonProperty("frequency")val updateFrequency: Int,
     @JsonProperty("title")val title: String,
@@ -86,7 +86,7 @@ class Prepare(
  *
  * @param volume
  */
-class Volume(
+class MediaVolumeCommandParams(
     @JsonProperty("volume") val volume: Double
 ) : OCastCommandParams("volume")
 
@@ -97,14 +97,14 @@ class Volume(
  * @param trackID
  * @param isEnabled
  */
-class Track(
+class MediaTrackCommandParams(
     @JsonProperty("type") val type: Type,
     @JsonProperty("trackId") val trackID: String,
     @get:JsonIgnore @field:JsonProperty("enable") val isEnabled: Boolean
 ) : OCastCommandParams("track") {
 
     enum class Type {
-        @JsonProperty("text") TEXT,
+        @JsonProperty("text") SUBTITLE,
         @JsonProperty("audio") AUDIO,
         @JsonProperty("video") VIDEO
     }
@@ -115,7 +115,7 @@ class Track(
  *
  * @param position
  */
-class Seek(
+class MediaSeekCommandParams(
     @JsonProperty("position") val position: Double
 ) : OCastCommandParams("seek")
 
@@ -124,19 +124,19 @@ class Seek(
  *
  * @param isMuted
  */
-class Mute(
+class MediaMuteCommandParams(
     @get:JsonIgnore @field:JsonProperty("mute") val isMuted: Boolean
 ) : OCastCommandParams("mute")
 
 /**
  * Get playback status
  */
-class GetPlaybackStatus : OCastCommandParams("getPlaybackStatus")
+class MediaGetPlaybackStatusCommandParams : OCastCommandParams("getPlaybackStatus")
 
 /**
  * Get metadata
  */
-class GetMetadata : OCastCommandParams("getMetadata")
+class MediaGetMetadataCommandParams : OCastCommandParams("getMetadata")
 
 //endregion
 
@@ -152,14 +152,27 @@ class GetMetadata : OCastCommandParams("getMetadata")
  * @param volume
  * @param isMuted
  */
-class PlaybackStatus(
+class MediaPlaybackStatus(
     code: Int?,
     @JsonProperty("position") val position: Double,
     @JsonProperty("duration") val duration: Double?,
-    @JsonProperty("state") val state: Media.PlayerState,
+    @JsonProperty("state") val state: State,
     @JsonProperty("volume") val volume: Double,
     @get:JsonIgnore @field:JsonProperty("mute") val isMuted: Boolean
-) : OCastReplyEventParams(code)
+) : OCastReplyEventParams(code) {
+
+    enum class State(private val state: Int) {
+
+        UNKNOWN(0),
+        IDLE(1),
+        PLAYING(2),
+        PAUSED(3),
+        BUFFERING(4);
+
+        @JsonValue
+        fun toValue() = state
+    }
+}
 
 /**
  *
@@ -169,35 +182,36 @@ class PlaybackStatus(
  * @param subtitle
  * @param logo
  * @param mediaType
- * @param textTracks
+ * @param subtitleTracks
  * @param audioTracks
  * @param videoTracks
  */
-class Metadata(
+class MediaMetadata(
     code: Int?,
     @JsonProperty("title") val title: String,
     @JsonProperty("subtitle") val subtitle: String?,
     @JsonProperty("logo") val logo: String?,
     @JsonProperty("mediaType") val mediaType: Media.Type,
-    @JsonProperty("textTracks") val textTracks: List<TrackDescription>?,
-    @JsonProperty("audioTracks") val audioTracks: List<TrackDescription>?,
-    @JsonProperty("videoTracks") val videoTracks: List<TrackDescription>?
-) : OCastReplyEventParams(code)
+    @JsonProperty("textTracks") val subtitleTracks: List<Track>?,
+    @JsonProperty("audioTracks") val audioTracks: List<Track>?,
+    @JsonProperty("videoTracks") val videoTracks: List<Track>?
+) : OCastReplyEventParams(code) {
 
-/**
- * Track description
- *
- * @param language
- * @param label
- * @param isEnabled
- * @param id
- */
-class TrackDescription(
-    @JsonProperty("language") val language: String,
-    @JsonProperty("label") val label: String,
-    @get:JsonIgnore @field:JsonProperty("enable") val isEnabled: Boolean,
-    @JsonProperty("trackId") val id: String
-)
+    /**
+     * Track
+     *
+     * @param language
+     * @param label
+     * @param isEnabled
+     * @param id
+     */
+    class Track(
+        @JsonProperty("language") val language: String,
+        @JsonProperty("label") val label: String,
+        @get:JsonIgnore @field:JsonProperty("enable") val isEnabled: Boolean,
+        @JsonProperty("trackId") val id: String
+    )
+}
 
 //endregion
 
@@ -214,17 +228,6 @@ class Media {
     enum class TransferMode {
         @JsonProperty("buffered") BUFFERED,
         @JsonProperty("streamed") STREAMED
-    }
-
-    enum class PlayerState(private val state: Int) {
-        UNKNOWN(0),
-        IDLE(1),
-        PLAYING(2),
-        PAUSED(3),
-        BUFFERING(4);
-
-        @JsonValue
-        fun toValue() = state
     }
 }
 

@@ -33,22 +33,21 @@ import androidx.mediarouter.media.MediaRouteProviderDescriptor
 import java.util.Collections
 import org.ocast.mediaroute.models.MediaRouteDevice
 import org.ocast.sdk.core.Device
+import org.ocast.sdk.core.DeviceCenter
 import org.ocast.sdk.core.DeviceListener
-import org.ocast.sdk.core.OCastCenter
 
-internal class OCastMediaRouteProvider(context: Context, private val oCastCenter: OCastCenter, private val mainHandler: Handler) : MediaRouteProvider(context) {
+internal class OCastMediaRouteProvider(context: Context, private val deviceCenter: DeviceCenter, private val mainHandler: Handler) : MediaRouteProvider(context) {
 
     internal companion object {
         internal const val FILTER_CATEGORY_OCAST = "org.ocast.CATEGORY_OCAST"
         private const val TAG = "OCastMediaRouteProvider"
     }
 
-    private val routeDescriptorsByUuid = Collections.synchronizedMap(mutableMapOf<String, MediaRouteDescriptor>())
+    private val routeDescriptorsByUpnpID = Collections.synchronizedMap(mutableMapOf<String, MediaRouteDescriptor>())
     private var isWifiMonitorReceiverRegistered = false
-    private var isActiveScan = false
 
     init {
-        oCastCenter.addDeviceListener(OCastMediaRouteDeviceListener())
+        deviceCenter.addDeviceListener(OCastMediaRouteDeviceListener())
     }
 
     private fun createMediaRouteDescriptor(device: Device): MediaRouteDescriptor {
@@ -61,7 +60,7 @@ internal class OCastMediaRouteProvider(context: Context, private val oCastCenter
         val controlFilter = IntentFilter().apply {
             addCategory(FILTER_CATEGORY_OCAST)
         }
-        return MediaRouteDescriptor.Builder(device.uuid, device.friendlyName)
+        return MediaRouteDescriptor.Builder(device.upnpID, device.friendlyName)
             .setDescription(device.modelName)
             .addControlFilter(controlFilter)
             .setExtras(bundledDevice)
@@ -70,9 +69,9 @@ internal class OCastMediaRouteProvider(context: Context, private val oCastCenter
 
     private fun publishRoutes() {
         mainHandler.post {
-            descriptor = synchronized(routeDescriptorsByUuid) {
+            descriptor = synchronized(routeDescriptorsByUpnpID) {
                 MediaRouteProviderDescriptor.Builder()
-                    .apply { addRoutes(routeDescriptorsByUuid.values) }
+                    .apply { addRoutes(routeDescriptorsByUpnpID.values) }
                     .build()
             }
         }
@@ -83,17 +82,17 @@ internal class OCastMediaRouteProvider(context: Context, private val oCastCenter
             // onConnectionStateChanged(false) is not necessarily called when changing WiFi network
             // This is why stopDiscovery is called here
             // Otherwise the list of devices is not cleared
-            oCastCenter.stopDiscovery()
-            oCastCenter.resumeDiscovery(isActiveScan)
+            deviceCenter.stopDiscovery()
+            deviceCenter.resumeDiscovery()
         } else {
-            oCastCenter.stopDiscovery()
+            deviceCenter.stopDiscovery()
         }
     }
 
     override fun onDiscoveryRequestChanged(request: MediaRouteDiscoveryRequest?) {
         if (request != null) {
             Log.d(TAG, "onDiscoveryRequest $request")
-            isActiveScan = request.isActiveScan
+            deviceCenter.discoveryInterval = if (request.isActiveScan) DeviceCenter.MINIMUM_DISCOVERY_INTERVAL else DeviceCenter.DEFAULT_DISCOVERY_INTERVAL
             if (!isWifiMonitorReceiverRegistered) {
                 isWifiMonitorReceiverRegistered = true
                 val wifiMonitorIntentFilter = IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION)
@@ -103,30 +102,30 @@ internal class OCastMediaRouteProvider(context: Context, private val oCastCenter
             @Suppress("DEPRECATION")
             val isWifiConnected = activeNetwork?.isConnectedOrConnecting == true && activeNetwork.type == ConnectivityManager.TYPE_WIFI
             if (isWifiConnected) {
-                oCastCenter.resumeDiscovery(isActiveScan)
+                deviceCenter.resumeDiscovery()
             }
         } else {
             if (isWifiMonitorReceiverRegistered) {
                 context.unregisterReceiver(wifiMonitorReceiver)
                 isWifiMonitorReceiverRegistered = false
             }
-            oCastCenter.stopDiscovery()
+            deviceCenter.stopDiscovery()
         }
     }
 
     private inner class OCastMediaRouteDeviceListener : DeviceListener {
 
         override fun onDeviceAdded(device: Device) {
-            routeDescriptorsByUuid[device.uuid] = createMediaRouteDescriptor(device)
+            routeDescriptorsByUpnpID[device.upnpID] = createMediaRouteDescriptor(device)
             publishRoutes()
         }
 
         override fun onDeviceRemoved(device: Device) {
-            synchronized(routeDescriptorsByUuid) {
-                routeDescriptorsByUuid
+            synchronized(routeDescriptorsByUpnpID) {
+                routeDescriptorsByUpnpID
                     .keys
-                    .firstOrNull { it == device.uuid }
-                    ?.run { routeDescriptorsByUuid.remove(this) }
+                    .firstOrNull { it == device.upnpID }
+                    ?.run { routeDescriptorsByUpnpID.remove(this) }
             }
             publishRoutes()
         }

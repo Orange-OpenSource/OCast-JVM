@@ -21,12 +21,13 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.system.exitProcess
 import org.ocast.sdk.core.Device
+import org.ocast.sdk.core.DeviceCenter
 import org.ocast.sdk.core.DeviceListener
 import org.ocast.sdk.core.EventListener
-import org.ocast.sdk.core.OCastCenter
 import org.ocast.sdk.core.ReferenceDevice
 import org.ocast.sdk.core.models.Media
-import org.ocast.sdk.core.models.PlaybackStatus
+import org.ocast.sdk.core.models.MediaPlaybackStatus
+import org.ocast.sdk.core.models.MediaPrepareCommandParams
 import org.ocast.sdk.core.utils.OCastLog
 
 class AppKotlin : EventListener, DeviceListener {
@@ -42,22 +43,22 @@ class AppKotlin : EventListener, DeviceListener {
     private val latch = CountDownLatch(1)
     private val logger = Logger.getLogger("sampleAppKotlin")
 
-    private val oCastCenter = OCastCenter()
+    private val deviceCenter = DeviceCenter()
 
     init {
-        oCastCenter.addEventListener(this)
-        oCastCenter.addDeviceListener(this)
-        oCastCenter.registerDevice(ReferenceDevice::class.java)
+        deviceCenter.addEventListener(this)
+        deviceCenter.addDeviceListener(this)
+        deviceCenter.registerDevice(ReferenceDevice::class.java)
         OCastLog.level = OCastLog.Level.ALL
     }
 
     fun run() {
         try {
             logger.log(Level.INFO, "Application launched")
-            oCastCenter.resumeDiscovery()
+            deviceCenter.resumeDiscovery()
             latch.await()
         } catch (e: Exception) {
-            oCastCenter.stopDiscovery()
+            deviceCenter.stopDiscovery()
             logger.log(Level.WARNING, "error:", e)
             Thread.currentThread().interrupt()
         }
@@ -67,35 +68,34 @@ class AppKotlin : EventListener, DeviceListener {
 
     private fun startApplication(device: Device) {
         device.applicationName = "Orange-DefaultReceiver-DEV"
-        device.connect({
-            device.startApplication({
-                prepareMedia(device)
+        device.connect(
+            null, {
+                device.startApplication(
+                    { prepareMedia(device) },
+                    { logger.log(Level.WARNING, "startApplication error: ${it.message}") }
+                )
             }, { oCastError ->
-                logger.log(Level.WARNING, "startApplication error: ${oCastError.message}")
-            })
-        }, { oCastError ->
-            logger.log(Level.WARNING, "connect error: ${oCastError.message}")
-        })
+                logger.log(Level.WARNING, "connect error: ${oCastError.message}")
+            }
+        )
     }
 
     private fun prepareMedia(device: Device) {
-        device.prepareMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
+        val params = MediaPrepareCommandParams(
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
             1,
             "Big Buck Bunny",
             "sampleAppKotlin",
             "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
             Media.Type.VIDEO,
             Media.TransferMode.STREAMED,
-            true,
-            null, {
-                // ok
-            }, {
-                oCastError -> logger.log(Level.WARNING, "prepareMedia error: ${oCastError.message}")
-            })
+            true
+        )
+        device.prepareMedia(params, null, {}, { logger.log(Level.WARNING, "prepareMedia error: ${it.message}") })
     }
 
-    override fun onPlaybackStatus(device: Device, playbackStatus: PlaybackStatus) {
-        logger.log(Level.INFO, "[{${device.friendlyName}}] onPlaybackStatus: progress=${playbackStatus.position} state=${playbackStatus.state}")
+    override fun onMediaPlaybackStatus(device: Device, mediaPlaybackStatus: MediaPlaybackStatus) {
+        logger.log(Level.INFO, "[{${device.friendlyName}}] onMediaPlaybackStatus: progress=${mediaPlaybackStatus.position} state=${mediaPlaybackStatus.state}")
     }
 
     override fun onDeviceAdded(device: Device) {

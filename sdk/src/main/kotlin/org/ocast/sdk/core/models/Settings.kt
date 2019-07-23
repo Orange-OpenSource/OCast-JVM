@@ -17,6 +17,7 @@
 package org.ocast.sdk.core.models
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonValue
 import org.ocast.sdk.core.ReferenceDevice
 
 //region Message
@@ -42,12 +43,12 @@ class DeviceMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(Refer
 /**
  *
  */
-class GetUpdateStatus : OCastCommandParams("getUpdateStatus")
+class GetUpdateStatusCommandParams : OCastCommandParams("getUpdateStatus")
 
 /**
  *
  */
-class GetDeviceID : OCastCommandParams("getDeviceID")
+class GetDeviceIDCommandParams : OCastCommandParams("getDeviceID")
 
 /**
  *
@@ -60,15 +61,27 @@ class GetDeviceID : OCastCommandParams("getDeviceID")
  * @param meta
  * @param location
  */
-class KeyPressed(
+class KeyEventCommandParams(
     @JsonProperty("key") val key: String,
     @JsonProperty("code") val code: String,
     @JsonProperty("ctrl") val ctrl: Boolean,
     @JsonProperty("alt") val alt: Boolean,
     @JsonProperty("shift") val shift: Boolean,
     @JsonProperty("meta") val meta: Boolean,
-    @JsonProperty("location") val location: Int
-) : OCastCommandParams("keyPressed")
+    @JsonProperty("location") val location: DOMKeyLocation
+) : OCastCommandParams("keyPressed") {
+
+    enum class DOMKeyLocation(private val value: Int) {
+
+        STANDARD(0),
+        LEFT(1),
+        RIGHT(2),
+        NUMPAD(3);
+
+        @JsonValue
+        fun toValue() = value
+    }
+}
 
 /**
  *
@@ -77,7 +90,7 @@ class KeyPressed(
  * @param y
  * @param buttons
  */
-class MouseEvent(
+class MouseEventCommandParams(
     @JsonProperty("x") val x: Int,
     @JsonProperty("y") val y: Int,
     @JsonProperty("buttons") val buttons: Int
@@ -89,23 +102,24 @@ class MouseEvent(
  * @param axes
  * @param buttons
  */
-class GamepadEvent(
-    @JsonProperty("axes") val axes: List<GamepadAxes>,
+class GamepadEventCommandParams(
+    @JsonProperty("axes") val axes: List<Axes>,
     @JsonProperty("buttons") val buttons: Int
-) : OCastCommandParams("gamepadEvent")
+) : OCastCommandParams("gamepadEvent") {
 
-/**
- *
- *
- * @param x
- * @param y
- * @param num
- */
-class GamepadAxes(
-    @JsonProperty("x") val x: Double,
-    @JsonProperty("y") val y: Double,
-    @JsonProperty("num") val num: Int
-)
+    /**
+     *
+     *
+     * @param x
+     * @param y
+     * @param num
+     */
+    class Axes(
+        @JsonProperty("x") val x: Double,
+        @JsonProperty("y") val y: Double,
+        @JsonProperty("num") val num: Int
+    )
+}
 
 //endregion
 
@@ -121,10 +135,25 @@ class GamepadAxes(
  */
 class UpdateStatus(
     code: Int?,
-    @JsonProperty("state") val state: String,
+    @JsonProperty("state") val state: State,
     @JsonProperty("version") val version: String,
     @JsonProperty("progress") val progress: Int
-) : OCastReplyEventParams(code)
+) : OCastReplyEventParams(code) {
+
+    enum class State(private val value: String) {
+
+        SUCCESS("success"),
+        ERROR("error"),
+        NOT_CHECKED("notChecked"),
+        UP_TO_DATE("upToDate"),
+        NEW_VERSION_FOUND("newVersionFound"),
+        DOWNLOADING("downloading"),
+        NEW_VERSION_READY("newVersionReady");
+
+        @JsonValue
+        fun toValue() = value
+    }
+}
 
 /**
  *

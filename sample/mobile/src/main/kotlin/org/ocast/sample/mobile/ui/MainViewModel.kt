@@ -21,28 +21,27 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import org.ocast.sdk.core.Device
-import org.ocast.sdk.core.models.Media
-import org.ocast.sdk.core.models.Metadata
-import org.ocast.sdk.core.models.PlaybackStatus
+import org.ocast.sdk.core.models.MediaMetadata
+import org.ocast.sdk.core.models.MediaPlaybackStatus
 
 class MainViewModel : ViewModel() {
 
     val selectedDevice = MutableLiveData<Device?>()
 
-    val playbackStatus = MutableLiveData<PlaybackStatus>()
+    val playbackStatus = MutableLiveData<MediaPlaybackStatus>()
     val mediaDuration: LiveData<Double> = Transformations.map(playbackStatus) { it?.duration }
     val mediaPosition: LiveData<Double> = Transformations.map(playbackStatus) { it?.position }
     val mediaVolumeLevel: LiveData<Double> = Transformations.map(playbackStatus) { it?.volume?.let { volume -> volume * 1000 } }
     val mediaIsMute: LiveData<Boolean> = Transformations.map(playbackStatus) { it?.isMuted }
-    val mediaState: LiveData<Media.PlayerState> = Transformations.map(playbackStatus) { it?.state }
+    val mediaState: LiveData<MediaPlaybackStatus.State> = Transformations.map(playbackStatus) { it?.state }
 
-    val mediaMetadata = MutableLiveData<Metadata>()
+    val mediaMetadata = MutableLiveData<MediaMetadata>()
     val mediaTitle: LiveData<String> = Transformations.map(mediaMetadata) { it?.title }
 
     fun onPlayPauseButtonClick() {
         when (mediaState.value) {
-            Media.PlayerState.PLAYING -> selectedDevice.value?.pauseMedia({}, {})
-            Media.PlayerState.PAUSED -> selectedDevice.value?.resumeMedia({}, {})
+            MediaPlaybackStatus.State.PLAYING -> selectedDevice.value?.pauseMedia({}, {})
+            MediaPlaybackStatus.State.PAUSED -> selectedDevice.value?.resumeMedia({}, {})
             else -> selectedDevice.value?.playMedia(0.0, {}, {})
         }
     }
@@ -60,6 +59,6 @@ class MainViewModel : ViewModel() {
     }
 
     fun onSeekChanged(progressValue: Int) {
-        selectedDevice.value?.seekMediaTo(progressValue.toDouble(), {}, {})
+        selectedDevice.value?.seekMedia(progressValue.toDouble(), {}, {})
     }
 }

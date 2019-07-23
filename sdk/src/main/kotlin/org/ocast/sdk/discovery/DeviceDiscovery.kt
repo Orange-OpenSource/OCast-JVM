@@ -64,6 +64,12 @@ internal class DeviceDiscovery constructor(
 
     companion object {
 
+        /** The default value for the interval. */
+        const val DEFAULT_INTERVAL = 30_000L
+
+        /** The minimum value for the interval. */
+        const val MINIMUM_INTERVAL = 5_000L
+
         /** The SSDP multicast address. */
         private const val SSDP_MULTICAST_ADDRESS = "239.255.255.250"
 
@@ -104,9 +110,9 @@ internal class DeviceDiscovery constructor(
      * Minimum value is 5000 milliseconds.
      * Setting this property results in sending an SSDP M-SEARCH request immediately if discovery is on-going.
      */
-    var interval = 30_000L
+    var interval = DEFAULT_INTERVAL
         set(value) {
-            field = max(value, 5000)
+            field = max(value, MINIMUM_INTERVAL)
             if (!socket.isClosed) {
                 refreshDevices()
             }

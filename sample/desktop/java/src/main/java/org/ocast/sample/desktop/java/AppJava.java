@@ -19,7 +19,7 @@ package org.ocast.sample.desktop.java;
 import org.jetbrains.annotations.NotNull;
 import org.ocast.sdk.core.Device;
 import org.ocast.sdk.core.DeviceListener;
-import org.ocast.sdk.core.OCastCenter;
+import org.ocast.sdk.core.DeviceCenter;
 import org.ocast.sdk.core.EventListener;
 import org.ocast.sdk.core.ReferenceDevice;
 import org.ocast.sdk.core.models.*;
@@ -34,7 +34,7 @@ public class AppJava implements EventListener, DeviceListener {
     private final CountDownLatch latch = new CountDownLatch(1);
     private final Logger logger = Logger.getLogger("sampleAppJava");
 
-    private final OCastCenter oCastCenter;
+    private final DeviceCenter deviceCenter;
 
     public static void main(String[] args) {
         AppJava main = new AppJava();
@@ -42,20 +42,20 @@ public class AppJava implements EventListener, DeviceListener {
     }
 
     private AppJava() {
-        oCastCenter = new OCastCenter();
-        oCastCenter.addDeviceListener(this);
-        oCastCenter.addEventListener(this);
-        oCastCenter.registerDevice(ReferenceDevice.class);
+        deviceCenter = new DeviceCenter();
+        deviceCenter.addDeviceListener(this);
+        deviceCenter.addEventListener(this);
+        deviceCenter.registerDevice(ReferenceDevice.class);
         OCastLog.setLevel(OCastLog.Level.ALL);
     }
 
     private void run() {
         try {
             logger.log(Level.INFO, "Application launched");
-            oCastCenter.resumeDiscovery();
+            deviceCenter.resumeDiscovery();
             latch.await();
         } catch (Exception e) {
-            oCastCenter.stopDiscovery();
+            deviceCenter.stopDiscovery();
             logger.log(Level.WARNING, "error:", e);
             Thread.currentThread().interrupt();
         }
@@ -65,30 +65,37 @@ public class AppJava implements EventListener, DeviceListener {
     private void startApplication(Device device) {
         device.setApplicationName("Orange-DefaultReceiver-DEV");
         device.connect(
+                null,
                 () -> device.startApplication(
-                    () -> prepareMedia(device),
-                    oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getMessage())
+                        () -> prepareMedia(device),
+                        oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getMessage())
                 ),
-                oCastError -> logger.log(Level.WARNING, "connect error: " + oCastError.getMessage()));
+                oCastError -> logger.log(Level.WARNING, "connect error: " + oCastError.getMessage())
+        );
     }
 
     private void prepareMedia(Device device) {
-        device.prepareMedia("https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
-            1,
-            "Big Buck Bunny",
-            "sampleAppJava",
-            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
-            Media.Type.VIDEO,
-            Media.TransferMode.STREAMED,
-            true,
-            null,
-            () -> {}, oCastError -> logger.log(Level.WARNING, "prepareMedia error: " + oCastError.getStatus())
+        MediaPrepareCommandParams params = new MediaPrepareCommandParams(
+                "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
+                1,
+                "Big Buck Bunny",
+                "sampleAppKotlin",
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+                Media.Type.VIDEO,
+                Media.TransferMode.STREAMED,
+                true
+        );
+        device.prepareMedia(
+                params,
+                null,
+                () -> {},
+                oCastError -> logger.log(Level.WARNING, "prepareMedia error: " + oCastError.getStatus())
         );
     }
 
     @Override
-    public void onPlaybackStatus(@NotNull Device device, @NotNull PlaybackStatus playbackStatus) {
-        logger.log(Level.INFO, "[" + device.getFriendlyName() + "]" + "onPlaybackStatus: progress=" + playbackStatus.getPosition() + " state=" + playbackStatus.getState());
+    public void onMediaPlaybackStatus(@NotNull Device device, @NotNull MediaPlaybackStatus mediaPlaybackStatus) {
+        logger.log(Level.INFO, "[" + device.getFriendlyName() + "]" + "onMediaPlaybackStatus: progress=" + mediaPlaybackStatus.getPosition() + " state=" + mediaPlaybackStatus.getState());
     }
 
     @Override

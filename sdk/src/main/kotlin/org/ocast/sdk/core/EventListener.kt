@@ -17,8 +17,8 @@
 package org.ocast.sdk.core
 
 import org.json.JSONObject
-import org.ocast.sdk.core.models.Metadata
-import org.ocast.sdk.core.models.PlaybackStatus
+import org.ocast.sdk.core.models.MediaMetadata
+import org.ocast.sdk.core.models.MediaPlaybackStatus
 import org.ocast.sdk.core.models.UpdateStatus
 
 interface EventListener {
@@ -27,14 +27,14 @@ interface EventListener {
      * Playback Status of the player, sent at a rate defined by the frequency parameter of the prepare method.
      */
     @JvmDefault
-    fun onPlaybackStatus(device: Device, playbackStatus: PlaybackStatus) {
+    fun onMediaPlaybackStatus(device: Device, mediaPlaybackStatus: MediaPlaybackStatus) {
     }
 
     /**
      * Metadata sent each time is changed on the current playback.
      */
     @JvmDefault
-    fun onMetadataChanged(device: Device, metadata: Metadata) {
+    fun onMediaMetadataChanged(device: Device, mediaMetadata: MediaMetadata) {
     }
 
     /**

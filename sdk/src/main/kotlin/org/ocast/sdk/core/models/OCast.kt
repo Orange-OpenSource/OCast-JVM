@@ -35,6 +35,12 @@ import org.ocast.sdk.core.utils.RawJsonDeserializer
  */
 class SSLConfiguration(val trustManager: X509TrustManager, val socketFactory: SSLSocketFactory, val hostnameVerifier: HostnameVerifier)
 
+enum class OCastDomain(val value: String) {
+
+    BROWSER("browser"),
+    SETTINGS("settings")
+}
+
 //region Device layer
 
 /**

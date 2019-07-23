@@ -19,8 +19,8 @@ package org.ocast.sdk.core
 import java.util.Collections
 import org.json.JSONObject
 import org.ocast.sdk.common.extensions.ifNotNull
-import org.ocast.sdk.core.models.Metadata
-import org.ocast.sdk.core.models.PlaybackStatus
+import org.ocast.sdk.core.models.MediaMetadata
+import org.ocast.sdk.core.models.MediaPlaybackStatus
 import org.ocast.sdk.core.models.UpdateStatus
 import org.ocast.sdk.core.wrapper.CallbackWrapper
 import org.ocast.sdk.core.wrapper.CallbackWrapperOwner
@@ -28,7 +28,16 @@ import org.ocast.sdk.core.wrapper.SimpleCallbackWrapper
 import org.ocast.sdk.discovery.DeviceDiscovery
 import org.ocast.sdk.discovery.models.UpnpDevice
 
-open class OCastCenter : CallbackWrapperOwner {
+open class DeviceCenter : CallbackWrapperOwner {
+
+    companion object {
+
+        /** The default value for the discovery interval. */
+        const val DEFAULT_DISCOVERY_INTERVAL = DeviceDiscovery.DEFAULT_INTERVAL
+
+        /** The minimum value for the discovery interval. */
+        const val MINIMUM_DISCOVERY_INTERVAL = DeviceDiscovery.MINIMUM_INTERVAL
+    }
 
     override var callbackWrapper: CallbackWrapper = SimpleCallbackWrapper()
         set(value) {
@@ -48,14 +57,20 @@ open class OCastCenter : CallbackWrapperOwner {
     val devices: List<Device>
         get() = detectedDevices.toList()
 
+    var discoveryInterval: Long
+        get() = deviceDiscovery.interval
+        set(value) {
+            deviceDiscovery.interval = value
+        }
+
     private fun createDevice(device: UpnpDevice): Device? {
         return registeredDevicesByManufacturer[device.manufacturer]
             ?.getConstructor(UpnpDevice::class.java)
             ?.newInstance(device)
             ?.apply {
-                deviceListener = this@OCastCenter.deviceListener
-                eventListener = this@OCastCenter.eventListener
-                callbackWrapper = this@OCastCenter.callbackWrapper
+                deviceListener = this@DeviceCenter.deviceListener
+                eventListener = this@DeviceCenter.eventListener
+                callbackWrapper = this@DeviceCenter.callbackWrapper
                 // Custom actions on custom device
                 onCreateDevice(this)
                 detectedDevices.add(this)
@@ -108,23 +123,30 @@ open class OCastCenter : CallbackWrapperOwner {
         oCastCenterListeners.remove(oCastCenterListener)
     }
 
-    @JvmOverloads fun resumeDiscovery(isActiveScan: Boolean = false) {
+    fun resumeDiscovery(): Boolean {
         deviceDiscovery.listener = deviceDiscoveryListener
-        deviceDiscovery.resume()
+
+        return deviceDiscovery.resume()
     }
 
-    fun stopDiscovery() {
+    fun stopDiscovery(): Boolean {
         deviceDiscovery.listener = null
-        deviceDiscovery.stop()
+
+        return deviceDiscovery.stop()
+    }
+
+    fun pauseDiscovery(): Boolean {
+        return deviceDiscovery.pause()
     }
 
     //region Discovery listener
 
     private val deviceDiscoveryListener = object : DeviceDiscovery.Listener {
+
         override fun onDevicesAdded(devices: List<UpnpDevice>) {
             devices.forEach { upnpDevice ->
                 createDevice(upnpDevice)?.ifNotNull { device ->
-                    this@OCastCenter.deviceListener.onDeviceAdded(device)
+                    this@DeviceCenter.deviceListener.onDeviceAdded(device)
                 }
             }
         }
@@ -132,8 +154,8 @@ open class OCastCenter : CallbackWrapperOwner {
         override fun onDevicesRemoved(devices: List<UpnpDevice>) {
             devices.forEach { device ->
                 synchronized(detectedDevices) {
-                    detectedDevices.firstOrNull { device.uuid == it.uuid }?.ifNotNull {
-                        this@OCastCenter.deviceListener.onDeviceRemoved(it)
+                    detectedDevices.firstOrNull { device.id == it.upnpID }?.ifNotNull {
+                        this@DeviceCenter.deviceListener.onDeviceRemoved(it)
                         removeDevice(it)
                     }
                 }
@@ -151,12 +173,12 @@ open class OCastCenter : CallbackWrapperOwner {
 
     private val eventListener = object : EventListener {
 
-        override fun onPlaybackStatus(device: Device, playbackStatus: PlaybackStatus) {
-            eventListeners.wrapForEach { it.onPlaybackStatus(device, playbackStatus) }
+        override fun onMediaPlaybackStatus(device: Device, mediaPlaybackStatus: MediaPlaybackStatus) {
+            eventListeners.wrapForEach { it.onMediaPlaybackStatus(device, mediaPlaybackStatus) }
         }
 
-        override fun onMetadataChanged(device: Device, metadata: Metadata) {
-            eventListeners.wrapForEach { it.onMetadataChanged(device, metadata) }
+        override fun onMediaMetadataChanged(device: Device, mediaMetadata: MediaMetadata) {
+            eventListeners.wrapForEach { it.onMediaMetadataChanged(device, mediaMetadata) }
         }
 
         override fun onUpdateStatus(device: Device, updateStatus: UpdateStatus) {

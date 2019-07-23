@@ -25,12 +25,12 @@ import androidx.mediarouter.media.MediaRouter
 import org.ocast.mediaroute.models.MediaRouteDevice
 import org.ocast.mediaroute.wrapper.AndroidUIThreadCallbackWrapper
 import org.ocast.sdk.core.Device
+import org.ocast.sdk.core.DeviceCenter
 import org.ocast.sdk.core.EventListener
-import org.ocast.sdk.core.OCastCenter
 
 object OCastMediaRouteHelper {
 
-    private val oCastCenter = OCastCenter().apply { callbackWrapper = AndroidUIThreadCallbackWrapper() }
+    private val deviceCenter = DeviceCenter().apply { callbackWrapper = AndroidUIThreadCallbackWrapper() }
     private val mainHandler = Handler(Looper.getMainLooper())
     private var mediaRouter: MediaRouter? = null
     private var initialized = false
@@ -39,7 +39,7 @@ object OCastMediaRouteHelper {
         .addControlCategory(OCastMediaRouteProvider.FILTER_CATEGORY_OCAST)
         .build()
     val devices: List<Device>
-        get() = oCastCenter.devices
+        get() = deviceCenter.devices
 
     fun initialize(context: Context, devices: List<Class<out Device>>) {
         if (!initialized) {
@@ -47,8 +47,8 @@ object OCastMediaRouteHelper {
                 throw RuntimeException("${this::class.java.simpleName} should be instantiated on the UI thread.")
             }
             initialized = true
-            devices.forEach { oCastCenter.registerDevice(it) }
-            val oCastProvider = OCastMediaRouteProvider(context.applicationContext, oCastCenter, mainHandler)
+            devices.forEach { deviceCenter.registerDevice(it) }
+            val oCastProvider = OCastMediaRouteProvider(context.applicationContext, deviceCenter, mainHandler)
             mediaRouter = MediaRouter.getInstance(context.applicationContext)
             mediaRouter?.addProvider(oCastProvider)
         }
@@ -82,17 +82,17 @@ object OCastMediaRouteHelper {
 
     fun getDeviceFromRoute(routeInfo: MediaRouter.RouteInfo?): Device? {
         val mediaRouteDevice = routeInfo?.extras?.get(MediaRouteDevice.EXTRA_DEVICE) as? MediaRouteDevice
-        return oCastCenter.devices.firstOrNull { it.uuid == mediaRouteDevice?.uuid }
+        return deviceCenter.devices.firstOrNull { it.upnpID == mediaRouteDevice?.upnpID }
     }
 
     fun isOCastRouteInfo(routeInfo: MediaRouter.RouteInfo?) = routeInfo?.matchesSelector(mediaRouteSelector) == true
 
     fun addEventListener(listener: EventListener) {
-        oCastCenter.addEventListener(listener)
+        deviceCenter.addEventListener(listener)
     }
 
     fun removeEventListener(listener: EventListener) {
-        oCastCenter.removeEventListener(listener)
+        deviceCenter.removeEventListener(listener)
     }
 
     internal fun addMediaRouteProvider(mediaRouteProvider: MediaRouteProvider) {
