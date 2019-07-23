@@ -30,11 +30,11 @@ import androidx.mediarouter.media.MediaRouteDescriptor
 import androidx.mediarouter.media.MediaRouteDiscoveryRequest
 import androidx.mediarouter.media.MediaRouteProvider
 import androidx.mediarouter.media.MediaRouteProviderDescriptor
+import java.util.Collections
 import org.ocast.mediaroute.models.MediaRouteDevice
 import org.ocast.sdk.core.Device
 import org.ocast.sdk.core.DeviceCenter
 import org.ocast.sdk.core.DeviceListener
-import java.util.Collections
 
 internal class OCastMediaRouteProvider(context: Context, private val deviceCenter: DeviceCenter, private val mainHandler: Handler) : MediaRouteProvider(context) {
 

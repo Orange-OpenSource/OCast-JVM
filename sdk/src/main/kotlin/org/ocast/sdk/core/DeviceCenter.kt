@@ -16,6 +16,7 @@
 
 package org.ocast.sdk.core
 
+import java.util.Collections
 import org.json.JSONObject
 import org.ocast.sdk.common.extensions.ifNotNull
 import org.ocast.sdk.core.models.MediaMetadata
@@ -26,7 +27,6 @@ import org.ocast.sdk.core.wrapper.CallbackWrapperOwner
 import org.ocast.sdk.core.wrapper.SimpleCallbackWrapper
 import org.ocast.sdk.discovery.DeviceDiscovery
 import org.ocast.sdk.discovery.models.UpnpDevice
-import java.util.Collections
 
 open class DeviceCenter : CallbackWrapperOwner {
 

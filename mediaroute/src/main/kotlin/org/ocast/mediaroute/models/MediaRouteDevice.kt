@@ -17,7 +17,6 @@
 package org.ocast.mediaroute.models
 
 import android.os.Parcelable
-import java.net.URL
 import kotlinx.android.parcel.Parcelize
 import org.ocast.sdk.core.Device
 

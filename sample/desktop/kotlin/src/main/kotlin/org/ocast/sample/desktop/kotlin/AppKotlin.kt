@@ -16,6 +16,10 @@
 
 package org.ocast.sample.desktop.kotlin
 
+import java.util.concurrent.CountDownLatch
+import java.util.logging.Level
+import java.util.logging.Logger
+import kotlin.system.exitProcess
 import org.ocast.sdk.core.Device
 import org.ocast.sdk.core.DeviceCenter
 import org.ocast.sdk.core.DeviceListener
@@ -25,10 +29,6 @@ import org.ocast.sdk.core.models.Media
 import org.ocast.sdk.core.models.MediaPlaybackStatus
 import org.ocast.sdk.core.models.MediaPrepareCommandParams
 import org.ocast.sdk.core.utils.OCastLog
-import java.util.concurrent.CountDownLatch
-import java.util.logging.Level
-import java.util.logging.Logger
-import kotlin.system.exitProcess
 
 class AppKotlin : EventListener, DeviceListener {
 
