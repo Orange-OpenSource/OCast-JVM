@@ -183,11 +183,11 @@ open class OCastCommandParams(
 
     private val builder by lazy { OCastDataLayerBuilder(name, this) }
 
-    internal fun build(): OCastDataLayer<OCastCommandParams> {
+    fun build(): OCastDataLayer<OCastCommandParams> {
         return builder.build()
     }
 
-    internal fun options(options: JSONObject?) = apply { builder.options(options) }
+    fun options(options: JSONObject?) = apply { builder.options(options) }
 }
 
 open class OCastDataLayerBuilder<T>(

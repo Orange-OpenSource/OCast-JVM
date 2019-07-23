@@ -94,20 +94,20 @@ public abstract class Device implements CallbackWrapperOwner {
     }
 
     @Nullable
-    DeviceListener getDeviceListener() {
+    protected DeviceListener getDeviceListener() {
         return deviceListener;
     }
 
-    void setDeviceListener(@Nullable DeviceListener deviceListener) {
+    protected void setDeviceListener(@Nullable DeviceListener deviceListener) {
         this.deviceListener = deviceListener;
     }
 
     @Nullable
-    EventListener getEventListener() {
+    protected EventListener getEventListener() {
         return eventListener;
     }
 
-    void setEventListener(@Nullable EventListener eventListener) {
+    protected void setEventListener(@Nullable EventListener eventListener) {
         this.eventListener = eventListener;
     }
 
