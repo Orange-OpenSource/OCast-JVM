@@ -16,10 +16,10 @@
 
 package org.ocast.sdk.common.utils
 
-import org.w3c.dom.Node
-import org.xml.sax.InputSource
 import java.io.StringReader
 import javax.xml.parsers.DocumentBuilderFactory
+import org.w3c.dom.Node
+import org.xml.sax.InputSource
 
 /**
  * A simple XML parser which makes parsing more concise.

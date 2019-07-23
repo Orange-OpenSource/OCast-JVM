@@ -16,13 +16,13 @@
 
 package org.ocast.sdk.discovery
 
-import org.ocast.sdk.common.extensions.orTrue
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.InetAddress
 import java.net.MulticastSocket
 import java.net.SocketException
 import kotlin.concurrent.thread
+import org.ocast.sdk.common.extensions.orTrue
 
 /**
  * Instances of this class manage a UDP socket.

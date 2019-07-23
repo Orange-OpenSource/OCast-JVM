@@ -25,11 +25,11 @@ import androidx.mediarouter.media.MediaRouteDiscoveryRequest
 import androidx.mediarouter.media.MediaRouteProvider
 import androidx.mediarouter.media.MediaRouteProviderDescriptor
 import androidx.mediarouter.media.MediaRouter
+import java.net.URL
+import java.util.ArrayList
 import org.ocast.mediaroute.models.MediaRouteDevice
 import org.ocast.sdk.core.ReferenceDevice
 import org.ocast.sdk.discovery.models.UpnpDevice
-import java.net.URL
-import java.util.ArrayList
 
 class FakeDeviceMediaRouteProvider(context: Context) : MediaRouteProvider(context) {
 

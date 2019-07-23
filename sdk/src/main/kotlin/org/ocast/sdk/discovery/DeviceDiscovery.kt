@@ -16,11 +16,6 @@
 
 package org.ocast.sdk.discovery
 
-import org.ocast.sdk.core.utils.OCastLog
-import org.ocast.sdk.discovery.models.SsdpMSearchRequest
-import org.ocast.sdk.discovery.models.SsdpMSearchResponse
-import org.ocast.sdk.discovery.models.SsdpMessage
-import org.ocast.sdk.discovery.models.UpnpDevice
 import java.io.IOException
 import java.util.Collections.synchronizedMap
 import java.util.Date
@@ -29,6 +24,11 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.fixedRateTimer
 import kotlin.concurrent.schedule
 import kotlin.math.max
+import org.ocast.sdk.core.utils.OCastLog
+import org.ocast.sdk.discovery.models.SsdpMSearchRequest
+import org.ocast.sdk.discovery.models.SsdpMSearchResponse
+import org.ocast.sdk.discovery.models.SsdpMessage
+import org.ocast.sdk.discovery.models.UpnpDevice
 
 /**
  * This class represents the entry point for the discovery of OCast devices.

@@ -17,9 +17,9 @@
 package org.ocast.sdk.core.models
 
 import org.json.JSONObject
-import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Test
 import org.ocast.sdk.core.ReferenceDevice
 import org.ocast.sdk.core.utils.JsonTools
 

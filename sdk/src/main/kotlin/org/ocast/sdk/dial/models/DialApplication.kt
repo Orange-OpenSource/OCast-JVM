@@ -16,10 +16,10 @@
 
 package org.ocast.sdk.dial.models
 
-import org.ocast.sdk.common.utils.XMLParser
 import java.net.MalformedURLException
 import java.net.URI
 import java.net.URL
+import org.ocast.sdk.common.utils.XMLParser
 
 /**
  * This class represents a DIAL application.

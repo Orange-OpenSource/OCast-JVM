@@ -21,9 +21,9 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
+import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Test
-import junit.framework.TestCase.assertEquals
 import org.ocast.sdk.core.models.UpdateStatus
 import org.ocast.sdk.discovery.models.UpnpDevice
 
