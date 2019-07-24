@@ -18,6 +18,7 @@ package org.ocast.sdk.core.models
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
+import java.util.EnumSet
 import org.ocast.sdk.core.ReferenceDevice
 
 //region Message
@@ -93,8 +94,19 @@ class SendKeyEventCommandParams(
 class SendMouseEventCommandParams(
     @JsonProperty("x") val x: Int,
     @JsonProperty("y") val y: Int,
-    @JsonProperty("buttons") val buttons: Int
-) : OCastCommandParams("mouseEvent")
+    @JsonProperty("buttons") val buttons: EnumSet<Button>
+) : OCastCommandParams("mouseEvent") {
+
+    enum class Button(private val value: Int) {
+
+        PRIMARY(1 shl 0),
+        RIGHT(1 shl 1),
+        MIDDLE(1 shl 2);
+
+        @JsonValue
+        fun toValue() = value
+    }
+}
 
 /**
  *
@@ -102,9 +114,10 @@ class SendMouseEventCommandParams(
  * @param axes
  * @param buttons
  */
+
 class SendGamepadEventCommandParams(
-    @JsonProperty("axes") val axes: List<Axes>,
-    @JsonProperty("buttons") val buttons: Int
+    @JsonProperty("axes") val axes: List<Axe>,
+    @JsonProperty("buttons") val buttons: EnumSet<Button>
 ) : OCastCommandParams("gamepadEvent") {
 
     /**
@@ -114,11 +127,47 @@ class SendGamepadEventCommandParams(
      * @param y
      * @param num
      */
-    class Axes(
+    class Axe(
         @JsonProperty("x") val x: Double,
         @JsonProperty("y") val y: Double,
-        @JsonProperty("num") val num: Int
-    )
+        @JsonProperty("num") val type: Type
+    ) {
+
+        enum class Type(private val value: Int) {
+
+            LEFT_STICK_HORIZONTAL(0),
+            LEFT_STICK_VERTICAL(1),
+            RIGHT_STICK_HORIZONTAL(2),
+            RIGHT_STICK_VERTICAL(3);
+
+            @JsonValue
+            fun toValue() = value
+        }
+    }
+
+    enum class Button(private val value: Int) {
+
+        RIGHT_CLUSTER_BOTTOM(1 shl 0),
+        RIGHT_CLUSTER_RIGHT(1 shl 1),
+        RIGHT_CLUSTER_LEFT(1 shl 2),
+        RIGHT_CLUSTER_TOP(1 shl 3),
+        TOP_LEFT_FRONT(1 shl 4),
+        TOP_RIGHT_FRONT(1 shl 5),
+        BOTTOM_LEFT_FRONT(1 shl 6),
+        BOTTOM_RIGHT_FRONT(1 shl 7),
+        CENTER_CLUSTER_LEFT(1 shl 8),
+        CENTER_CLUSTER_RIGHT(1 shl 9),
+        LEFT_STICK_PRESSED(1 shl 10),
+        RIGHT_STICK_PRESSED(1 shl 11),
+        LEFT_CLUSTER_TOP(1 shl 12),
+        LEFT_CLUSTER_BOTTOM(1 shl 13),
+        LEFT_CLUSTER_LEFT(1 shl 14),
+        LEFT_CLUSTER_RIGHT(1 shl 15),
+        CENTER_CLUSTER_MIDDLE(1 shl 16);
+
+        @JsonValue
+        fun toValue() = value
+    }
 }
 
 //endregion
