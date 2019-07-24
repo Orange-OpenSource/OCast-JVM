@@ -49,7 +49,7 @@ open class DeviceCenter : CallbackWrapperOwner {
 
     private val eventListeners = mutableSetOf<EventListener>()
     private val deviceListeners = mutableSetOf<DeviceListener>()
-    private var oCastCenterListeners = mutableSetOf<OCastCenterListener>()
+    private var deviceCenterListeners = mutableSetOf<DeviceCenterListener>()
 
     private val registeredDevicesByManufacturer = mutableMapOf<String, Class<out Device>>()
     private val detectedDevices = Collections.synchronizedList(mutableListOf<Device>())
@@ -115,12 +115,12 @@ open class DeviceCenter : CallbackWrapperOwner {
         deviceListeners.remove(listener)
     }
 
-    fun addOCastCenterListener(oCastCenterListener: OCastCenterListener) {
-        oCastCenterListeners.add(oCastCenterListener)
+    fun addDeviceCenterListener(deviceCenterListener: DeviceCenterListener) {
+        deviceCenterListeners.add(deviceCenterListener)
     }
 
-    fun removeOCastCenterListener(oCastCenterListener: OCastCenterListener) {
-        oCastCenterListeners.remove(oCastCenterListener)
+    fun removeDeviceCenterListener(deviceCenterListener: DeviceCenterListener) {
+        deviceCenterListeners.remove(deviceCenterListener)
     }
 
     fun resumeDiscovery(): Boolean {
@@ -163,7 +163,7 @@ open class DeviceCenter : CallbackWrapperOwner {
         }
 
         override fun onDiscoveryStopped(error: Throwable?) {
-            oCastCenterListeners.wrapForEach { it.onDiscoveryStopped(error) }
+            deviceCenterListeners.wrapForEach { it.onDiscoveryStopped(error) }
         }
     }
 
@@ -212,7 +212,7 @@ open class DeviceCenter : CallbackWrapperOwner {
     //endregion
 }
 
-interface OCastCenterListener {
+interface DeviceCenterListener {
 
     fun onDiscoveryStopped(error: Throwable?)
 }
