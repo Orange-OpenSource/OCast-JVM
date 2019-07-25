@@ -103,7 +103,8 @@ open class BitflagsDeserializer<T>(private val clazz: Class<T>) : StdDeserialize
     override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): EnumSet<T> {
         val bitflags = p?.valueAsInt.orElse { 0 }
         val enums = clazz.enumConstants.mapNotNull { enum ->
-            enum.takeIf { (1 shl it.bit) and bitflags == (1 shl it.bit) }
+            val bitmask = 1 shl enum.bit
+            enum.takeIf { bitmask and bitflags == bitmask }
         }
 
         return if (enums.isEmpty()) EnumSet.noneOf(clazz) else EnumSet.copyOf(enums)
