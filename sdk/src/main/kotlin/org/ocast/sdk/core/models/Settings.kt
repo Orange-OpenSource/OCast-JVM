@@ -18,8 +18,13 @@ package org.ocast.sdk.core.models
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.EnumSet
 import org.ocast.sdk.core.ReferenceDevice
+import org.ocast.sdk.core.utils.BitflagsSerializer
+import org.ocast.sdk.core.utils.GamepadEventButtonsDeserializer
+import org.ocast.sdk.core.utils.MouseEventButtonsDeserializer
 
 //region Message
 
@@ -94,17 +99,19 @@ class SendKeyEventCommandParams(
 class SendMouseEventCommandParams(
     @JsonProperty("x") val x: Int,
     @JsonProperty("y") val y: Int,
+    @JsonSerialize(using = BitflagsSerializer::class)
+    @JsonDeserialize(using = MouseEventButtonsDeserializer::class)
     @JsonProperty("buttons") val buttons: EnumSet<Button>
 ) : OCastCommandParams("mouseEvent") {
 
-    enum class Button(private val value: Int) {
+    enum class Button(override val bit: Int) : Bitflag {
 
-        PRIMARY(1 shl 0),
-        RIGHT(1 shl 1),
-        MIDDLE(1 shl 2);
+        PRIMARY(0),
+        RIGHT(1),
+        MIDDLE(2);
 
         @JsonValue
-        fun toValue() = value
+        fun toValue() = bit
     }
 }
 
@@ -117,6 +124,8 @@ class SendMouseEventCommandParams(
 
 class SendGamepadEventCommandParams(
     @JsonProperty("axes") val axes: List<Axe>,
+    @JsonSerialize(using = BitflagsSerializer::class)
+    @JsonDeserialize(using = GamepadEventButtonsDeserializer::class)
     @JsonProperty("buttons") val buttons: EnumSet<Button>
 ) : OCastCommandParams("gamepadEvent") {
 
@@ -145,28 +154,28 @@ class SendGamepadEventCommandParams(
         }
     }
 
-    enum class Button(private val value: Int) {
+    enum class Button(override val bit: Int) : Bitflag {
 
-        RIGHT_CLUSTER_BOTTOM(1 shl 0),
-        RIGHT_CLUSTER_RIGHT(1 shl 1),
-        RIGHT_CLUSTER_LEFT(1 shl 2),
-        RIGHT_CLUSTER_TOP(1 shl 3),
-        TOP_LEFT_FRONT(1 shl 4),
-        TOP_RIGHT_FRONT(1 shl 5),
-        BOTTOM_LEFT_FRONT(1 shl 6),
-        BOTTOM_RIGHT_FRONT(1 shl 7),
-        CENTER_CLUSTER_LEFT(1 shl 8),
-        CENTER_CLUSTER_RIGHT(1 shl 9),
-        LEFT_STICK_PRESSED(1 shl 10),
-        RIGHT_STICK_PRESSED(1 shl 11),
-        LEFT_CLUSTER_TOP(1 shl 12),
-        LEFT_CLUSTER_BOTTOM(1 shl 13),
-        LEFT_CLUSTER_LEFT(1 shl 14),
-        LEFT_CLUSTER_RIGHT(1 shl 15),
-        CENTER_CLUSTER_MIDDLE(1 shl 16);
+        RIGHT_CLUSTER_BOTTOM(0),
+        RIGHT_CLUSTER_RIGHT(1),
+        RIGHT_CLUSTER_LEFT(2),
+        RIGHT_CLUSTER_TOP(3),
+        TOP_LEFT_FRONT(4),
+        TOP_RIGHT_FRONT(5),
+        BOTTOM_LEFT_FRONT(6),
+        BOTTOM_RIGHT_FRONT(7),
+        CENTER_CLUSTER_LEFT(8),
+        CENTER_CLUSTER_RIGHT(9),
+        LEFT_STICK_PRESSED(10),
+        RIGHT_STICK_PRESSED(11),
+        LEFT_CLUSTER_TOP(12),
+        LEFT_CLUSTER_BOTTOM(13),
+        LEFT_CLUSTER_LEFT(14),
+        LEFT_CLUSTER_RIGHT(15),
+        CENTER_CLUSTER_MIDDLE(16);
 
         @JsonValue
-        fun toValue() = value
+        fun toValue() = bit
     }
 }
 
