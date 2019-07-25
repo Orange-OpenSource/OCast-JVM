@@ -136,9 +136,9 @@ public abstract class Device implements CallbackWrapperOwner {
     public abstract void stopMedia(@NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
     public abstract void pauseMedia(@NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
     public abstract void resumeMedia(@NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
-    public abstract void prepareMedia(@NotNull MediaPrepareCommandParams params, @Nullable JSONObject options, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
+    public abstract void prepareMedia(@NotNull PrepareMediaCommandParams params, @Nullable JSONObject options, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
     public abstract void setMediaVolume(double volume, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
-    public abstract void setMediaTrack(@NotNull MediaTrackCommandParams params, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
+    public abstract void setMediaTrack(@NotNull SetMediaTrackCommandParams params, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
     public abstract void seekMedia(double position, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
     public abstract void muteMedia(boolean mute, @NotNull Runnable onSuccess, @NotNull Consumer<OCastMediaError> onError);
     public abstract void getMediaPlaybackStatus(@NotNull Consumer<MediaPlaybackStatus> onSuccess, @NotNull Consumer<OCastMediaError> onError);
@@ -149,9 +149,9 @@ public abstract class Device implements CallbackWrapperOwner {
     public abstract void getDeviceID(@NotNull Consumer<String> onSuccess, @NotNull Consumer<OCastDeviceSettingsError> onError);
 
     // Settings input commands
-    public abstract void sendKeyEvent(@NotNull KeyEventCommandParams params, @NotNull Runnable onSuccess, @NotNull Consumer<OCastInputSettingsError> onError);
-    public abstract void sendMouseEvent(@NotNull MouseEventCommandParams params, @NotNull Runnable onSuccess, @NotNull Consumer<OCastInputSettingsError> onError);
-    public abstract void sendGamepadEvent(@NotNull GamepadEventCommandParams params, @NotNull Runnable onSuccess, @NotNull Consumer<OCastInputSettingsError> onError);
+    public abstract void sendKeyEvent(@NotNull SendKeyEventCommandParams params, @NotNull Runnable onSuccess, @NotNull Consumer<OCastInputSettingsError> onError);
+    public abstract void sendMouseEvent(@NotNull SendMouseEventCommandParams params, @NotNull Runnable onSuccess, @NotNull Consumer<OCastInputSettingsError> onError);
+    public abstract void sendGamepadEvent(@NotNull SendGamepadEventCommandParams params, @NotNull Runnable onSuccess, @NotNull Consumer<OCastInputSettingsError> onError);
 
     // Custom commands
     public abstract <T> void send(@NotNull OCastApplicationLayer<T> message, @NotNull OCastDomain domain, @NotNull Runnable onSuccess, @NotNull Consumer<OCastError> onError);

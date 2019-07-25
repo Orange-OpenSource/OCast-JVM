@@ -61,7 +61,7 @@ class GetDeviceIDCommandParams : OCastCommandParams("getDeviceID")
  * @param meta
  * @param location
  */
-class KeyEventCommandParams(
+class SendKeyEventCommandParams(
     @JsonProperty("key") val key: String,
     @JsonProperty("code") val code: String,
     @JsonProperty("ctrl") val ctrl: Boolean,
@@ -90,7 +90,7 @@ class KeyEventCommandParams(
  * @param y
  * @param buttons
  */
-class MouseEventCommandParams(
+class SendMouseEventCommandParams(
     @JsonProperty("x") val x: Int,
     @JsonProperty("y") val y: Int,
     @JsonProperty("buttons") val buttons: Int
@@ -102,7 +102,7 @@ class MouseEventCommandParams(
  * @param axes
  * @param buttons
  */
-class GamepadEventCommandParams(
+class SendGamepadEventCommandParams(
     @JsonProperty("axes") val axes: List<Axes>,
     @JsonProperty("buttons") val buttons: Int
 ) : OCastCommandParams("gamepadEvent") {

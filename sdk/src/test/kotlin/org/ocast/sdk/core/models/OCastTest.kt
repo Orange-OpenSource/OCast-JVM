@@ -194,7 +194,7 @@ class OCastTest {
 
         // Given
         val options = JSONObject(hashMapOf("auth_cookie" to "azertyuiop1234"))
-        val prepareMessage = MediaMessage(MediaPrepareCommandParams(
+        val prepareMessage = MediaMessage(PrepareMediaCommandParams(
             "http://localhost",
             4,
             "La cité de la peur",

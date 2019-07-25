@@ -36,7 +36,7 @@ import org.ocast.sdk.core.ReferenceDevice
 import org.ocast.sdk.core.models.Media
 import org.ocast.sdk.core.models.MediaMetadata
 import org.ocast.sdk.core.models.MediaPlaybackStatus
-import org.ocast.sdk.core.models.MediaPrepareCommandParams
+import org.ocast.sdk.core.models.PrepareMediaCommandParams
 
 class MainActivity : AppCompatActivity(), EventListener {
 
@@ -103,7 +103,7 @@ class MainActivity : AppCompatActivity(), EventListener {
     }
 
     private fun prepareMedia(device: Device) {
-        val params = MediaPrepareCommandParams(
+        val params = PrepareMediaCommandParams(
             "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
             1,
             "Big Buck Bunny",

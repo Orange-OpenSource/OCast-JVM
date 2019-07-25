@@ -39,24 +39,24 @@ class MediaMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(Refere
  *
  * @param position position (in second)
  */
-class MediaPlayCommandParams(
+class PlayMediaCommandParams(
     @JsonProperty("position") val position: Double = 0.0
 ) : OCastCommandParams("play")
 
 /**
  * Stop the media
  */
-class MediaStopCommandParams : OCastCommandParams("stop")
+class StopMediaCommandParams : OCastCommandParams("stop")
 
 /**
  * Pause the media
  */
-class MediaPauseCommandParams : OCastCommandParams("pause")
+class PauseMediaCommandParams : OCastCommandParams("pause")
 
 /**
  * Resume the media
  */
-class MediaResumeCommandParams : OCastCommandParams("resume")
+class ResumeMediaCommandParams : OCastCommandParams("resume")
 
 /**
  * Prepare the media
@@ -70,7 +70,7 @@ class MediaResumeCommandParams : OCastCommandParams("resume")
  * @param transferMode
  * @param autoplay
  */
-class MediaPrepareCommandParams(
+class PrepareMediaCommandParams(
     @JsonProperty("url")val url: String,
     @JsonProperty("frequency")val updateFrequency: Int,
     @JsonProperty("title")val title: String,
@@ -86,7 +86,7 @@ class MediaPrepareCommandParams(
  *
  * @param volume
  */
-class MediaVolumeCommandParams(
+class SetMediaVolumeCommandParams(
     @JsonProperty("volume") val volume: Double
 ) : OCastCommandParams("volume")
 
@@ -97,7 +97,7 @@ class MediaVolumeCommandParams(
  * @param trackID
  * @param isEnabled
  */
-class MediaTrackCommandParams(
+class SetMediaTrackCommandParams(
     @JsonProperty("type") val type: Type,
     @JsonProperty("trackId") val trackID: String,
     @get:JsonIgnore @field:JsonProperty("enable") val isEnabled: Boolean
@@ -115,7 +115,7 @@ class MediaTrackCommandParams(
  *
  * @param position
  */
-class MediaSeekCommandParams(
+class SeekMediaCommandParams(
     @JsonProperty("position") val position: Double
 ) : OCastCommandParams("seek")
 
@@ -124,19 +124,19 @@ class MediaSeekCommandParams(
  *
  * @param isMuted
  */
-class MediaMuteCommandParams(
+class MuteMediaCommandParams(
     @get:JsonIgnore @field:JsonProperty("mute") val isMuted: Boolean
 ) : OCastCommandParams("mute")
 
 /**
  * Get playback status
  */
-class MediaGetPlaybackStatusCommandParams : OCastCommandParams("getPlaybackStatus")
+class GetMediaPlaybackStatusCommandParams : OCastCommandParams("getPlaybackStatus")
 
 /**
  * Get metadata
  */
-class MediaGetMetadataCommandParams : OCastCommandParams("getMetadata")
+class GetMediaMetadataCommandParams : OCastCommandParams("getMetadata")
 
 //endregion
 

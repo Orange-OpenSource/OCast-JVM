@@ -29,26 +29,15 @@ import org.ocast.sdk.common.extensions.orElse
 import org.ocast.sdk.core.models.Consumer
 import org.ocast.sdk.core.models.DeviceID
 import org.ocast.sdk.core.models.DeviceMessage
-import org.ocast.sdk.core.models.GamepadEventCommandParams
 import org.ocast.sdk.core.models.GetDeviceIDCommandParams
+import org.ocast.sdk.core.models.GetMediaMetadataCommandParams
+import org.ocast.sdk.core.models.GetMediaPlaybackStatusCommandParams
 import org.ocast.sdk.core.models.GetUpdateStatusCommandParams
 import org.ocast.sdk.core.models.InputMessage
-import org.ocast.sdk.core.models.KeyEventCommandParams
-import org.ocast.sdk.core.models.MediaGetMetadataCommandParams
-import org.ocast.sdk.core.models.MediaGetPlaybackStatusCommandParams
 import org.ocast.sdk.core.models.MediaMessage
 import org.ocast.sdk.core.models.MediaMetadata
-import org.ocast.sdk.core.models.MediaMuteCommandParams
-import org.ocast.sdk.core.models.MediaPauseCommandParams
-import org.ocast.sdk.core.models.MediaPlayCommandParams
 import org.ocast.sdk.core.models.MediaPlaybackStatus
-import org.ocast.sdk.core.models.MediaPrepareCommandParams
-import org.ocast.sdk.core.models.MediaResumeCommandParams
-import org.ocast.sdk.core.models.MediaSeekCommandParams
-import org.ocast.sdk.core.models.MediaStopCommandParams
-import org.ocast.sdk.core.models.MediaTrackCommandParams
-import org.ocast.sdk.core.models.MediaVolumeCommandParams
-import org.ocast.sdk.core.models.MouseEventCommandParams
+import org.ocast.sdk.core.models.MuteMediaCommandParams
 import org.ocast.sdk.core.models.OCastApplicationLayer
 import org.ocast.sdk.core.models.OCastCommandDeviceLayer
 import org.ocast.sdk.core.models.OCastDataLayer
@@ -60,9 +49,20 @@ import org.ocast.sdk.core.models.OCastMediaError
 import org.ocast.sdk.core.models.OCastRawDataLayer
 import org.ocast.sdk.core.models.OCastRawDeviceLayer
 import org.ocast.sdk.core.models.OCastReplyEventParams
+import org.ocast.sdk.core.models.PauseMediaCommandParams
+import org.ocast.sdk.core.models.PlayMediaCommandParams
+import org.ocast.sdk.core.models.PrepareMediaCommandParams
 import org.ocast.sdk.core.models.ReplyCallback
+import org.ocast.sdk.core.models.ResumeMediaCommandParams
 import org.ocast.sdk.core.models.RunnableCallback
 import org.ocast.sdk.core.models.SSLConfiguration
+import org.ocast.sdk.core.models.SeekMediaCommandParams
+import org.ocast.sdk.core.models.SendGamepadEventCommandParams
+import org.ocast.sdk.core.models.SendKeyEventCommandParams
+import org.ocast.sdk.core.models.SendMouseEventCommandParams
+import org.ocast.sdk.core.models.SetMediaTrackCommandParams
+import org.ocast.sdk.core.models.SetMediaVolumeCommandParams
+import org.ocast.sdk.core.models.StopMediaCommandParams
 import org.ocast.sdk.core.models.UpdateStatus
 import org.ocast.sdk.core.models.WebAppConnectedStatusEvent
 import org.ocast.sdk.core.models.WebAppStatus
@@ -343,47 +343,47 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     //region Media commands
 
     override fun playMedia(position: Double, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(MediaPlayCommandParams(position).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(PlayMediaCommandParams(position).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun stopMedia(onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(MediaStopCommandParams().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(StopMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun pauseMedia(onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(MediaPauseCommandParams().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(PauseMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun resumeMedia(onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(MediaResumeCommandParams().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(ResumeMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
-    override fun prepareMedia(params: MediaPrepareCommandParams, options: JSONObject?, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
+    override fun prepareMedia(params: PrepareMediaCommandParams, options: JSONObject?, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
         send(MediaMessage(params.options(options).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun setMediaVolume(volume: Double, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(MediaVolumeCommandParams(volume).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(SetMediaVolumeCommandParams(volume).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
-    override fun setMediaTrack(params: MediaTrackCommandParams, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
+    override fun setMediaTrack(params: SetMediaTrackCommandParams, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
         send(MediaMessage(params.build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun seekMedia(position: Double, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(MediaSeekCommandParams(position).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(SeekMediaCommandParams(position).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun muteMedia(mute: Boolean, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(MediaMuteCommandParams(mute).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(MuteMediaCommandParams(mute).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun getMediaPlaybackStatus(onSuccess: Consumer<MediaPlaybackStatus>, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(MediaGetPlaybackStatusCommandParams().build()), OCastDomain.BROWSER, MediaPlaybackStatus::class.java, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(GetMediaPlaybackStatusCommandParams().build()), OCastDomain.BROWSER, MediaPlaybackStatus::class.java, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     override fun getMediaMetadata(onSuccess: Consumer<MediaMetadata>, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(MediaGetMetadataCommandParams().build()), OCastDomain.BROWSER, MediaMetadata::class.java, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(GetMediaMetadataCommandParams().build()), OCastDomain.BROWSER, MediaMetadata::class.java, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
     }
 
     //endregion
@@ -402,15 +402,15 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
 
     //region Settings input commands
 
-    override fun sendKeyEvent(params: KeyEventCommandParams, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
+    override fun sendKeyEvent(params: SendKeyEventCommandParams, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
         send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
     }
 
-    override fun sendMouseEvent(params: MouseEventCommandParams, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
+    override fun sendMouseEvent(params: SendMouseEventCommandParams, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
         send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
     }
 
-    override fun sendGamepadEvent(params: GamepadEventCommandParams, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
+    override fun sendGamepadEvent(params: SendGamepadEventCommandParams, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
         send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
     }
 

@@ -75,7 +75,7 @@ public class AppJava implements EventListener, DeviceListener {
     }
 
     private void prepareMedia(Device device) {
-        MediaPrepareCommandParams params = new MediaPrepareCommandParams(
+        PrepareMediaCommandParams params = new PrepareMediaCommandParams(
                 "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
                 1,
                 "Big Buck Bunny",
