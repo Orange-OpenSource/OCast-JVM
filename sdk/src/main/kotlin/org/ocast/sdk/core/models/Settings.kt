@@ -129,7 +129,7 @@ class SendGamepadEventCommandParams(
      *
      * @param x
      * @param y
-     * @param num
+     * @param type
      */
     class Axe(
         @JsonProperty("x") val x: Double,
