@@ -116,10 +116,8 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
     private inner class OCastMediaRouteDeviceListener : DeviceListener {
 
         override fun onDevicesAdded(devices: List<Device>) {
-            synchronized(routeDescriptorsByUpnpID) {
-                devices.forEach { device ->
-                    routeDescriptorsByUpnpID[device.upnpID] = createMediaRouteDescriptor(device)
-                }
+            devices.forEach { device ->
+                routeDescriptorsByUpnpID[device.upnpID] = createMediaRouteDescriptor(device)
             }
             publishRoutes()
         }
