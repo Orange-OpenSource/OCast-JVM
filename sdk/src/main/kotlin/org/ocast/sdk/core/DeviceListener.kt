@@ -23,11 +23,11 @@ interface DeviceListener {
     }
 
     @JvmDefault
-    fun onDeviceAdded(device: Device) {
+    fun onDevicesAdded(devices: List<Device>) {
     }
 
     @JvmDefault
-    fun onDeviceRemoved(device: Device) {
+    fun onDevicesRemoved(devices: List<Device>) {
     }
 
     @JvmDefault
