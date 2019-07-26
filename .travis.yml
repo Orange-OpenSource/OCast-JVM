@@ -28,3 +28,5 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
+# Install of oraclejdk8 fails on Xenial but works fine on Trusty
+dist: trusty
