@@ -25,6 +25,7 @@ import org.ocast.sdk.core.ReferenceDevice;
 import org.ocast.sdk.core.models.*;
 import org.ocast.sdk.core.utils.OCastLog;
 
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -99,8 +100,10 @@ public class AppJava implements EventListener, DeviceListener {
     }
 
     @Override
-    public void onDeviceAdded(@NotNull Device device) {
-        logger.log(Level.INFO, "onDeviceAdded: " + device.getFriendlyName() + "]");
-        startApplication(device);
+    public void onDevicesAdded(@NotNull List<? extends Device> devices) {
+        for (Device device : devices) {
+            logger.log(Level.INFO, "onDeviceAdded: " + device.getFriendlyName() + "]");
+            startApplication(device);
+        }
     }
 }

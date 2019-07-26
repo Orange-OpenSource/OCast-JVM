@@ -115,17 +115,23 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
 
     private inner class OCastMediaRouteDeviceListener : DeviceListener {
 
-        override fun onDeviceAdded(device: Device) {
-            routeDescriptorsByUpnpID[device.upnpID] = createMediaRouteDescriptor(device)
+        override fun onDevicesAdded(devices: List<Device>) {
+            synchronized(routeDescriptorsByUpnpID) {
+                devices.forEach { device ->
+                    routeDescriptorsByUpnpID[device.upnpID] = createMediaRouteDescriptor(device)
+                }
+            }
             publishRoutes()
         }
 
-        override fun onDeviceRemoved(device: Device) {
+        override fun onDevicesRemoved(devices: List<Device>) {
             synchronized(routeDescriptorsByUpnpID) {
-                routeDescriptorsByUpnpID
-                    .keys
-                    .firstOrNull { it == device.upnpID }
-                    ?.run { routeDescriptorsByUpnpID.remove(this) }
+                devices.forEach { device ->
+                    routeDescriptorsByUpnpID
+                        .keys
+                        .firstOrNull { it == device.upnpID }
+                        ?.run { routeDescriptorsByUpnpID.remove(this) }
+                }
             }
             publishRoutes()
         }

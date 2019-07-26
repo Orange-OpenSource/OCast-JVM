@@ -135,21 +135,18 @@ open class DeviceCenter : CallbackWrapperOwner {
     private val deviceDiscoveryListener = object : DeviceDiscovery.Listener {
 
         override fun onDevicesAdded(devices: List<UpnpDevice>) {
-            devices.forEach { upnpDevice ->
-                createDevice(upnpDevice)?.ifNotNull { device ->
-                    this@DeviceCenter.deviceListener.onDeviceAdded(device)
-                }
-            }
+            val devicesToAdd = devices.mapNotNull { createDevice(it) }
+            this@DeviceCenter.deviceListener.onDevicesAdded(devicesToAdd)
         }
 
         override fun onDevicesRemoved(devices: List<UpnpDevice>) {
-            devices.forEach { device ->
-                synchronized(detectedDevices) {
-                    detectedDevices.firstOrNull { device.id == it.upnpID }?.ifNotNull {
-                        this@DeviceCenter.deviceListener.onDeviceRemoved(it)
-                        removeDevice(it)
-                    }
+            synchronized(detectedDevices) {
+                val devicesToRemove = devices.mapNotNull { device ->
+                    detectedDevices
+                        .firstOrNull { device.id == it.upnpID }
+                        .ifNotNull { removeDevice(it) }
                 }
+                this@DeviceCenter.deviceListener.onDevicesRemoved(devicesToRemove)
             }
         }
 
@@ -187,12 +184,12 @@ open class DeviceCenter : CallbackWrapperOwner {
 
     private val deviceListener = object : DeviceListener {
 
-        override fun onDeviceAdded(device: Device) {
-            deviceListeners.wrapForEach { it.onDeviceAdded(device) }
+        override fun onDevicesAdded(devices: List<Device>) {
+            deviceListeners.wrapForEach { it.onDevicesAdded(devices) }
         }
 
-        override fun onDeviceRemoved(device: Device) {
-            deviceListeners.wrapForEach { it.onDeviceRemoved(device) }
+        override fun onDevicesRemoved(devices: List<Device>) {
+            deviceListeners.wrapForEach { it.onDevicesRemoved(devices) }
         }
 
         override fun onDeviceDisconnected(device: Device, error: Throwable?) {

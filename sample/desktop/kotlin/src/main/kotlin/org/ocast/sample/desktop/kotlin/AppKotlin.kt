@@ -98,8 +98,10 @@ class AppKotlin : EventListener, DeviceListener {
         logger.log(Level.INFO, "[{${device.friendlyName}}] onMediaPlaybackStatus: progress=${mediaPlaybackStatus.position} state=${mediaPlaybackStatus.state}")
     }
 
-    override fun onDeviceAdded(device: Device) {
-        logger.log(Level.INFO, "onDeviceAdded: ${device.friendlyName}")
-        startApplication(device)
+    override fun onDevicesAdded(devices: List<Device>) {
+        devices.forEach {
+            logger.log(Level.INFO, "onDeviceAdded: ${it.friendlyName}")
+            startApplication(it)
+        }
     }
 }
