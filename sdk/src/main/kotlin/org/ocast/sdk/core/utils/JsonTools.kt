@@ -17,17 +17,23 @@
 package org.ocast.sdk.core.utils
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import java.util.EnumSet
+import org.ocast.sdk.common.extensions.orElse
+import org.ocast.sdk.core.models.Bitflag
 
 object JsonTools {
 
@@ -59,12 +65,48 @@ object JsonTools {
     }
 }
 
-class RawJsonDeserializer : JsonDeserializer<String>() {
+class RawJsonDeserializer : StdDeserializer<String>(String::class.java) {
 
     @Throws(Exception::class)
     override fun deserialize(parser: JsonParser?, context: DeserializationContext?): String {
         val mapper = parser?.codec as? ObjectMapper
         val node = mapper?.readTree<TreeNode>(parser)
         return mapper?.writeValueAsString(node).orEmpty()
+    }
+}
+
+/**
+ * A serializer that serializes an [EnumSet] to an integer which represents bitflags.
+ *
+ * @param T The type of the bitflags enum.
+ * @constructor Creates an instance of [BitflagsSerializer].
+ */
+class BitflagsSerializer<T> : StdSerializer<EnumSet<T>>(EnumSet::class.java, false) where T : Enum<T>, T : Bitflag {
+
+    @Throws(Exception::class)
+    override fun serialize(value: EnumSet<T>?, gen: JsonGenerator?, serializers: SerializerProvider?) {
+        val bitflags = value.orEmpty().sumBy { 1 shl it.bit }
+        gen?.writeNumber(bitflags)
+    }
+}
+
+/**
+ * A deserializer that deserializes an integer which represents bitflags to an [EnumSet].
+ *
+ * @param T The type of the bitflags enum.
+ * @property clazz The class of the bitflags enum.
+ * @constructor Creates an instance of [BitflagsDeserializer].
+ */
+open class BitflagsDeserializer<T>(private val clazz: Class<T>) : StdDeserializer<EnumSet<T>>(EnumSet::class.java) where T : Enum<T>, T : Bitflag {
+
+    @Throws(Exception::class)
+    override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): EnumSet<T> {
+        val bitflags = p?.valueAsInt.orElse { 0 }
+        val enums = clazz.enumConstants.mapNotNull { enum ->
+            val bitmask = 1 shl enum.bit
+            enum.takeIf { bitmask and bitflags == bitmask }
+        }
+
+        return if (enums.isEmpty()) EnumSet.noneOf(clazz) else EnumSet.copyOf(enums)
     }
 }
