@@ -29,4 +29,8 @@ interface DeviceListener {
     @JvmDefault
     fun onDeviceRemoved(device: Device) {
     }
+
+    @JvmDefault
+    fun onDiscoveryStopped(error: Throwable?) {
+    }
 }

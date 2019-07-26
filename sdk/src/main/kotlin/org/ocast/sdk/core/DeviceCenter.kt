@@ -49,7 +49,6 @@ open class DeviceCenter : CallbackWrapperOwner {
 
     private val eventListeners = mutableSetOf<EventListener>()
     private val deviceListeners = mutableSetOf<DeviceListener>()
-    private var deviceCenterListeners = mutableSetOf<DeviceCenterListener>()
 
     private val registeredDevicesByManufacturer = mutableMapOf<String, Class<out Device>>()
     private val detectedDevices = Collections.synchronizedList(mutableListOf<Device>())
@@ -115,14 +114,6 @@ open class DeviceCenter : CallbackWrapperOwner {
         deviceListeners.remove(listener)
     }
 
-    fun addDeviceCenterListener(deviceCenterListener: DeviceCenterListener) {
-        deviceCenterListeners.add(deviceCenterListener)
-    }
-
-    fun removeDeviceCenterListener(deviceCenterListener: DeviceCenterListener) {
-        deviceCenterListeners.remove(deviceCenterListener)
-    }
-
     fun resumeDiscovery(): Boolean {
         deviceDiscovery.listener = deviceDiscoveryListener
 
@@ -163,7 +154,7 @@ open class DeviceCenter : CallbackWrapperOwner {
         }
 
         override fun onDiscoveryStopped(error: Throwable?) {
-            deviceCenterListeners.wrapForEach { it.onDiscoveryStopped(error) }
+            this@DeviceCenter.deviceListener.onDiscoveryStopped(error)
         }
     }
 
@@ -207,12 +198,11 @@ open class DeviceCenter : CallbackWrapperOwner {
         override fun onDeviceDisconnected(device: Device, error: Throwable?) {
             deviceListeners.wrapForEach { it.onDeviceDisconnected(device, error) }
         }
+
+        override fun onDiscoveryStopped(error: Throwable?) {
+            deviceListeners.wrapForEach { it.onDiscoveryStopped(error) }
+        }
     }
 
     //endregion
-}
-
-interface DeviceCenterListener {
-
-    fun onDiscoveryStopped(error: Throwable?)
 }

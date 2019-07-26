@@ -129,9 +129,6 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
             }
             publishRoutes()
         }
-
-        override fun onDeviceDisconnected(device: Device, error: Throwable?) {
-        }
     }
 
     private val wifiMonitorReceiver = object : BroadcastReceiver() {
