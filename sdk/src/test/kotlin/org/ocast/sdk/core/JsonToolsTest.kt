@@ -16,12 +16,12 @@
 
 package org.ocast.sdk.core
 
-import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.EnumSet
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Test
-import org.ocast.sdk.core.models.SendMouseEventCommandParams
+import org.ocast.sdk.core.models.Bitflag
 import org.ocast.sdk.core.utils.BitflagsDeserializer
 import org.ocast.sdk.core.utils.BitflagsSerializer
 import org.ocast.sdk.core.utils.JsonTools
@@ -32,19 +32,22 @@ import org.ocast.sdk.core.utils.RawJsonDeserializer
  */
 class JsonToolsTest {
 
-    @Before
-    fun setUp() {
-        val module = SimpleModule()
-        module.addSerializer(BitflagsSerializer<SendMouseEventCommandParams.Button>())
-        module.addDeserializer(EnumSet::class.java, BitflagsDeserializer(SendMouseEventCommandParams.Button::class.java))
-        module.addDeserializer(String::class.java, RawJsonDeserializer())
-        JsonTools.objectMapper.registerModule(module)
-    }
+    //region RawJsonDeserializer
+
+    /**
+     * This class represents a container of a raw JSON string.
+     */
+    class RawJsonContainer(
+
+        /** The raw JSON string */
+        @JsonDeserialize(using = RawJsonDeserializer::class)
+        val rawJson: String
+    )
 
     @Test
-    fun deserializeRawStringSucceeds() {
+    fun deserializeRawJsonSucceeds() {
         // Given
-        val jsonString = """
+        val rawJson = """
             {
               "foo": "string",
               "bar": 1,
@@ -59,82 +62,120 @@ class JsonToolsTest {
         """.trimIndent()
             .replace("\\s|\\R".toRegex(), "")
 
+        val containerString = "{ \"rawJson\": $rawJson }"
+
         // When
-        val decodedJsonString = JsonTools.decode<String>(jsonString)
+        val containerObject = JsonTools.decode<RawJsonContainer>(containerString)
 
         // Then
-        assertEquals(jsonString, decodedJsonString)
+        assertEquals(rawJson, containerObject.rawJson)
+    }
+
+    //endregion
+
+    //region Bitflags
+
+    /**
+     * This class represents a container of bitflags.
+     */
+    class BitflagsContainer(
+
+        /** The bitflags. */
+        @JsonSerialize(using = BitflagsSerializer::class)
+        @JsonDeserialize(using = TestBitflagsDeserializer::class)
+        val bitflags: EnumSet<TestBitflag>
+    )
+
+    /**
+     * This class is a [BitflagsDeserializer] of [TestBitflag].
+     *
+     * The [JsonDeserialize] annotation only takes a class for its `using` parameter.
+     * However the [BitflagsDeserializer] constructor has a parameter.
+     * Thus we need to define a subclass of [BitflagsDeserializer] with the desired parameter and use this subclass with [JsonDeserialize].
+     */
+    class TestBitflagsDeserializer : BitflagsDeserializer<TestBitflag>(TestBitflag::class.java)
+
+    /**
+     * This class is an enum of bitflags for tests.
+     */
+    enum class TestBitflag(override val bit: Int) : Bitflag {
+
+        BITFLAG_0(0),
+        BITFLAG_1(1),
+        BITFLAG_2(2)
     }
 
     @Test
     fun serializeNoBitflagSucceeds() {
         // Given
-        val buttons = EnumSet.noneOf(SendMouseEventCommandParams.Button::class.java)
+        val container = BitflagsContainer(EnumSet.noneOf(TestBitflag::class.java))
 
         // When
-        val bitflags = JsonTools.encode(buttons).toInt()
+        val bitflags = JsonTools.encode(container)
 
         // Then
-        assertEquals(0, bitflags)
+        assertEquals("{\"bitflags\":0}", bitflags)
     }
 
     @Test
     fun serializeSingleBitflagSucceeds() {
         // Given
-        val buttons = EnumSet.of(SendMouseEventCommandParams.Button.MIDDLE)
+        val container = BitflagsContainer(EnumSet.of(TestBitflag.BITFLAG_1))
 
         // When
-        val bitflags = JsonTools.encode(buttons).toInt()
+        val bitflags = JsonTools.encode(container)
 
         // Then
-        assertEquals(4, bitflags)
+        assertEquals("{\"bitflags\":2}", bitflags)
     }
 
     @Test
     fun serializeAllBitflagsSucceeds() {
         // Given
-        val buttons = EnumSet.allOf(SendMouseEventCommandParams.Button::class.java)
+        val container = BitflagsContainer(EnumSet.allOf(TestBitflag::class.java))
 
         // When
-        val bitflags = JsonTools.encode(buttons).toInt()
+        val bitflags = JsonTools.encode(container)
 
         // Then
-        assertEquals(7, bitflags)
+        assertEquals("{\"bitflags\":7}", bitflags)
     }
 
     @Test
     fun deserializeNoBitflagSucceeds() {
         // Given
-        val bitflags = 0
+        val containerString = "{\"bitflags\": 0}"
 
         // When
-        val buttons = JsonTools.decode<EnumSet<SendMouseEventCommandParams.Button>>(bitflags.toString())
+        val containerObject = JsonTools.decode<BitflagsContainer>(containerString)
 
         // Then
-        assertEquals(EnumSet.noneOf(SendMouseEventCommandParams.Button::class.java), buttons)
+        assertEquals(EnumSet.noneOf(TestBitflag::class.java), containerObject.bitflags)
     }
 
     @Test
     fun deserializeSingleBitflagSucceeds() {
         // Given
-        val bitflags = 4
+        val containerString = "{\"bitflags\": 2}"
 
         // When
-        val buttons = JsonTools.decode<EnumSet<SendMouseEventCommandParams.Button>>(bitflags.toString())
+        val containerObject = JsonTools.decode<BitflagsContainer>(containerString)
 
         // Then
-        assertEquals(EnumSet.of(SendMouseEventCommandParams.Button.MIDDLE), buttons)
+        assertEquals(EnumSet.of(TestBitflag.BITFLAG_1), containerObject.bitflags)
     }
 
     @Test
     fun deserializeAllBitflagsSucceeds() {
         // Given
-        val bitflags = 7
+        val containerString = "{\"bitflags\": 7}"
 
         // When
-        val buttons = JsonTools.decode<EnumSet<SendMouseEventCommandParams.Button>>(bitflags.toString())
+        val containerObject = JsonTools.decode<BitflagsContainer>(containerString)
 
         // Then
-        assertEquals(EnumSet.allOf(SendMouseEventCommandParams.Button::class.java), buttons)
+        assertEquals(EnumSet.allOf(TestBitflag::class.java), containerObject.bitflags)
     }
+
+    //endregion
 }

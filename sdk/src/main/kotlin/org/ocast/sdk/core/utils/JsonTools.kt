@@ -34,8 +34,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import java.util.EnumSet
 import org.ocast.sdk.common.extensions.orElse
 import org.ocast.sdk.core.models.Bitflag
-import org.ocast.sdk.core.models.SendGamepadEventCommandParams
-import org.ocast.sdk.core.models.SendMouseEventCommandParams
 
 object JsonTools {
 
@@ -110,13 +108,3 @@ open class BitflagsDeserializer<T>(private val clazz: Class<T>) : StdDeserialize
         return if (enums.isEmpty()) EnumSet.noneOf(clazz) else EnumSet.copyOf(enums)
     }
 }
-
-/**
- * A deserializer for [SendMouseEventCommandParams.Button] bitflags.
- */
-class MouseEventButtonsDeserializer : BitflagsDeserializer<SendMouseEventCommandParams.Button>(SendMouseEventCommandParams.Button::class.java)
-
-/**
- * A deserializer for [SendGamepadEventCommandParams.Button] bitflags.
- */
-class GamepadEventButtonsDeserializer : BitflagsDeserializer<SendGamepadEventCommandParams.Button>(SendGamepadEventCommandParams.Button::class.java)

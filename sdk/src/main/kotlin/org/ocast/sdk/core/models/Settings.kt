@@ -18,13 +18,10 @@ package org.ocast.sdk.core.models
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.EnumSet
 import org.ocast.sdk.core.ReferenceDevice
 import org.ocast.sdk.core.utils.BitflagsSerializer
-import org.ocast.sdk.core.utils.GamepadEventButtonsDeserializer
-import org.ocast.sdk.core.utils.MouseEventButtonsDeserializer
 
 //region Message
 
@@ -100,7 +97,6 @@ class SendMouseEventCommandParams(
     @JsonProperty("x") val x: Int,
     @JsonProperty("y") val y: Int,
     @JsonSerialize(using = BitflagsSerializer::class)
-    @JsonDeserialize(using = MouseEventButtonsDeserializer::class)
     @JsonProperty("buttons") val buttons: EnumSet<Button>
 ) : OCastCommandParams("mouseEvent") {
 
@@ -125,7 +121,6 @@ class SendMouseEventCommandParams(
 class SendGamepadEventCommandParams(
     @JsonProperty("axes") val axes: List<Axe>,
     @JsonSerialize(using = BitflagsSerializer::class)
-    @JsonDeserialize(using = GamepadEventButtonsDeserializer::class)
     @JsonProperty("buttons") val buttons: EnumSet<Button>
 ) : OCastCommandParams("gamepadEvent") {
 
