@@ -83,6 +83,7 @@ class RawJsonDeserializer : StdDeserializer<String>(String::class.java) {
  */
 class BitflagsSerializer<T> : StdSerializer<EnumSet<T>>(EnumSet::class.java, false) where T : Enum<T>, T : Bitflag {
 
+    @Throws(Exception::class)
     override fun serialize(value: EnumSet<T>?, gen: JsonGenerator?, serializers: SerializerProvider?) {
         val bitflags = value.orEmpty().sumBy { 1 shl it.bit }
         gen?.writeNumber(bitflags)
@@ -98,6 +99,7 @@ class BitflagsSerializer<T> : StdSerializer<EnumSet<T>>(EnumSet::class.java, fal
  */
 open class BitflagsDeserializer<T>(private val clazz: Class<T>) : StdDeserializer<EnumSet<T>>(EnumSet::class.java) where T : Enum<T>, T : Bitflag {
 
+    @Throws(Exception::class)
     override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): EnumSet<T> {
         val bitflags = p?.valueAsInt.orElse { 0 }
         val enums = clazz.enumConstants.mapNotNull { enum ->
