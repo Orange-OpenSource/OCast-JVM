@@ -17,6 +17,7 @@
 package org.ocast.sdk.core
 
 import com.fasterxml.jackson.databind.module.SimpleModule
+import java.util.EnumSet
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -25,7 +26,6 @@ import org.ocast.sdk.core.utils.BitflagsDeserializer
 import org.ocast.sdk.core.utils.BitflagsSerializer
 import org.ocast.sdk.core.utils.JsonTools
 import org.ocast.sdk.core.utils.RawJsonDeserializer
-import java.util.EnumSet
 
 /**
  * Unit tests for the JsonTools object.
@@ -65,7 +65,6 @@ class JsonToolsTest {
         // Then
         assertEquals(jsonString, decodedJsonString)
     }
-
 
     @Test
     fun serializeNoBitflagSucceeds() {
