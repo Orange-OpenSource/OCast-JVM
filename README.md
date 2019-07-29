@@ -28,7 +28,7 @@ The sample project aims to demonstrate the basic instruction set of the Orange O
 
 ## Installation
 
-OCast is available through [JFrog Bintray](https://bintray.com/orange-opensource/maven). To install it, simply add the following lines to your Gradle file:
+The Orange OCast SDK is available through [JFrog Bintray](https://bintray.com/orange-opensource/maven). To install it, simply add the following lines to your Gradle file:
 
 ```groovy
 repositories {
@@ -36,9 +36,11 @@ repositories {
         url  "https://dl.bintray.com/orange-opensource/maven" 
     }
 }
+
 dependencies {
     implementation "org.ocast:sdk:2.0.0"
-    // The following line is only needed if you are using OCast on Android and want to take advantage of the MediaRouter framework
+    // The following line is only needed if you are using OCast on Android
+    // and want to take advantage of the MediaRouter framework
     implementation "org.ocast:mediaroute:2.0.0"
 }
 ```
@@ -55,13 +57,13 @@ git clone https://github.com/Orange-OpenSource/OCast-JVM.git
 
 You have to register your device type into the `DeviceCenter`.
 
-> Java
+:small_orange_diamond: Java
 ```java
 DeviceCenter deviceCenter = new DeviceCenter();
 deviceCenter.registerDevice(ReferenceDevice.class);
 ```
 
-> Kotlin
+:small_blue_diamond: Kotlin
 ```kotlin
 val deviceCenter = DeviceCenter()
 deviceCenter.registerDevice(ReferenceDevice::class.java)
@@ -75,7 +77,7 @@ If devices are found on your network, the `onDevicesAdded(@NotNull List<? extend
 
 If devices are lost (network problem or device is turned-off), the `onDevicesRemoved(@NotNull List<? extends Device> devices)` method is called.
 
-> Java
+:small_orange_diamond: Java
 ```java
 deviceCenter.addDeviceListener(this);
 deviceCenter.resumeDiscovery();
@@ -89,7 +91,7 @@ public void onDevicesRemoved(@NotNull List<? extends Device> devices) {}
 public void onDiscoveryStopped(@Nullable Throwable error) {}
 ```
 
-> Kotlin
+:small_blue_diamond: Kotlin
 ```kotlin
 deviceCenter.addDeviceListener(this)
 deviceCenter.resumeDiscovery()
@@ -110,19 +112,19 @@ By default, the list of devices is refreshed every 30 seconds. You can decrease 
 
 To connect to the device and use OCast media commands on your own application, you must set the device `applicationName` property. When you connect to the device, the application is started automatically if needed. You can also manage the application state manually. See [Manage application state](#8-manage-application-state).
 
-> Java
+:small_orange_diamond: Java
 ```java
 device.setApplicationName("MyWebApp");
 ```
 
-> Kotlin
+:small_blue_diamond: Kotlin
 ```kotlin
 device.applicationName = "MyWebApp"
 ```
 
 If you want to perform a secure connection, you can set an `SSLConfiguration` object with your custom settings. Then you must call the `connect(sslConfiguration: SSLConfiguration?, onSuccess: Runnable, onError: Consumer<OCastError>)` method. Once either `onSuccess` or `onError` is called, you can send commands to your device.
 
-> Java
+:small_orange_diamond: Java
 ```java
 SSLConfiguration sslConfiguration = new SSLConfiguration(trustManager, socketFactory, hostnameVerifier);
 device.connect(sslConfiguration, () -> {
@@ -132,7 +134,7 @@ device.connect(sslConfiguration, () -> {
 });
 ```
 
-> Kotlin
+:small_blue_diamond: Kotlin
 ```kotlin
 val sslConfiguration = SSLConfiguration(trustManager, socketFactory, hostnameVerifier)
 device.connect(sslConfiguration, {
@@ -148,9 +150,9 @@ If a network error occurs, the `onDeviceDisconnected(@NotNull Device device, @Nu
 
 ### 4. Send OCast commands
 
-You can use the OCast commands provided by the SDK in the `Device` abstract class. The command list is described here: http://www.ocast.org/OCast-Protocol.pdf
+You can use the OCast commands provided by the SDK in the `Device` abstract class. The command list is described [here](http://www.ocast.org/OCast-Protocol.pdf).
 
-> Java
+:small_orange_diamond: Java
 ```java
 PrepareMediaCommandParams params = new PrepareMediaCommandParams(
         "http://myMovie.mp4",
@@ -165,7 +167,7 @@ PrepareMediaCommandParams params = new PrepareMediaCommandParams(
 device.prepareMedia(params, null, () -> {}, oCastError -> {});
 ```
 
-> Kotlin
+:small_blue_diamond: Kotlin
 ```kotlin
 val params = PrepareMediaCommandParams(
     "http://myMovie.mp4",
@@ -184,7 +186,7 @@ device.prepareMedia(params, null, {}, {})
 
 The device can send events defined in the OCast protocol. The various methods of the `EventListener` interface will be called depending on the event.
 
-> Java
+:small_orange_diamond: Java
 ```java
 deviceCenter.addEventListener(this);
 
@@ -197,7 +199,7 @@ public void onMediaMetadataChanged(@NotNull Device device, @NotNull MediaMetadat
 public void onUpdateStatus(@NotNull Device device, @NotNull UpdateStatus updateStatus) {}
 ```
 
-> Kotlin
+:small_blue_diamond: Kotlin
 ```kotlin
 deviceCenter.addEventListener(this)
 
@@ -212,7 +214,7 @@ override fun onUpdateStatus(device: Device, updateStatus: UpdateStatus) {}
 If you need to send a command not defined in the OCast protocol, you can use the `send(@NotNull OCastApplicationLayer<T> message, @NotNull OCastDomain domain, @NotNull Runnable onSuccess, @NotNull Consumer<OCastError> onError)` method (or its `Consumer` counterpart) of the `Device` abstract class.
 The custom command must subclass `OCastCommandParams`.
 
-> Java
+:small_orange_diamond: Java
 ```java
 class CustomCommandParams extends OCastCommandParams {
 
@@ -254,7 +256,7 @@ device.send(message, OCastDomain.BROWSER, CustomReplyParams.class, customReplyPa
 });
 ````
 
-> Kotlin
+:small_blue_diamond: Kotlin
 ```kotlin
 class CustomCommandParams(val myParameter: String) : OCastCommandParams("customCommand")
 class CustomReplyParams(myValue: String)
@@ -274,7 +276,7 @@ Please note that the Orange OCast SDK uses [Jackson](https://github.com/FasterXM
 
 If you need to receive an event not defined in the OCast protocol, you can override the `onCustomEvent(@NotNull Device device, @NotNull String name, @NotNull String params)` method of the `EventListerner` interface.
 
-> Java
+:small_orange_diamond: Java
 ```java
 class CustomEvent {
 
@@ -295,24 +297,24 @@ class CustomEvent {
 public void onCustomEvent(@NotNull Device device, @NotNull String name, @NotNull String params) {
     try {
         CustomEvent customEvent = JsonTools.INSTANCE.decode(params, CustomEvent.class);
+        // ...
     } catch (Exception e) {
         e.printStackTrace();
     }
-    // ...
 }
 ```
 
-> Kotlin
+:small_blue_diamond: Kotlin
 ```kotlin
 class CustomEvent(val myEventValue: String)
 
 override fun onCustomEvent(device: Device, name: String, params: String) {
     try {
         val customEvent = JsonTools.decode<CustomEvent>(params)
+        // ...
     } catch (e: Exception) {
         e.printStackTrace()
     }
-    // ...
 }
 ```
 
@@ -328,7 +330,7 @@ You do not need to manipulate any instance of `DeviceCenter` when using the OCas
 
 To use the Android media route module, simply initialize the `OCastMediaRouteHelper` singleton with the list of device types you want to detect, and register a `MediaRouter.Callback` to be notified of the various `MediaRouter` events:
 
-> Java
+:small_orange_diamond: Java
 ```java
 OCastMediaRouteHelper.INSTANCE.initialize(this, Arrays.asList(ReferenceDevice.class));
 OCastMediaRouteHelper.addMediaRouterCallback(mediaRouterCallback)
@@ -351,7 +353,7 @@ public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo info) {}
 public void onRouteChanged(MediaRouter router, MediaRouter.RouteInfo info) {}
 ```
 
-> Kotlin
+:small_blue_diamond: Kotlin
 ```kotlin
 OCastMediaRouteHelper.initialize(this, listOf(ReferenceDevice::class.java))
 OCastMediaRouteHelper.addMediaRouterCallback(mediaRouterCallback)
@@ -370,7 +372,7 @@ override fun onRouteChanged(router: MediaRouter?, route: MediaRouter.RouteInfo?)
 
 As with `DeviceCenter`, it is also possible to add an `EventListener` to receive OCast events:
 
-> Java
+:small_orange_diamond: Java
 ```java
 OCastMediaRouteHelper.INSTANCE.addEventListener(this);
 
@@ -383,7 +385,7 @@ public void onMediaMetadataChanged(@NotNull Device device, @NotNull MediaMetadat
 public void onUpdateStatus(@NotNull Device device, @NotNull UpdateStatus updateStatus) {}
 ```
 
-> Kotlin
+:small_blue_diamond: Kotlin
 ```kotlin
 OCastMediaRouteHelper.addEventListener(this)
 override fun onMediaPlaybackStatus(device: Device, mediaPlaybackStatus: MediaPlaybackStatus) {}
@@ -393,7 +395,6 @@ override fun onUpdateStatus(device: Device, updateStatus: UpdateStatus) {}
 
 The `MediaRouter` framework allows you to display a dialog with the list of detected media routes. To do so you need to create an XML file with the content hereafter and implement the `onCreateOptionsMenu(Menu menu)` method of your activity:
 
-> XML
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -406,7 +407,7 @@ The `MediaRouter` framework allows you to display a dialog with the list of dete
 </menu>
 ```
 
-> Java
+:small_orange_diamond: Java
 ```java
 @Override
 public boolean onCreateOptionsMenu(Menu menu) {
@@ -421,7 +422,7 @@ public boolean onCreateOptionsMenu(Menu menu) {
 }
 ```
 
-> Kotlin
+:small_blue_diamond: Kotlin
 ```kotlin
 override fun onCreateOptionsMenu(menu: Menu): Boolean {
     super.onCreateOptionsMenu(menu)
