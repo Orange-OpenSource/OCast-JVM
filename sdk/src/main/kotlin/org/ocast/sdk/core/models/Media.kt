@@ -145,7 +145,6 @@ class GetMediaMetadataCommandParams : OCastCommandParams("getMetadata")
 /**
  * Media playback status
  *
- * @param code
  * @param position
  * @param duration
  * @param state
@@ -153,13 +152,12 @@ class GetMediaMetadataCommandParams : OCastCommandParams("getMetadata")
  * @param isMuted
  */
 class MediaPlaybackStatus(
-    code: Int?,
     @JsonProperty("position") val position: Double,
     @JsonProperty("duration") val duration: Double?,
     @JsonProperty("state") val state: State,
     @JsonProperty("volume") val volume: Double,
     @get:JsonIgnore @field:JsonProperty("mute") val isMuted: Boolean
-) : OCastReplyEventParams(code) {
+) {
 
     enum class State(private val state: Int) {
 
@@ -177,7 +175,6 @@ class MediaPlaybackStatus(
 /**
  *
  *
- * @param code
  * @param title
  * @param subtitle
  * @param logo
@@ -187,7 +184,6 @@ class MediaPlaybackStatus(
  * @param videoTracks
  */
 class MediaMetadata(
-    code: Int?,
     @JsonProperty("title") val title: String,
     @JsonProperty("subtitle") val subtitle: String?,
     @JsonProperty("logo") val logo: String?,
@@ -195,7 +191,7 @@ class MediaMetadata(
     @JsonProperty("textTracks") val subtitleTracks: List<Track>?,
     @JsonProperty("audioTracks") val audioTracks: List<Track>?,
     @JsonProperty("videoTracks") val videoTracks: List<Track>?
-) : OCastReplyEventParams(code) {
+) {
 
     /**
      * Track

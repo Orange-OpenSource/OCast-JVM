@@ -1,5 +1,4 @@
 // ktlint-disable filename
-
 /*
  * Copyright 2019 Orange
  *
