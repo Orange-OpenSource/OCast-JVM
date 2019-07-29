@@ -38,6 +38,7 @@ repositories {
 }
 dependencies {
     implementation "org.ocast:sdk:2.0.0"
+    // The following line is only needed if you are using OCast on Android and want to take advantage of the MediaRouter framework
     implementation "org.ocast:mediaroute:2.0.0"
 }
 ```
@@ -167,6 +168,67 @@ override fun onCustomEvent(device: Device, name: String, params: String) {
 ### 8. Manage application state
 
 You can manage the application state manually. The `startApplication(onSuccess: Runnable, onError: Consumer<OCastError>)` method starts the application identified by the `applicationName` property whereas the `stopApplication(onSuccess: Runnable, onError: Consumer<OCastError>)` method stops it.
+
+### 9. Android media route module
+
+If you are using OCast SDK on Android, you may optionally use the OCast media route module. This module allows you to take advantage of the native Android `MediaRouter` framework when interacting with OCast devices.
+
+You do not need to manipulate any instance of `DeviceCenter` when using the OCast media route module. You use the `OCastMediaRouteHelper` instead, and devices are wrapped into instances of `MediaRouter.RouteInfo`.
+
+To use the Android media route module, simply initialize the `OCastMediaRouteHelper` singleton with the list of device types you want to detect, and register a `MediaRouter.Callback` to be notified of the various `MediaRouter` events:
+
+```kotlin
+OCastMediaRouteHelper.initialize(this, listOf(ReferenceDevice::class.java))
+OCastMediaRouteHelper.addMediaRouterCallback(this)
+// MediaRouter.Callback methods
+override fun onRouteSelected(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
+    OCastMediaRouteHelper.getDeviceFromRoute(route)?.run {
+        // Set applicationName property and connect to the device
+    }
+}
+override fun onRouteUnselected(mediaRouter: MediaRouter?, route: MediaRouter.RouteInfo?) {}
+override fun onRouteRemoved(router: MediaRouter?, route: MediaRouter.RouteInfo?) {}
+override fun onRouteAdded(router: MediaRouter?, route: MediaRouter.RouteInfo?) {}
+override fun onRouteChanged(router: MediaRouter?, route: MediaRouter.RouteInfo?) {}
+```
+
+As with `DeviceCenter`, it is also possible to add an `EventListener` to receive OCast events:
+
+```kotlin
+OCastMediaRouteHelper.addEventListener(this)
+override fun onMediaPlaybackStatus(device: Device, mediaPlaybackStatus: MediaPlaybackStatus) {}
+override fun onMediaMetadataChanged(device: Device, mediaMetadata: MediaMetadata) {}
+override fun onUpdateStatus(device: Device, updateStatus: UpdateStatus) {}
+```
+
+The `MediaRouter` framework allows you to display a dialog with the list of detected media routes. To do so you need to create an XML file with the content hereafter and implement the `onCreateOptionsMenu(menu: Menu)` method of your activity:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/item_all_media_route"
+        android:title="@string/all_media_route"
+        app:actionProviderClass="androidx.mediarouter.app.MediaRouteActionProvider"
+        app:showAsAction="always" />
+
+</menu>
+```
+
+```kotlin
+override fun onCreateOptionsMenu(menu: Menu): Boolean {
+    super.onCreateOptionsMenu(menu)
+
+    menuInflater.inflate(R.menu.my_menu, menu)
+    val mediaRouteMenuItem = menu.findItem(R.id.item_all_media_route)
+    val actionProvider = MenuItemCompat.getActionProvider(mediaRouteMenuItem) as MediaRouteActionProvider
+    actionProvider.routeSelector = OCastMediaRouteHelper.mediaRouteSelector
+
+    return true
+}
+```
+
+The Android media route module automatically sets the `discoverInterval` property of the underlying `DeviceCenter` to its minimum value when the media route selection dialog is displayed, and sets it back to its default value when the dialog is dismissed.
 
 ## Sample applications
 
