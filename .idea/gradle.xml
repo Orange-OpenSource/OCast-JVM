@@ -8,9 +8,11 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/OCast" />
-            <option value="$PROJECT_DIR$/sampleDesktopJava" />
-            <option value="$PROJECT_DIR$/sampleDesktopKotlin" />
+            <option value="$PROJECT_DIR$/mediaroute" />
+            <option value="$PROJECT_DIR$/sample/desktop/java" />
+            <option value="$PROJECT_DIR$/sample/desktop/kotlin" />
+            <option value="$PROJECT_DIR$/sample/mobile" />
+            <option value="$PROJECT_DIR$/sdk" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
