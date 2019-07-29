@@ -332,8 +332,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             }
             else -> {
                 // Custom event
-                val params = JsonTools.decode<JSONObject>(oCastData.params)
-                eventListener?.onCustomEvent(this, oCastData.name, params)
+                eventListener?.onCustomEvent(this, oCastData.name, oCastData.params)
             }
         }
     }
