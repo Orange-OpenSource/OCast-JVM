@@ -1,16 +1,25 @@
 # OCast-JVM
 
-[![License](https://img.shields.io/badge/licence-APACHE--2-lightgrey.svg)](https://github.com/Orange-OpenSource/OCast-iOS/blob/master/LICENSE)
-
-[![Build Status](https://travis-ci.org/Orange-OpenSource/OCast-JVM.svg?branch=master)](https://travis-ci.org/Orange-OpenSource/OCast-JVM)
-
-Download the OCast SDK
-
-[ ![Download](https://api.bintray.com/packages/orange-opensource/maven/ocast-jvm-sdk/images/download.svg) ](https://bintray.com/orange-opensource/maven/ocast-jvm-sdk/_latestVersion)
-
-Download the MediaRoute module for Android
-
-[ ![Download](https://api.bintray.com/packages/orange-opensource/maven/ocast-jvm-mediaroute/images/download.svg) ](https://bintray.com/orange-opensource/maven/ocast-jvm-mediaroute/_latestVersion)
+<table>
+<tbody>
+<tr>
+<td>Licence</td>
+<td><a href="https://github.com/Orange-OpenSource/OCast-JVM/blob/master/LICENSE.txt"><img src="https://img.shields.io/badge/licence-APACHE--2-lightgrey.svg"></a></td>
+</tr>
+<tr>
+<td>Build status</td>
+<td><a href="https://travis-ci.org/Orange-OpenSource/OCast-JVM"><img src="https://travis-ci.org/Orange-OpenSource/OCast-JVM.svg?branch=master"></a></td>
+</tr>
+<tr>
+<td>OCast SDK</td>
+<td><a href="https://bintray.com/orange-opensource/maven/ocast-jvm-sdk/_latestVersion"><img src="https://api.bintray.com/packages/orange-opensource/maven/ocast-jvm-sdk/images/download.svg"></a></td>
+</tr>
+<tr>
+<td> OCast media route module for Android</td>
+<td><a href="https://bintray.com/orange-opensource/maven/ocast-jvm-mediaroute/_latestVersion"><img src="https://api.bintray.com/packages/orange-opensource/maven/ocast-jvm-mediaroute/images/download.svg"></a></td>
+</tr>
+</tbody>
+</table>
 
 <br>
 The Orange OCast SDK provides all required API methods to implement cast applications to interact with an OCast device.
