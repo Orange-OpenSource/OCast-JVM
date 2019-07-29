@@ -16,7 +16,6 @@
 
 package org.ocast.sdk.core
 
-import org.json.JSONObject
 import org.ocast.sdk.core.models.MediaMetadata
 import org.ocast.sdk.core.models.MediaPlaybackStatus
 import org.ocast.sdk.core.models.UpdateStatus
@@ -48,6 +47,6 @@ interface EventListener {
      * Receive custom event sent from web application
      */
     @JvmDefault
-    fun onCustomEvent(device: Device, name: String, params: JSONObject) {
+    fun onCustomEvent(device: Device, name: String, params: String) {
     }
 }
