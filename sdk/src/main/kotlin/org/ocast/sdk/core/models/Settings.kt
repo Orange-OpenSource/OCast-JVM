@@ -181,17 +181,15 @@ class SendGamepadEventCommandParams(
 /**
  *
  *
- * @param code
  * @param state
  * @param version
  * @param progress
  */
 class UpdateStatus(
-    code: Int?,
     @JsonProperty("state") val state: State,
     @JsonProperty("version") val version: String,
     @JsonProperty("progress") val progress: Int
-) : OCastReplyEventParams(code) {
+) {
 
     enum class State(private val value: String) {
 
@@ -211,12 +209,10 @@ class UpdateStatus(
 /**
  *
  *
- * @param code
  * @param id
  */
 class DeviceID(
-    code: Int?,
     @JsonProperty("id") val id: String
-) : OCastReplyEventParams(code)
+)
 
 //endregion
