@@ -17,7 +17,6 @@
 package org.ocast.sdk.core
 
 import java.util.Collections
-import org.json.JSONObject
 import org.ocast.sdk.common.extensions.ifNotNull
 import org.ocast.sdk.core.models.MediaMetadata
 import org.ocast.sdk.core.models.MediaPlaybackStatus
@@ -173,7 +172,7 @@ open class DeviceCenter : CallbackWrapperOwner {
             eventListeners.wrapForEach { it.onUpdateStatus(device, updateStatus) }
         }
 
-        override fun onCustomEvent(device: Device, name: String, params: JSONObject) {
+        override fun onCustomEvent(device: Device, name: String, params: String) {
             eventListeners.wrapForEach { it.onCustomEvent(device, name, params) }
         }
     }
