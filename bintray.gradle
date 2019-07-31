@@ -9,14 +9,15 @@ bintray {
         name = package_name
         desc = project.description
         userOrg = 'orange-opensource'
-        override = project.hasProperty('override') ? project.property('override').toBoolean() : false
-        dryRun = project.hasProperty('dryRun') ? project.property('dryRun').toBoolean() : true
+        override = (project.findProperty('override') ?: "true").toBoolean()
+        dryRun = (project.findProperty('dryRun') ?: "true").toBoolean()
         licenses = ['Apache-2.0']
+        websiteUrl = url_name
         vcsUrl = scm_url
+        issueTrackerUrl = 'https://github.com/Orange-OpenSource/OCast-JVM/issues'
         version {
             name = project.version
             desc = project.description
-            released  = new Date()
             vcsTag = version_name
         }
     }
