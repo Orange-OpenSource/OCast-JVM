@@ -9,7 +9,7 @@ bintray {
         name = package_name
         desc = project.description
         userOrg = 'orange-opensource'
-        override = (project.findProperty('override') ?: "true").toBoolean()
+        override = (project.findProperty('override') ?: "false").toBoolean()
         dryRun = (project.findProperty('dryRun') ?: "true").toBoolean()
         licenses = ['Apache-2.0']
         websiteUrl = url_name
