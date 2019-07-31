@@ -15,7 +15,6 @@ ext {
         }
         organization {
             name vendor_name
-            url url_name
         }
         scm {
             url scm_url
