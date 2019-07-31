@@ -2,6 +2,7 @@ apply plugin: 'java-library'
 apply plugin: 'kotlin'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'maven-publish'
+apply plugin: 'checkstyle'
 apply from: project.file('../ktlint.gradle')
 apply from: project.file('../dokka.gradle')
 apply from: project.file('../bintray.gradle')
@@ -26,6 +27,11 @@ buildscript {
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokka_version"
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$bintray_plugin_version"
     }
+}
+
+checkstyle {
+    toolVersion checkstyle_version
+    maxWarnings = 0
 }
 
 sourceSets {
