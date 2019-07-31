@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'org.jetbrains.dokka-android'
+apply plugin: 'maven-publish'
 apply from: project.file('../ktlint.gradle')
 apply from: project.file('../dokka.gradle')
 
@@ -12,8 +13,14 @@ androidExtensions {
 
 buildscript {
     apply from: project.file('../dependencies.gradle')
+    apply from: project.file('../publish.gradle')
 
-    version = "2.0.0"
+    description = "OCast Android media route"
+    ext.package_name = "ocast-jvm-mediaroute"
+    version = version_name
+    group = group_name
+
+    apply from: project.file('../bintray.gradle')
 
     repositories {
         jcenter()
@@ -21,6 +28,7 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokka_version"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$bintray_plugin_version"
     }
 }
 
@@ -94,6 +102,42 @@ allprojects {
     configurations.all {
         resolutionStrategy {
             force("org.objenesis:objenesis:2.6")
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+publishing.publications {
+    android.libraryVariants.all { variant ->
+        if (variant.buildType.name == "release") {
+            mavenJava(MavenPublication) {
+                groupId project.group
+                artifactId project.name
+                version project.version
+
+                artifact variant.packageLibraryProvider.get().archivePath
+                artifact sourcesJar
+                artifact javadocJar
+
+                pom.withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    def root = asNode()
+                    root.appendNode('description', project.description)
+                    root.appendNode('name', package_name)
+                    root.children().last() + pomConfig
+                    configurations.implementation.allDependencies.each {
+                        if (it.group == null) return
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
         }
     }
 }
