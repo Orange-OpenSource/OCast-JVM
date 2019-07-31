@@ -1,0 +1,23 @@
+ext {
+    version_name = '2.0.0'
+    vendor_name = 'Orange'
+    group_name = 'org.ocast'
+    url_name = 'http://ocast.org'
+    scm_url = 'https://github.com/Orange-OpenSource/OCast-JVM.git'
+
+    pomConfig = {
+        licenses {
+            license {
+                name "The Apache Software License, Version 2.0"
+                url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution "repo"
+            }
+        }
+        organization {
+            name vendor_name
+        }
+        scm {
+            url scm_url
+        }
+    }
+}
