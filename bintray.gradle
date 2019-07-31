@@ -9,8 +9,8 @@ bintray {
         name = package_name
         desc = project.description
         userOrg = 'orange-opensource'
-        override = project.findProperty('override')?.toBoolean() ?: false
-        dryRun = project.findProperty('dryRun')?.toBoolean() ?: true
+        override = project.hasProperty('override') ? project.property('override').toBoolean() : false
+        dryRun = project.hasProperty('dryRun') ? project.property('dryRun').toBoolean() : true
         licenses = ['Apache-2.0']
         vcsUrl = scm_url
         version {

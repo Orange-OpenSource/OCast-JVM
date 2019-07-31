@@ -6,6 +6,7 @@ apply plugin: 'org.jetbrains.dokka-android'
 apply plugin: 'maven-publish'
 apply from: project.file('../ktlint.gradle')
 apply from: project.file('../dokka.gradle')
+apply from: project.file('../bintray.gradle')
 
 androidExtensions {
     experimental = true
@@ -19,8 +20,6 @@ buildscript {
     ext.package_name = "ocast-jvm-mediaroute"
     version = version_name
     group = group_name
-
-    apply from: project.file('../bintray.gradle')
 
     repositories {
         jcenter()
