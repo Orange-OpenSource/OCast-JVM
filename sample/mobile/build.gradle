@@ -48,8 +48,8 @@ android {
 }
 
 dependencies {
-    implementation project(':ocast.sdk')
-    implementation project(':ocast.mediaroute')
+    implementation project(':sdk')
+    implementation project(':mediaroute')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "androidx.mediarouter:mediarouter:$media_router_version"
     implementation "androidx.legacy:legacy-support-v4:$legacy_support_version"

@@ -5,7 +5,7 @@ mainClassName = "org.ocast.sample.desktop.java.AppJava"
 description = "Sample Java desktop application for the OCast SDK"
 
 dependencies {
-    implementation project(':ocast.sdk')
+    implementation project(':sdk')
     implementation "org.json:json:$json_version"
     implementation "com.intellij:annotations:$annotations_version"
 }

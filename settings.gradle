@@ -1,6 +1,6 @@
-include ':ocast.sdk', ':ocast.mediaroute', ':ocast.sample.desktop.java', ':ocast.sample.desktop.kotlin', ':ocast.sample.mobile'
-project(':ocast.sdk').projectDir = new File('sdk')
-project(':ocast.mediaroute').projectDir = new File('mediaroute')
-project(':ocast.sample.desktop.java').projectDir = new File('sample/desktop/java')
-project(':ocast.sample.desktop.kotlin').projectDir = new File('sample/desktop/kotlin')
-project(':ocast.sample.mobile').projectDir = new File('sample/mobile')
+include ':sdk', ':mediaroute', ':sample-desktop-java', ':sample-desktop-kotlin', ':sample-mobile'
+project(':sdk').projectDir = new File('sdk')
+project(':mediaroute').projectDir = new File('mediaroute')
+project(':sample-desktop-java').projectDir = new File('sample/desktop/java')
+project(':sample-desktop-kotlin').projectDir = new File('sample/desktop/kotlin')
+project(':sample-mobile').projectDir = new File('sample/mobile')
