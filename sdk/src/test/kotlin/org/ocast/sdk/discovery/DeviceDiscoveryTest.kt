@@ -114,6 +114,7 @@ class DeviceDiscoveryTest {
         verify(listener, times(2)).onDevicesAdded(addedDevicesCaptor.capture())
         assertEquals(listOf(secondDevice), addedDevicesCaptor.firstValue)
         assertEquals(listOf(firstDevice), addedDevicesCaptor.secondValue)
+        verify(listener, never()).onDevicesChanged(any())
         verify(listener, never()).onDevicesRemoved(any())
         verify(listener, never()).onDiscoveryStopped(anyOrNull())
     }
@@ -168,6 +169,53 @@ class DeviceDiscoveryTest {
         val removedDevicesCaptor = argumentCaptor<List<UpnpDevice>>()
         verify(listener, times(1)).onDevicesRemoved(removedDevicesCaptor.capture())
         assertEquals(listOf(firstDevice), removedDevicesCaptor.firstValue)
+        verify(listener, never()).onDevicesChanged(any())
+        verify(listener, never()).onDiscoveryStopped(anyOrNull())
+    }
+
+    @Test
+    fun receiveChangedDeviceDescriptionCallsListenerOnDeviceChanged() {
+        // Given
+        val oldSearchResponseString = "HTTP/1.1 200 OK\r\n" +
+                "LOCATION: http://10.0.0.28:56790/old-device-desc.xml\r\n" +
+                "CACHE-CONTROL: max-age=1800\r\n" +
+                "EXT:\r\n" +
+                "BOOTID.UPNP.ORG: 1\r\n" +
+                "SERVER: Linux/4.9 UPnP/1.1 quick_ssdp/1.1\r\n" +
+                "ST: urn:cast-ocast-org:service:cast:1\r\n" +
+                "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7\r\n" +
+                "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
+
+        val newSearchResponseString = "HTTP/1.1 200 OK\r\n" +
+                "LOCATION: http://10.0.0.28:56790/new-device-desc.xml\r\n" +
+                "CACHE-CONTROL: max-age=1800\r\n" +
+                "EXT:\r\n" +
+                "BOOTID.UPNP.ORG: 1\r\n" +
+                "SERVER: Linux/4.9 UPnP/1.1 quick_ssdp/1.1\r\n" +
+                "ST: urn:cast-ocast-org:service:cast:1\r\n" +
+                "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7\r\n" +
+                "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
+
+        stubMSearchResponses(listOf(oldSearchResponseString to 200L, newSearchResponseString to 400L))
+        val oldDevice = UpnpDevice("UDN", URL("http://foo"), "OldName", "Manufacturer", "Model")
+        stubDeviceDescriptionResponses(hashMapOf("http://10.0.0.28:56790/old-device-desc.xml" to oldDevice))
+        val newDevice = UpnpDevice("UDN", URL("http://foo"), "NewName", "Manufacturer", "Model")
+        stubDeviceDescriptionResponses(hashMapOf("http://10.0.0.28:56790/new-device-desc.xml" to newDevice))
+
+        // When
+        discovery.resume()
+
+        // Then
+        Thread.sleep(300)
+        assertThat(discovery.devices, containsInAnyOrder(oldDevice))
+        Thread.sleep(700)
+        assertThat(discovery.devices, containsInAnyOrder(newDevice))
+
+        verify(listener, times(1)).onDevicesAdded(any())
+        verify(listener, never()).onDevicesRemoved(any())
+        val changedDevicesCaptor = argumentCaptor<List<UpnpDevice>>()
+        verify(listener, times(1)).onDevicesChanged(changedDevicesCaptor.capture())
+        assertEquals(listOf(newDevice), changedDevicesCaptor.firstValue)
         verify(listener, never()).onDiscoveryStopped(anyOrNull())
     }
 
@@ -239,6 +287,7 @@ class DeviceDiscoveryTest {
         verify(listener, times(2)).onDevicesAdded(addedDevicesCaptor.capture())
         assertEquals(listOf(firstDevice), addedDevicesCaptor.firstValue)
         assertEquals(listOf(secondDevice), addedDevicesCaptor.secondValue)
+        verify(listener, never()).onDevicesChanged(any())
         verify(listener, never()).onDevicesRemoved(any())
         verify(listener, never()).onDiscoveryStopped(any())
     }
@@ -266,6 +315,7 @@ class DeviceDiscoveryTest {
         // Then
         Thread.sleep(1000)
         assertEquals(emptyList<UpnpDevice>(), discovery.devices)
+        verify(listener, never()).onDevicesChanged(any())
         verify(listener, never()).onDevicesAdded(any())
         verify(listener, never()).onDevicesRemoved(any())
         verify(listener, never()).onDiscoveryStopped(any())
@@ -339,6 +389,7 @@ class DeviceDiscoveryTest {
         verify(listener, times(1)).onDevicesRemoved(removedDevicesCaptor.capture())
         assertThat(removedDevicesCaptor.firstValue, containsInAnyOrder(firstDevice, secondDevice))
         verify(listener, times(1)).onDiscoveryStopped(isNull())
+        verify(listener, never()).onDevicesChanged(any())
     }
 
     @Test
@@ -389,6 +440,7 @@ class DeviceDiscoveryTest {
         verify(listener, times(1)).onDevicesRemoved(removedDevicesCaptor.capture())
         assertThat(removedDevicesCaptor.firstValue, containsInAnyOrder(firstDevice, secondDevice))
         verify(listener, times(1)).onDiscoveryStopped(isNull())
+        verify(listener, never()).onDevicesChanged(any())
     }
 
     @Test
@@ -414,6 +466,7 @@ class DeviceDiscoveryTest {
         // Then
         Thread.sleep(1000)
         assertEquals(emptyList<UpnpDevice>(), discovery.devices)
+        verify(listener, never()).onDevicesChanged(any())
         verify(listener, never()).onDevicesAdded(any())
         verify(listener, never()).onDevicesRemoved(any())
         verify(listener, times(1)).onDiscoveryStopped(isNull())
