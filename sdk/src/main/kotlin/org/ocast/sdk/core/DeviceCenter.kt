@@ -155,7 +155,9 @@ open class DeviceCenter : CallbackWrapperOwner {
 
         override fun onDevicesChanged(devices: List<UpnpDevice>) {
             val devicesChanged = devices.mapNotNull { device ->
-                detectedDevices.firstOrNull { device.id == it.upnpID }
+                detectedDevices
+                        .firstOrNull { device.id == it.upnpID }
+                        .ifNotNull { it.upnpDevice = device }
             }
             if (devicesChanged.isNotEmpty()) {
                 this@DeviceCenter.deviceListener.onDevicesChanged(devicesChanged)

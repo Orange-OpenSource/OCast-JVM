@@ -37,7 +37,7 @@ public abstract class Device implements CallbackWrapperOwner {
         DISCONNECTED
     }
 
-    @NotNull private final UpnpDevice upnpDevice;
+    @NotNull private UpnpDevice upnpDevice;
     @NotNull private State state = State.DISCONNECTED;
     @Nullable private String applicationName;
     @Nullable private DeviceListener deviceListener;
@@ -49,6 +49,15 @@ public abstract class Device implements CallbackWrapperOwner {
     }
 
     // Device configuration
+
+    @NotNull
+    UpnpDevice getUpnpDevice() {
+        return upnpDevice;
+    }
+
+    void setUpnpDevice(@NotNull UpnpDevice upnpDevice) {
+        this.upnpDevice = upnpDevice;
+    }
 
     @NotNull
     public String getUpnpID() {
