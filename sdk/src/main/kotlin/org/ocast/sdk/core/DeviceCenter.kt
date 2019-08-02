@@ -135,17 +135,30 @@ open class DeviceCenter : CallbackWrapperOwner {
 
         override fun onDevicesAdded(devices: List<UpnpDevice>) {
             val devicesToAdd = devices.mapNotNull { createDevice(it) }
-            this@DeviceCenter.deviceListener.onDevicesAdded(devicesToAdd)
+            if (devicesToAdd.isNotEmpty()) {
+                this@DeviceCenter.deviceListener.onDevicesAdded(devicesToAdd)
+            }
         }
 
         override fun onDevicesRemoved(devices: List<UpnpDevice>) {
             synchronized(detectedDevices) {
-                val devicesToRemove = devices.mapNotNull { device ->
+                val devicesRemoved = devices.mapNotNull { device ->
                     detectedDevices
                         .firstOrNull { device.id == it.upnpID }
                         .ifNotNull { removeDevice(it) }
                 }
-                this@DeviceCenter.deviceListener.onDevicesRemoved(devicesToRemove)
+                if (devicesRemoved.isNotEmpty()) {
+                    this@DeviceCenter.deviceListener.onDevicesRemoved(devicesRemoved)
+                }
+            }
+        }
+
+        override fun onDevicesChanged(devices: List<UpnpDevice>) {
+            val devicesChanged = devices.mapNotNull { device ->
+                detectedDevices.firstOrNull { device.id == it.upnpID }
+            }
+            if (devicesChanged.isNotEmpty()) {
+                this@DeviceCenter.deviceListener.onDevicesChanged(devicesChanged)
             }
         }
 
@@ -189,6 +202,10 @@ open class DeviceCenter : CallbackWrapperOwner {
 
         override fun onDevicesRemoved(devices: List<Device>) {
             deviceListeners.wrapForEach { it.onDevicesRemoved(devices) }
+        }
+
+        override fun onDevicesChanged(devices: List<Device>) {
+            deviceListeners.wrapForEach { it.onDevicesChanged(devices) }
         }
 
         override fun onDeviceDisconnected(device: Device, error: Throwable?) {

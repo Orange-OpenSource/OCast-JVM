@@ -31,6 +31,10 @@ interface DeviceListener {
     }
 
     @JvmDefault
+    fun onDevicesChanged(devices: List<Device>) {
+    }
+
+    @JvmDefault
     fun onDiscoveryStopped(error: Throwable?) {
     }
 }

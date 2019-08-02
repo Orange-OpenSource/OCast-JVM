@@ -296,10 +296,14 @@ internal class DeviceDiscovery constructor(
                         result.onSuccess { device ->
                             synchronized(devicesByUuid) {
                                 // Check that this device has not already been added because M-SEARCH requests are sent twice
-                                if (devicesByUuid[uuid] == null) {
+                                val existingDevice = devicesByUuid[uuid]
+                                if (existingDevice == null) {
                                     devicesByUuid[uuid] = device
                                     listener?.onDevicesAdded(listOf(device))
+                                } else if (device != existingDevice) {
+                                    listener?.onDevicesChanged(listOf(device))
                                 }
+                                return@onSuccess
                             }
                         }
                     }
@@ -326,6 +330,13 @@ internal class DeviceDiscovery constructor(
          * @param devices The lost devices.
          */
         fun onDevicesRemoved(devices: List<UpnpDevice>)
+
+        /**
+         * Tells the listener that devices have changed.
+         *
+         * @param devices The changed devices.
+         */
+        fun onDevicesChanged(devices: List<UpnpDevice>)
 
         /**
          * Tells the listener that the discovery stopped.
