@@ -29,7 +29,7 @@ import org.ocast.sdk.discovery.UpnpClient
  * @param manufacturer The manufacturer of the device.
  * @param modelName The model name.
  */
-class UpnpDevice(
+data class UpnpDevice(
     val id: String,
     val dialURL: URL,
     val friendlyName: String,
