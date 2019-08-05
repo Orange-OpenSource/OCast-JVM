@@ -20,6 +20,15 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 import org.ocast.sdk.core.Device
 
+/**
+ * Represents an OCast device in the Android media route framework.
+ *
+ * @property upnpID The UPnP identifier of the device.
+ * @property friendlyName The friendly name of the device.
+ * @property manufacturer The manufacturer of the device.
+ * @property modelName The model name of the device.
+ * @constructor Creates an instance of [MediaRouteDevice].
+ */
 @Parcelize
 data class MediaRouteDevice(
     var upnpID: String,
@@ -28,9 +37,18 @@ data class MediaRouteDevice(
     var modelName: String
 ) : Parcelable {
 
+    /**
+     * The companion object.
+     */
     companion object {
+
+        /** The key to store a [MediaRouteDevice] as an extra of the various classes of the Android media route framework. */
         const val EXTRA_DEVICE = "org.ocast.mediaroute.extra.DEVICE"
     }
 
+    /**
+     * @param device The OCast device.
+     * @constructor Creates an instance of [MediaRouteDevice] from a [Device].
+     */
     constructor(device: Device) : this(device.upnpID, device.friendlyName, device.manufacturer, device.modelName)
 }

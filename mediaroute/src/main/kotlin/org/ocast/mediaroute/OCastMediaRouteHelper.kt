@@ -28,19 +28,45 @@ import org.ocast.sdk.core.Device
 import org.ocast.sdk.core.DeviceCenter
 import org.ocast.sdk.core.EventListener
 
+/**
+ * This singleton provides methods to take advantage of the Android media route framework with OCast devices.
+ */
 object OCastMediaRouteHelper {
 
+    /** The device center. */
     private val deviceCenter = DeviceCenter().apply { callbackWrapper = AndroidUIThreadCallbackWrapper() }
+
+    /** A handler on the main thread. */
     private val mainHandler = Handler(Looper.getMainLooper())
+
+    /** The media router singleton. */
     private var mediaRouter: MediaRouter? = null
+
+    /** Indicates if the [OCastMediaRouteHelper] singleton has been initialized. */
     private var initialized = false
 
+    /**
+     *  The OCast media route selector.
+     *
+     *  Set the `routeSelector` property of the `actionProvider` of your menu item with the value returned by this property
+     *  to show a dialog which displays a list of the discovered OCast devices.
+     */
     val mediaRouteSelector = MediaRouteSelector.Builder()
         .addControlCategory(OCastMediaRouteProvider.FILTER_CATEGORY_OCAST)
         .build()
+
+    /** The discovered OCast devices. */
     val devices: List<Device>
         get() = deviceCenter.devices
 
+    /**
+     * Initializes the [OCastMediaRouteHelper] singleton with the specified device classes.
+     *
+     * This method MUST be called on the main thread prior to any other method calls.
+     *
+     * @param context The context.
+     * @param devices The classes of devices that will be searched during the discovery process.
+     */
     fun initialize(context: Context, devices: List<Class<out Device>>) {
         if (!initialized) {
             if (!isMainThread()) {
@@ -55,9 +81,9 @@ object OCastMediaRouteHelper {
     }
 
     /**
-     * Add the callback on start to tell the media router what kinds of routes the application is interested in so that it can try to discover suitable ones.
+     * Adds a media router callback.
      *
-     * @param mediaRouterCallback
+     * @param mediaRouterCallback The callback to add.
      */
     fun addMediaRouterCallback(mediaRouterCallback: MediaRouter.Callback) {
         if (initialized) {
@@ -70,9 +96,9 @@ object OCastMediaRouteHelper {
     }
 
     /**
-     * Remove the selector on stop to tell the media router that it no longer needs to invest effort trying to discover routes of these kinds for now.
+     * Removes a media router callback that has been previously added with the `addMediaRouterCallback(@NotNull MediaRouter.Callback mediaRouterCallback)` method.
      *
-     * @param mediaRouterCallback
+     * @param mediaRouterCallback The callback to remove.
      */
     fun removeMediaRouterCallback(mediaRouterCallback: MediaRouter.Callback) {
         runOnMainThread {
@@ -80,21 +106,49 @@ object OCastMediaRouteHelper {
         }
     }
 
+    /**
+     * Returns the OCast device which is associated to a [MediaRouter.RouteInfo].
+     *
+     * @param routeInfo The route info.
+     * @return The associated OCast device.
+     */
     fun getDeviceFromRoute(routeInfo: MediaRouter.RouteInfo?): Device? {
         val mediaRouteDevice = routeInfo?.extras?.get(MediaRouteDevice.EXTRA_DEVICE) as? MediaRouteDevice
         return deviceCenter.devices.firstOrNull { it.upnpID == mediaRouteDevice?.upnpID }
     }
 
+    /**
+     * Indicates if a route info is associated with an OCast device.
+     *
+     * @param `true` if the route info is associated to an OCast device, otherwise `false`.
+     */
     fun isOCastRouteInfo(routeInfo: MediaRouter.RouteInfo?) = routeInfo?.matchesSelector(mediaRouteSelector) == true
 
+    /**
+     * Adds a listener for the OCast protocol events.
+     *
+     * @param listener The listener to add.
+     */
     fun addEventListener(listener: EventListener) {
         deviceCenter.addEventListener(listener)
     }
 
+    /**
+     * Removes a listener which has been previously added with the `addEventListener(@NotNull EventListener listener)` method.
+     *
+     * @param listener The listener to remove.
+     */
     fun removeEventListener(listener: EventListener) {
         deviceCenter.removeEventListener(listener)
     }
 
+    /**
+     * Adds a [MediaRouteProvider] to the media router singleton.
+     *
+     * This method is used for tests purpose only.
+     *
+     * @param mediaRouteProvider The media route provider to add.
+     */
     internal fun addMediaRouteProvider(mediaRouteProvider: MediaRouteProvider) {
         if (initialized) {
             runOnMainThread {
@@ -105,16 +159,33 @@ object OCastMediaRouteHelper {
         }
     }
 
+    /**
+     * Removes a [MediaRouteProvider] from the media router singleton.
+     *
+     * This method is used for tests purpose only.
+     *
+     * @param mediaRouteProvider The media route provider to remove.
+     */
     internal fun removeMediaRouteProvider(mediaRouteProvider: MediaRouteProvider) {
         runOnMainThread {
             mediaRouter?.removeProvider(mediaRouteProvider)
         }
     }
 
+    /**
+     * Indicates if the current thread is the main thread.
+     *
+     * @return `true` if the current thread is the main thread, otherwise `false`.
+     */
     private fun isMainThread(): Boolean {
         return Looper.getMainLooper() == Looper.myLooper()
     }
 
+    /**
+     * Runs the specified block of code on the main thread.
+     *
+     * @param block The block of code to run.
+     */
     private fun runOnMainThread(block: () -> Unit) {
         if (isMainThread()) {
             block()
