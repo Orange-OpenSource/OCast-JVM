@@ -50,14 +50,19 @@ interface DeviceListener {
     }
 
     /**
-     * Tells the listener that the device discovery stopped.
+     * Tells the listener that one or more devices have changed.
      *
-     * @param error The error, or `null` is the discovery was stopped by the user.
+     * @param devices The changed devices.
      */
     @JvmDefault
     fun onDevicesChanged(devices: List<Device>) {
     }
 
+    /**
+     * Tells the listener that the device discovery stopped.
+     *
+     * @param error The error, or `null` is the discovery was stopped by the user.
+     */
     @JvmDefault
     fun onDiscoveryStopped(error: Throwable?) {
     }

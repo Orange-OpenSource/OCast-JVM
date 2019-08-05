@@ -67,13 +67,28 @@ data class UpnpDevice(
      */
     private object Decoder {
 
+        /** The name of the application URL HTTP header. */
         const val APPLICATION_URL_HEADER_NAME = "Application-DIAL-URL"
+
+        /** The alternate name of the application URL HTTP header. */
         const val APPLICATION_URL_ALTERNATE_HEADER_NAME = "Application-URL"
+
+        /** The name of the root XML element. */
         const val XML_ROOT_ELEMENT_NAME = "root"
+
+        /** The name of the device XML element. */
         const val XML_DEVICE_ELEMENT_NAME = "device"
+
+        /** The name of the friendly name XML element. */
         const val XML_FRIENDLY_NAME_ELEMENT_NAME = "friendlyName"
+
+        /** The name of the manufacturer XML element. */
         const val XML_MANUFACTURER_ELEMENT_NAME = "manufacturer"
+
+        /** The name of the model name XML element. */
         const val XML_MODEL_NAME_ELEMENT_NAME = "modelName"
+
+        /** The name of the UDN XML element. */
         const val XML_UDN_ELEMENT_NAME = "UDN"
 
         /**

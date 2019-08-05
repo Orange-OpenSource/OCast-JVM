@@ -28,6 +28,9 @@ interface ErrorStatus {
     /** The status code. */
     val code: Int
 
+    /**
+     * The companion object.
+     */
     companion object {
 
         /**

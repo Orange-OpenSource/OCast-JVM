@@ -96,20 +96,49 @@ internal data class DialApplication(
      */
     private object Decoder {
 
+        /** The name of the service XML element. */
         const val XML_SERVICE_ELEMENT_NAME = "service"
+
+        /** The name of the name XML element. */
         const val XML_NAME_ELEMENT_NAME = "name"
+
+        /** The name of the options XML element. */
         const val XML_OPTIONS_ELEMENT_NAME = "options"
+
+        /** The name of the state XML element. */
         const val XML_STATE_ELEMENT_NAME = "state"
+
+        /** The name of the link XML element. */
         const val XML_LINK_ELEMENT_NAME = "link"
+
+        /** The name of the href XML attribute. */
         const val XML_HREF_ATTRIBUTE_NAME = "href"
+
+        /** The name of the additional data XML element. */
         const val XML_ADDITIONAL_DATA_ELEMENT_NAME = "additionalData"
+
+        /** The name of the allow stop XML attribute. */
         const val XML_ALLOW_STOP_ATTRIBUTE_NAME = "allowStop"
+
+        /** The name of the OCast app2app URL XML element. */
         const val XML_OCAST_APP_2_APP_URL_ELEMENT_NAME = "ocast:X_OCAST_App2AppURL"
+
+        /** The name of the OCast version XML element. */
         const val XML_OCAST_VERSION_ELEMENT_NAME = "ocast:X_OCAST_Version"
+
+        /** The name of the XML text value for the true boolean. */
         const val XML_TRUE_TEXT_VALUE = "true"
+
+        /** The name of the XML text value for the running state. */
         const val XML_RUNNING_STATE_TEXT_VALUE = "running"
+
+        /** The name of the XML text value for the stopped state. */
         const val XML_STOPPED_STATE_TEXT_VALUE = "stopped"
+
+        /** The name of the XML text value for the hidden state. */
         const val XML_HIDDEN_STATE_TEXT_VALUE = "hidden"
+
+        /** The name of the XML text value for the installable state. */
         const val XML_INSTALLABLE_STATE_TEXT_VALUE = "installable"
 
         /**
