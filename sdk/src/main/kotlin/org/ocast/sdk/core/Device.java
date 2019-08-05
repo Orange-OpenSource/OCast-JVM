@@ -96,7 +96,7 @@ public abstract class Device implements CallbackWrapperOwner {
     /**
      * Returns the underlying associated UPnP device.
      *
-     * UPnP devices can be retrieved with an UPnP device description request.
+     * <p>UPnP devices can be retrieved with an UPnP device description request.</p>
      *
      * @return The UPnP device.
      */
@@ -108,7 +108,7 @@ public abstract class Device implements CallbackWrapperOwner {
     /**
      * Changes the underlying UPnP device.
      *
-     * UPnP devices can be retrieved with an UPnP device description request.
+     * <p>UPnP devices can be retrieved with an UPnP device description request.</p>
      *
      * @param upnpDevice The new UPnP device.
      */
@@ -129,7 +129,7 @@ public abstract class Device implements CallbackWrapperOwner {
     /**
      * Returns the URL of the DIAL service.
      *
-     * This URL is used to start or stop web applications on the device.
+     * <p>This URL is used to start or stop web applications on the device.</p>
      *
      * @return The DIAL service URL.
      */
@@ -200,7 +200,8 @@ public abstract class Device implements CallbackWrapperOwner {
     /**
      * Changes the name of the web application to use.
      *
-     * You MUST set the application name before calling `startApplication(@NotNull Runnable onSuccess, @NotNull Consumer<OCastError> onError)` or any media command.
+     * <p>You MUST set the application name before calling `startApplication(@NotNull Runnable onSuccess, @NotNull Consumer&lt;OCastError&gt; onError)`
+     * or any media command.</p>
      *
      * @param applicationName The new application name.
      */
@@ -424,7 +425,7 @@ public abstract class Device implements CallbackWrapperOwner {
     //region Settings device commands
 
     /**
-     * Retrieves the firmware update status of the device
+     * Retrieves the firmware update status of the device.
      *
      * @param onSuccess The operation executed if the update status was retrieved successfully.
      * @param onError The operation executed if there was an error while retrieving the update status.
