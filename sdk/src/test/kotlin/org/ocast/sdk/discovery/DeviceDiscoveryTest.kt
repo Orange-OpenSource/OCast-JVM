@@ -176,7 +176,7 @@ class DeviceDiscoveryTest {
     @Test
     fun receiveChangedDeviceDescriptionCallsListenerOnDeviceChanged() {
         // Given
-        val oldSearchResponseString = "HTTP/1.1 200 OK\r\n" +
+        val oldMSearchResponseString = "HTTP/1.1 200 OK\r\n" +
                 "LOCATION: http://10.0.0.28:56790/old-device-desc.xml\r\n" +
                 "CACHE-CONTROL: max-age=1800\r\n" +
                 "EXT:\r\n" +
@@ -186,7 +186,7 @@ class DeviceDiscoveryTest {
                 "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7\r\n" +
                 "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
 
-        val newSearchResponseString = "HTTP/1.1 200 OK\r\n" +
+        val newMSearchResponseString = "HTTP/1.1 200 OK\r\n" +
                 "LOCATION: http://10.0.0.28:56790/new-device-desc.xml\r\n" +
                 "CACHE-CONTROL: max-age=1800\r\n" +
                 "EXT:\r\n" +
@@ -196,7 +196,7 @@ class DeviceDiscoveryTest {
                 "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7\r\n" +
                 "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
 
-        stubMSearchResponses(listOf(oldSearchResponseString to 200L, newSearchResponseString to 400L))
+        stubMSearchResponses(listOf(oldMSearchResponseString to 200L, newMSearchResponseString to 400L))
         val oldDevice = UpnpDevice("UDN", URL("http://foo"), "OldName", "Manufacturer", "Model")
         stubDeviceDescriptionResponses(hashMapOf("http://10.0.0.28:56790/old-device-desc.xml" to oldDevice))
         val newDevice = UpnpDevice("UDN", URL("http://foo"), "NewName", "Manufacturer", "Model")

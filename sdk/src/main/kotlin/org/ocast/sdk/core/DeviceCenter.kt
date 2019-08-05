@@ -134,9 +134,9 @@ open class DeviceCenter : CallbackWrapperOwner {
     private val deviceDiscoveryListener = object : DeviceDiscovery.Listener {
 
         override fun onDevicesAdded(devices: List<UpnpDevice>) {
-            val devicesToAdd = devices.mapNotNull { createDevice(it) }
-            if (devicesToAdd.isNotEmpty()) {
-                this@DeviceCenter.deviceListener.onDevicesAdded(devicesToAdd)
+            val devicesAdded = devices.mapNotNull { createDevice(it) }
+            if (devicesAdded.isNotEmpty()) {
+                this@DeviceCenter.deviceListener.onDevicesAdded(devicesAdded)
             }
         }
 
