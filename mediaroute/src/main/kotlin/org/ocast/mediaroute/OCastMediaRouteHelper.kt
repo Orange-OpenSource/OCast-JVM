@@ -16,13 +16,13 @@
 
 package org.ocast.mediaroute
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.mediarouter.media.MediaRouteProvider
 import androidx.mediarouter.media.MediaRouteSelector
 import androidx.mediarouter.media.MediaRouter
-import org.ocast.mediaroute.models.MediaRouteDevice
 import org.ocast.mediaroute.wrapper.AndroidUIThreadCallbackWrapper
 import org.ocast.sdk.core.Device
 import org.ocast.sdk.core.DeviceCenter
@@ -30,8 +30,10 @@ import org.ocast.sdk.core.EventListener
 
 object OCastMediaRouteHelper {
 
+    internal const val EXTRA_DEVICE = "org.ocast.mediaroute.extra.DEVICE"
     private val deviceCenter = DeviceCenter().apply { callbackWrapper = AndroidUIThreadCallbackWrapper() }
     private val mainHandler = Handler(Looper.getMainLooper())
+    @SuppressLint("StaticFieldLeak")
     private var mediaRouter: MediaRouter? = null
     private var initialized = false
 
@@ -81,7 +83,7 @@ object OCastMediaRouteHelper {
     }
 
     fun getDeviceFromRoute(routeInfo: MediaRouter.RouteInfo?): Device? {
-        val mediaRouteDevice = routeInfo?.extras?.get(MediaRouteDevice.EXTRA_DEVICE) as? MediaRouteDevice
+        val mediaRouteDevice = routeInfo?.extras?.get(EXTRA_DEVICE) as? Device
         return deviceCenter.devices.firstOrNull { it.upnpID == mediaRouteDevice?.upnpID }
     }
 
