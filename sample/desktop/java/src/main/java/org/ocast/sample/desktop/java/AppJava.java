@@ -16,19 +16,20 @@
 
 package org.ocast.sample.desktop.java;
 
-import org.jetbrains.annotations.NotNull;
-import org.ocast.sdk.core.Device;
-import org.ocast.sdk.core.DeviceListener;
-import org.ocast.sdk.core.DeviceCenter;
-import org.ocast.sdk.core.EventListener;
-import org.ocast.sdk.core.ReferenceDevice;
-import org.ocast.sdk.core.models.*;
-import org.ocast.sdk.core.utils.OCastLog;
-
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.ocast.sdk.core.Device;
+import org.ocast.sdk.core.DeviceCenter;
+import org.ocast.sdk.core.DeviceListener;
+import org.ocast.sdk.core.EventListener;
+import org.ocast.sdk.core.ReferenceDevice;
+import org.ocast.sdk.core.models.Media;
+import org.ocast.sdk.core.models.MediaPlaybackStatus;
+import org.ocast.sdk.core.models.PrepareMediaCommandParams;
+import org.ocast.sdk.core.utils.OCastLog;
 
 public class AppJava implements EventListener, DeviceListener {
 
@@ -66,31 +67,31 @@ public class AppJava implements EventListener, DeviceListener {
     private void startApplication(Device device) {
         device.setApplicationName("Orange-DefaultReceiver-DEV");
         device.connect(
-                null,
-                () -> device.startApplication(
-                        () -> prepareMedia(device),
-                        oCastError -> logger.log(Level.WARNING, "startApplication error: " + oCastError.getMessage())
-                ),
-                oCastError -> logger.log(Level.WARNING, "connect error: " + oCastError.getMessage())
+            null,
+            () -> device.startApplication(
+                () -> prepareMedia(device),
+                ocastError -> logger.log(Level.WARNING, "startApplication error: " + ocastError.getMessage())
+            ),
+            ocastError -> logger.log(Level.WARNING, "connect error: " + ocastError.getMessage())
         );
     }
 
     private void prepareMedia(Device device) {
         PrepareMediaCommandParams params = new PrepareMediaCommandParams(
-                "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
-                1,
-                "Big Buck Bunny",
-                "sampleAppKotlin",
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
-                Media.Type.VIDEO,
-                Media.TransferMode.STREAMED,
-                true
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/CastVideos/mp4/BigBuckBunny.mp4",
+            1,
+            "Big Buck Bunny",
+            "sampleAppKotlin",
+            "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+            Media.Type.VIDEO,
+            Media.TransferMode.STREAMED,
+            true
         );
         device.prepareMedia(
-                params,
-                null,
-                () -> {},
-                oCastError -> logger.log(Level.WARNING, "prepareMedia error: " + oCastError.getStatus())
+            params,
+            null,
+            () -> {},
+            ocastError -> logger.log(Level.WARNING, "prepareMedia error: " + ocastError.getStatus())
         );
     }
 
