@@ -28,6 +28,8 @@ interface EventListener {
     /**
      * Tells the listener that a media playback status event was sent by a device.
      *
+     * This event is sent at a rate defined by the frequency parameter of the prepare command.
+     *
      * @param device The device that sent the event.
      * @param mediaPlaybackStatus The playback status of the current media.
      */
