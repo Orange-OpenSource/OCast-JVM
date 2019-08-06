@@ -23,7 +23,7 @@ package org.ocast.sdk.dial.models
  * @param cause The cause of the error.
  * @constructor Creates an instance of [DialError] with the specified message and cause.
  */
-class DialError(message: String?, cause: Throwable?) : Throwable(message, cause) {
+internal class DialError(message: String?, cause: Throwable?) : Throwable(message, cause) {
 
     /**
      * @param message The error message.

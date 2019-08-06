@@ -21,7 +21,7 @@ import org.ocast.sdk.core.models.Consumer
 /**
  * This interface is implemented by classes which have a [CallbackWrapper].
  */
-interface CallbackWrapperOwner {
+internal interface CallbackWrapperOwner {
 
     /** The callback wrapper. */
     var callbackWrapper: CallbackWrapper
