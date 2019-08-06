@@ -48,7 +48,7 @@ class OCastTest {
                 }
               }
             }
-        """.trimIndent()
+        """
 
         // When
         val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
@@ -101,7 +101,7 @@ class OCastTest {
                 }
               }
             }
-        """.trimIndent()
+        """
 
         // When
         val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
@@ -161,7 +161,7 @@ class OCastTest {
                 }
               }
             }
-        """.trimIndent()
+        """
 
         // When
         val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
@@ -205,7 +205,7 @@ class OCastTest {
         ).options(options).build())
         val uuid = "89cf41b8-ef40-48d9-99c3-2a1951abcde5"
         val identifier = 666L
-        val deviceLayer = OCastCommandDeviceLayer(uuid, OCastDomain.BROWSER.value, OCastRawDeviceLayer.Type.COMMAND, identifier, prepareMessage)
+        val deviceLayer = OCastCommandDeviceLayer(uuid, OCastDomain.BROWSER.value, identifier, prepareMessage)
 
         // When
         val layerMessage = JsonTools.encode(deviceLayer)
@@ -215,8 +215,8 @@ class OCastTest {
             {
               "src": "89cf41b8-ef40-48d9-99c3-2a1951abcde5",
               "dst": "browser",
-              "type": "command",
               "id": 666,
+              "type": "command",
               "message": {
                 "data": {
                   "name": "prepare",
@@ -236,13 +236,9 @@ class OCastTest {
                 "service": "org.ocast.media"
               }
             }
-        """.trimIndent()
-            .split("\\R".toRegex())
-            .joinToString("") {
-                it.trim().replace("\": ", "\":")
-            }
+        """
 
-        assertEquals(oCastMessage, layerMessage)
+        assertEquals(JsonTools.objectMapper.readTree(oCastMessage), JsonTools.objectMapper.readTree(layerMessage))
     }
 
     @Test
@@ -256,7 +252,7 @@ class OCastTest {
 
         val uuid = "89cf41b8-ef40-48d9-99c3-2a1951abcde5"
         val identifier = 666L
-        val deviceLayer = OCastCommandDeviceLayer(uuid, "my destination", OCastRawDeviceLayer.Type.COMMAND, identifier, customMessage)
+        val deviceLayer = OCastCommandDeviceLayer(uuid, "my destination", identifier, customMessage)
 
         // When
         val layerMessage = JsonTools.encode(deviceLayer)
@@ -266,8 +262,8 @@ class OCastTest {
             {
               "src": "89cf41b8-ef40-48d9-99c3-2a1951abcde5",
               "dst": "my destination",
-              "type": "command",
               "id": 666,
+              "type": "command",
               "message": {
                 "service": "my service",
                 "data": {
@@ -281,12 +277,8 @@ class OCastTest {
                 }
               }
             }
-        """.trimIndent()
-            .split("\\R".toRegex())
-            .joinToString("") {
-                it.trim().replace("\": ", "\":")
-            }
+        """
 
-        assertEquals(oCastMessage, layerMessage)
+        assertEquals(JsonTools.objectMapper.readTree(oCastMessage), JsonTools.objectMapper.readTree(layerMessage))
     }
 }
