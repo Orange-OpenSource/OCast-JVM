@@ -7,6 +7,7 @@ android:
     - platform-tools
     - build-tools-28.0.3
     - android-28
+    - sys-img-x86-android-28
 stages:
   - build
   - verification
@@ -21,7 +22,14 @@ jobs:
     - name: Java linter
       script: ./gradlew checkstyleMain
     - name: Unit tests
-      script: ./gradlew :sdk:test
+      script: ./gradlew test
+    - name: Android tests
+      before_script:
+        - echo no | android create avd --force -n test -t android-28 --abi x86 -c 100M
+        - emulator -avd test -no-audio -no-window &
+        - ./android-wait-for-emulator
+        - adb shell input keyevent 82 &
+      script: ./gradlew connectedAndroidTest
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
