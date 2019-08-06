@@ -67,7 +67,7 @@ class OCastMediaRouteHelperTest {
         latch.await(10, TimeUnit.SECONDS)
 
         Assert.assertEquals(mediaRouteDevice?.friendlyName, FakeDeviceMediaRouteProvider.FAKE_DEVICE_NAME)
-        Assert.assertEquals(mediaRouteDevice?.uuid, FakeDeviceMediaRouteProvider.FAKE_DEVICE_UUID)
+        Assert.assertEquals(mediaRouteDevice?.upnpID, FakeDeviceMediaRouteProvider.FAKE_DEVICE_UUID)
     }
 
     private inner class MediaRouterCallback : MediaRouter.Callback() {

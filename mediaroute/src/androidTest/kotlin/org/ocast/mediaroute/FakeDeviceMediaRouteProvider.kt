@@ -49,7 +49,7 @@ class FakeDeviceMediaRouteProvider(context: Context) : MediaRouteProvider(contex
             val bundledDevice = Bundle()
             bundledDevice.putParcelable(MediaRouteDevice.EXTRA_DEVICE, mediaRouteDevice)
 
-            mediaRouteDescriptor = MediaRouteDescriptor.Builder(upnpDevice.uuid, upnpDevice.friendlyName)
+            mediaRouteDescriptor = MediaRouteDescriptor.Builder(upnpDevice.id, upnpDevice.friendlyName)
                 .setDescription(upnpDevice.modelName)
                 .addControlFilters(controlFiltersBasic)
                 .setPlaybackStream(AudioManager.STREAM_MUSIC)
