@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.EnumSet
-import org.ocast.sdk.core.ReferenceDevice
 import org.ocast.sdk.core.utils.BitflagsSerializer
 
 //region Messages
@@ -32,7 +31,7 @@ import org.ocast.sdk.core.utils.BitflagsSerializer
  * @param data The data layer conveyed by the public settings input message.
  * @constructor Creates an instance of [InputMessage].
  */
-class InputMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_SETTINGS_INPUT, data)
+class InputMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(SettingsService.INPUT, data)
 
 /**
  * Represents a public settings device message.
@@ -41,7 +40,7 @@ class InputMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(Refere
  * @param data The data layer conveyed by the public settings device message.
  * @constructor Creates an instance of [DeviceMessage].
  */
-class DeviceMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_SETTINGS_DEVICE, data)
+class DeviceMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(SettingsService.DEVICE, data)
 
 //endregion
 

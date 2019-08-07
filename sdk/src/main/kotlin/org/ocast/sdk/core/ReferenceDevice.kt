@@ -29,6 +29,7 @@ import org.ocast.sdk.common.extensions.orElse
 import org.ocast.sdk.core.models.Consumer
 import org.ocast.sdk.core.models.DeviceID
 import org.ocast.sdk.core.models.DeviceMessage
+import org.ocast.sdk.core.models.Event
 import org.ocast.sdk.core.models.GetDeviceIDCommandParams
 import org.ocast.sdk.core.models.GetMediaMetadataCommandParams
 import org.ocast.sdk.core.models.GetMediaPlaybackStatusCommandParams
@@ -60,8 +61,10 @@ import org.ocast.sdk.core.models.SeekMediaCommandParams
 import org.ocast.sdk.core.models.SendGamepadEventCommandParams
 import org.ocast.sdk.core.models.SendKeyEventCommandParams
 import org.ocast.sdk.core.models.SendMouseEventCommandParams
+import org.ocast.sdk.core.models.Service
 import org.ocast.sdk.core.models.SetMediaTrackCommandParams
 import org.ocast.sdk.core.models.SetMediaVolumeCommandParams
+import org.ocast.sdk.core.models.SettingsService
 import org.ocast.sdk.core.models.StopMediaCommandParams
 import org.ocast.sdk.core.models.UpdateStatus
 import org.ocast.sdk.core.models.WebAppConnectedStatusEvent
@@ -78,33 +81,6 @@ import org.ocast.sdk.discovery.models.UpnpDevice
  * @constructor Creates an instance of [ReferenceDevice].
  */
 open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSocket.Listener {
-
-    /**
-     * The companion object.
-     */
-    companion object {
-
-        /** The name of the device settings service. */
-        internal const val SERVICE_SETTINGS_DEVICE = "org.ocast.settings.device"
-
-        /** The name of the input settings service. */
-        internal const val SERVICE_SETTINGS_INPUT = "org.ocast.settings.input"
-
-        /** The name of the media service. */
-        internal const val SERVICE_MEDIA = "org.ocast.media"
-
-        /** The name of the web application service. */
-        internal const val SERVICE_APPLICATION = "org.ocast.webapp"
-
-        /** The name of the media playback status event. */
-        private const val EVENT_MEDIA_PLAYBACK_STATUS = "playbackStatus"
-
-        /** The name of the media metadata changed event. */
-        private const val EVENT_MEDIA_METADATA_CHANGED = "metadataChanged"
-
-        /** The name of the firmware update status event. */
-        private const val EVENT_DEVICE_UPDATE_STATUS = "updateStatus"
-    }
 
     override fun getSearchTarget() = "urn:cast-ocast-org:service:cast:1"
 
@@ -360,7 +336,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     private fun analyzeEvent(deviceLayer: OCastRawDeviceLayer) {
         val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
         when (deviceLayer.message.service) {
-            SERVICE_APPLICATION -> {
+            Service.APPLICATION -> {
                 when (JsonTools.decode<WebAppConnectedStatusEvent>(oCastData.params).status) {
                     WebAppStatus.CONNECTED -> {
                         isApplicationRunning.set(true)
@@ -370,21 +346,21 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                     else -> {}
                 }
             }
-            SERVICE_MEDIA -> {
+            Service.MEDIA -> {
                 when (oCastData.name) {
-                    EVENT_MEDIA_PLAYBACK_STATUS -> {
+                    Event.Media.PLAYBACK_STATUS -> {
                         val playbackStatus = JsonTools.decode<MediaPlaybackStatus>(oCastData.params)
                         eventListener?.onMediaPlaybackStatus(this, playbackStatus)
                     }
-                    EVENT_MEDIA_METADATA_CHANGED -> {
+                    Event.Media.METADATA_CHANGED -> {
                         val metadataChanged = JsonTools.decode<MediaMetadata>(oCastData.params)
                         eventListener?.onMediaMetadataChanged(this, metadataChanged)
                     }
                 }
             }
-            SERVICE_SETTINGS_DEVICE -> {
+            SettingsService.DEVICE -> {
                 when (oCastData.name) {
-                    EVENT_DEVICE_UPDATE_STATUS -> {
+                    Event.Device.UPDATE_STATUS -> {
                         val updateStatus = JsonTools.decode<UpdateStatus>(oCastData.params)
                         eventListener?.onUpdateStatus(this, updateStatus)
                     }
