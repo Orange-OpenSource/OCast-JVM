@@ -130,7 +130,7 @@ open class WebSocket(private val webSocketURL: String, private val sslConfigurat
         if (this.webSocket == webSocket) {
             OCastLog.debug { "Socket: Connected !" }
             state = State.CONNECTED
-            listener.onConnected(this, webSocketURL)
+            listener.onConnected(this)
         }
     }
 
@@ -200,8 +200,7 @@ open class WebSocket(private val webSocketURL: String, private val sslConfigurat
          * Tells the listener that the socket is connected to the device.
          *
          * @param webSocket
-         * @param url The connection URL.
          */
-        fun onConnected(webSocket: WebSocket, url: String)
+        fun onConnected(webSocket: WebSocket)
     }
 }
