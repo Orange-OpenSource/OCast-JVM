@@ -4,7 +4,6 @@ apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'maven-publish'
 apply plugin: 'checkstyle'
 apply from: project.file('../ktlint.gradle')
-apply from: project.file('../dokka.gradle')
 apply from: project.file('../bintray.gradle')
 
 buildscript {
@@ -93,6 +92,23 @@ test {
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
+}
+
+dokka {
+    outputFormat = 'javadoc'
+    outputDirectory = "$buildDir/javadoc"
+    jdkVersion = 8
+    externalDocumentationLink {
+        url = new URL("https://square.github.io/okhttp/3.x/okhttp/")
+    }
+    externalDocumentationLink {
+        url = new URL("https://fasterxml.github.io/jackson-databind/javadoc/2.9/")
+    }
+}
+
+task javadocJar(type: Jar, group: "build", dependsOn: dokka) {
+    classifier = 'javadoc'
+    from "$buildDir/javadoc"
 }
 
 publishing.publications {

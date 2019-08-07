@@ -18,8 +18,18 @@ package org.ocast.sdk.core.models;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Represents an operation that accepts a single input argument and returns no result.
+ *
+ * @param <T> The type of the input to the operation.
+ */
 @FunctionalInterface
 public interface Consumer<T> {
 
+    /**
+     * Performs this operation on the given argument.
+     *
+     * @param t The input argument.
+     */
     void run(@NotNull T t);
 }

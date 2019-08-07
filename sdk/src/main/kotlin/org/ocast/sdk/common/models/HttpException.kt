@@ -18,4 +18,10 @@ package org.ocast.sdk.common.models
 
 import java.lang.Exception
 
+/**
+ * Represents an HTTP error.
+ *
+ * @property statusCode The HTTP status code.
+ * @constructor Creates an instance of [HttpException].
+ */
 class HttpException(val statusCode: Int) : Exception()

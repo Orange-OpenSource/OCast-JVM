@@ -21,54 +21,64 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
 import org.ocast.sdk.core.ReferenceDevice
 
-//region Message
+//region Messages
 
 /**
+ * Represents a media message.
  *
- *
- * @param data
+ * @param T The type of params.
+ * @param data The data layer conveyed by the media message.
+ * @constructor Creates an instance of [MediaMessage].
  */
 class MediaMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_MEDIA, data)
 
 //endregion
 
-//region Command
+//region Commands
 
 /**
- * Play the media
+ * Represents the parameters of a `play` command.
  *
- * @param position position (in second)
+ * @property position The starting position of the media, in seconds.
+ * @constructor Creates an instance of [PlayMediaCommandParams].
  */
 class PlayMediaCommandParams(
     @JsonProperty("position") val position: Double = 0.0
 ) : OCastCommandParams("play")
 
 /**
- * Stop the media
+ * Represents the parameters of a `stop` command.
+ *
+ * @constructor Creates an instance of [StopMediaCommandParams].
  */
 class StopMediaCommandParams : OCastCommandParams("stop")
 
 /**
- * Pause the media
+ * Represents the parameters of a `pause` command.
+ *
+ * @constructor Creates an instance of [PauseMediaCommandParams].
  */
 class PauseMediaCommandParams : OCastCommandParams("pause")
 
 /**
- * Resume the media
+ * Represents the parameters of a `resume` command.
+ *
+ * @constructor Creates an instance of [ResumeMediaCommandParams].
  */
 class ResumeMediaCommandParams : OCastCommandParams("resume")
 
 /**
- * Prepare the media
+ * Represents the parameters of a `prepare` command.
  *
- * @param url
- * @param updateFrequency Update playback status frequency (0 = no event)
- * @param title
- * @param subtitle
- * @param logo
- * @param mediaType
- * @param transferMode
- * @param autoplay
+ * @property url The media URL.
+ * @property updateFrequency The frequency of [MediaPlaybackStatus] events, in seconds. 0 means no event.
+ * @property title The media title.
+ * @property subtitle The media subtitle.
+ * @property logo The media thumbnail.
+ * @property mediaType The media type.
+ * @property transferMode The media transfer mode.
+ * @property autoplay Indicates if the media should play automatically once the prepare command is complete.
+ * @constructor Creates an instance of [PrepareMediaCommandParams].
  */
 class PrepareMediaCommandParams(
     @JsonProperty("url")val url: String,
@@ -82,20 +92,22 @@ class PrepareMediaCommandParams(
 ) : OCastCommandParams("prepare")
 
 /**
- * Change volume
+ * Represents the parameters of a `volume` command.
  *
- * @param volume
+ * @property volume The media volume, ranging from 0.0 to 1.0.
+ * @constructor Creates an instance of [SetMediaVolumeCommandParams].
  */
 class SetMediaVolumeCommandParams(
     @JsonProperty("volume") val volume: Double
 ) : OCastCommandParams("volume")
 
 /**
- * Change a track of the current playback
+ * Represents the parameters of a `track` command.
  *
- * @param type
- * @param trackID
- * @param isEnabled
+ * @param type The track type.
+ * @param trackID The track identifier.
+ * @param isEnabled Indicates if the track is enabled or not.
+ * @constructor Creates an instance of [SetMediaTrackCommandParams].
  */
 class SetMediaTrackCommandParams(
     @JsonProperty("type") val type: Type,
@@ -103,53 +115,69 @@ class SetMediaTrackCommandParams(
     @get:JsonIgnore @field:JsonProperty("enable") val isEnabled: Boolean
 ) : OCastCommandParams("track") {
 
+    /**
+     * Represents the different types of [MediaMetadata.Track].
+     */
     enum class Type {
+
+        /** A subtitle track. */
         @JsonProperty("text") SUBTITLE,
+
+        /** An audio track. */
         @JsonProperty("audio") AUDIO,
+
+        /** A video track. */
         @JsonProperty("video") VIDEO
     }
 }
 
 /**
- * Seek to the position (in second)
+ * Represents the parameters of a `seek` command.
  *
- * @param position
+ * @param position The media position, in seconds.
+ * @constructor Creates an instance of [SeekMediaCommandParams].
  */
 class SeekMediaCommandParams(
     @JsonProperty("position") val position: Double
 ) : OCastCommandParams("seek")
 
 /**
- * Mute volume
+ * Represents the parameters of a `mute` command.
  *
- * @param isMuted
+ * @param isMuted Indicates if the media is muted or not.
+ * @constructor Creates an instance of [MuteMediaCommandParams].
  */
 class MuteMediaCommandParams(
     @get:JsonIgnore @field:JsonProperty("mute") val isMuted: Boolean
 ) : OCastCommandParams("mute")
 
 /**
- * Get playback status
+ * Represents the parameters of a `getPlaybackStatus` command.
+ *
+ * @constructor Creates an instance of [GetMediaPlaybackStatusCommandParams].
  */
 class GetMediaPlaybackStatusCommandParams : OCastCommandParams("getPlaybackStatus")
 
 /**
- * Get metadata
+ * Represents the parameters of a `getMetadata` command.
+ *
+ * @constructor Creates an instance of [GetMediaMetadataCommandParams].
  */
 class GetMediaMetadataCommandParams : OCastCommandParams("getMetadata")
 
 //endregion
 
-//region Reply
+//region Replies and events
 
 /**
- * Media playback status
+ * Represents the playback status of a media.
  *
- * @param position
- * @param duration
- * @param state
- * @param volume
- * @param isMuted
+ * @property position The media position, in seconds.
+ * @property duration The media duration, in seconds.
+ * @property state The playback state.
+ * @property volume The media volume, ranging from 0.0 to 1.0.
+ * @property isMuted Indicates if the media is muted or not.
+ * @constructor Creates an instance of [MediaPlaybackStatus].
  */
 class MediaPlaybackStatus(
     @JsonProperty("position") val position: Double,
@@ -159,29 +187,47 @@ class MediaPlaybackStatus(
     @get:JsonIgnore @field:JsonProperty("mute") val isMuted: Boolean
 ) {
 
+    /**
+     * Represents the playback states of a media.
+     *
+     * @property state The raw state value.
+     */
     enum class State(private val state: Int) {
 
+        /** The media playback state is unknown. */
         UNKNOWN(0),
+
+        /** The media is idle. */
         IDLE(1),
+
+        /** The media is playing. */
         PLAYING(2),
+
+        /** The media is paused. */
         PAUSED(3),
+
+        /** The media is buffering. */
         BUFFERING(4);
 
+        /**
+         * Returns the raw state value.
+         */
         @JsonValue
         fun toValue() = state
     }
 }
 
 /**
+ * Represents the media metadata.
  *
- *
- * @param title
- * @param subtitle
- * @param logo
- * @param mediaType
- * @param subtitleTracks
- * @param audioTracks
- * @param videoTracks
+ * @property title The media title.
+ * @property subtitle The media subtitle.
+ * @property logo The media thumbnail.
+ * @property mediaType The media type.
+ * @property subtitleTracks The list of subtitle tracks of the media.
+ * @property audioTracks The list of audio tracks of the media.
+ * @property videoTracks The list of video tracks of the media.
+ * @constructor Creates an instance of [MediaMetadata].
  */
 class MediaMetadata(
     @JsonProperty("title") val title: String,
@@ -194,12 +240,13 @@ class MediaMetadata(
 ) {
 
     /**
-     * Track
+     * Represents a media track.
      *
-     * @param language
-     * @param label
-     * @param isEnabled
-     * @param id
+     * @property language The track language.
+     * @property label The track label.
+     * @property isEnabled Indicates if the track is enabled or not.
+     * @property id The track identifier.
+     * @constructor Creates an instance of [Track].
      */
     class Track(
         @JsonProperty("language") val language: String,
@@ -213,16 +260,35 @@ class MediaMetadata(
 
 //region Enums
 
+/**
+ * This class is a container for enum classes which are used by several other media classes.
+ */
 class Media {
 
+    /**
+     * Represents the type of a media.
+     */
     enum class Type {
+
+        /** The media is audio. */
         @JsonProperty("audio") AUDIO,
+
+        /** The media is an image. */
         @JsonProperty("image") IMAGE,
+
+        /** The media is a video. */
         @JsonProperty("video") VIDEO
     }
 
+    /**
+     * Represents the transfer mode of a media.
+     */
     enum class TransferMode {
+
+        /** The media is buffered. */
         @JsonProperty("buffered") BUFFERED,
+
+        /** The media is streamed. */
         @JsonProperty("streamed") STREAMED
     }
 }

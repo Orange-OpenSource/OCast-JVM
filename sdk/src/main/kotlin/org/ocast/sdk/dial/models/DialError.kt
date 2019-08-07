@@ -20,21 +20,20 @@ package org.ocast.sdk.dial.models
  * This class represents a DIAL error.
  *
  * @param message The error message.
- * @param cause The error cause.
+ * @param cause The cause of the error.
+ * @constructor Creates an instance of [DialError] with the specified message and cause.
  */
 internal class DialError(message: String?, cause: Throwable?) : Throwable(message, cause) {
 
     /**
-     * Constructs a [DialError] with the specified message.
-     *
      * @param message The error message.
+     * @constructor Creates an instance of [DialError] with the specified message.
      */
     constructor(message: String) : this(message, null)
 
     /**
-     * Constructs a [DialError] with the specified cause.
-     *
-     * @param cause The error cause.
+     * @param cause The cause of the error.
+     * @constructor Creates an instance of [DialError] with the specified cause.
      */
     constructor(cause: Throwable) : this(cause.toString(), cause)
 }
