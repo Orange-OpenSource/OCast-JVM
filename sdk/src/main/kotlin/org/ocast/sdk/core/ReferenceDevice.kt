@@ -313,7 +313,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 OCastRawDeviceLayer.Type.COMMAND -> {}
             }
         } catch (e: Exception) {
-            replyCallback?.onError?.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Receive a bad formatted message: $data"))
+            replyCallback?.onError?.wrapRun(OCastError(OCastError.Status.DECODE_ERROR.code, "Receive a bad formatted message: $data"))
         } finally {
             deviceLayer?.ifNotNull {
                 // Remove callback

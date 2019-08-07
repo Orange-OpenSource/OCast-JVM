@@ -78,7 +78,10 @@ data class OCastError(val code: Int, val message: String, val throwable: Throwab
         CLIENT_ERROR(-2),
 
         /** There was an error in the received OCast device layer. */
-        DEVICE_LAYER_ERROR(-3)
+        DEVICE_LAYER_ERROR(-3),
+
+        /** There was an error during decoding message. */
+        DECODE_ERROR(-4)
     }
 }
 
@@ -113,7 +116,10 @@ data class OCastDeviceSettingsError(val status: Status, val message: String, val
         CLIENT_ERROR(-2),
 
         /** There was an error in the received OCast device layer. */
-        DEVICE_LAYER_ERROR(-3)
+        DEVICE_LAYER_ERROR(-3),
+
+        /** There was an error during decoding message. */
+        DECODE_ERROR(-4)
     }
 }
 
@@ -148,7 +154,10 @@ data class OCastInputSettingsError(val status: Status, val message: String, val 
         CLIENT_ERROR(-2),
 
         /** There was an error in the received OCast device layer. */
-        DEVICE_LAYER_ERROR(-3)
+        DEVICE_LAYER_ERROR(-3),
+
+        /** There was an error during decoding message. */
+        DECODE_ERROR(-4)
     }
 }
 
@@ -210,6 +219,9 @@ data class OCastMediaError(val status: Status, val message: String, val throwabl
         CLIENT_ERROR(-2),
 
         /** There was an error in the received OCast device layer. */
-        DEVICE_LAYER_ERROR(-3)
+        DEVICE_LAYER_ERROR(-3),
+
+        /** There was an error during decoding message. */
+        DECODE_ERROR(-4)
     }
 }
