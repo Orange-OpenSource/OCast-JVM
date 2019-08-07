@@ -23,7 +23,6 @@ import com.nhaarman.mockitokotlin2.verify
 import java.net.URI
 import java.net.URL
 import java.util.concurrent.TimeUnit
-import javax.xml.ws.http.HTTPException
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.SocketPolicy
 import org.junit.Assert.assertEquals
@@ -35,6 +34,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.ocast.sdk.common.HttpClientTest
 import org.ocast.sdk.common.SynchronizedFunction1
+import org.ocast.sdk.common.models.HttpException
 import org.ocast.sdk.common.removeXMLElement
 import org.ocast.sdk.dial.models.DialApplication
 
@@ -134,7 +134,7 @@ internal class DialClientTest {
             synchronizedCallback.await(5, TimeUnit.SECONDS)
             val resultCaptor = argumentCaptor<Result<DialApplication>>()
             verify(callback, times(1)).invoke(resultCaptor.capture())
-            val httpException = resultCaptor.firstValue.exceptionOrNull() as? HTTPException
+            val httpException = resultCaptor.firstValue.exceptionOrNull() as? HttpException
             assertEquals(404, httpException?.statusCode)
         }
 
@@ -209,7 +209,7 @@ internal class DialClientTest {
             synchronizedCallback.await(5, TimeUnit.SECONDS)
             val resultCaptor = argumentCaptor<Result<Unit>>()
             verify(callback, times(1)).invoke(resultCaptor.capture())
-            val httpException = resultCaptor.firstValue.exceptionOrNull() as? HTTPException
+            val httpException = resultCaptor.firstValue.exceptionOrNull() as? HttpException
             assertEquals(404, httpException?.statusCode)
         }
 
@@ -355,7 +355,7 @@ internal class DialClientTest {
             synchronizedCallback.await(5, TimeUnit.SECONDS)
             val resultCaptor = argumentCaptor<Result<Unit>>()
             verify(callback, times(1)).invoke(resultCaptor.capture())
-            val httpException = resultCaptor.firstValue.exceptionOrNull() as? HTTPException
+            val httpException = resultCaptor.firstValue.exceptionOrNull() as? HttpException
             assertEquals(404, httpException?.statusCode)
         }
 
@@ -373,7 +373,7 @@ internal class DialClientTest {
             synchronizedCallback.await(5, TimeUnit.SECONDS)
             val resultCaptor = argumentCaptor<Result<Unit>>()
             verify(callback, times(1)).invoke(resultCaptor.capture())
-            val httpException = resultCaptor.firstValue.exceptionOrNull() as? HTTPException
+            val httpException = resultCaptor.firstValue.exceptionOrNull() as? HttpException
             assertEquals(404, httpException?.statusCode)
         }
 

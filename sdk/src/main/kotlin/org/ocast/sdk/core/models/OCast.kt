@@ -122,7 +122,6 @@ class OCastRawDeviceLayer(
  * @param T The type of the data parameters contained in the command message.
  * @property source The component which sends the message.
  * @property destination The component to which the message is sent to.
- * @property type The type of message.
  * @property identifier The message identifier.
  * @property message The message to send.
  * @constructor Creates an instance of [OCastCommandDeviceLayer].
@@ -130,10 +129,12 @@ class OCastRawDeviceLayer(
 class OCastCommandDeviceLayer<T>(
     @JsonProperty("src") val source: String,
     @JsonProperty("dst") val destination: String,
-    @JsonProperty("type") val type: OCastRawDeviceLayer.Type,
     @JsonProperty("id") val identifier: Long,
     @JsonProperty("message") val message: OCastApplicationLayer<T>
-)
+) {
+    @JsonProperty("type")
+    val type = OCastRawDeviceLayer.Type.COMMAND
+}
 
 //endregion
 

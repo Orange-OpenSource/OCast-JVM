@@ -16,13 +16,13 @@
 
 package org.ocast.mediaroute
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.mediarouter.media.MediaRouteProvider
 import androidx.mediarouter.media.MediaRouteSelector
 import androidx.mediarouter.media.MediaRouter
-import org.ocast.mediaroute.models.MediaRouteDevice
 import org.ocast.mediaroute.wrapper.AndroidUIThreadCallbackWrapper
 import org.ocast.sdk.core.Device
 import org.ocast.sdk.core.DeviceCenter
@@ -33,6 +33,9 @@ import org.ocast.sdk.core.EventListener
  */
 object OCastMediaRouteHelper {
 
+    /** The key to store a [Device] as an extra in the Android media route framework. */
+    internal const val EXTRA_DEVICE = "org.ocast.mediaroute.extra.DEVICE"
+
     /** The device center. */
     private val deviceCenter = DeviceCenter().apply { callbackWrapper = AndroidUIThreadCallbackWrapper() }
 
@@ -40,6 +43,7 @@ object OCastMediaRouteHelper {
     private val mainHandler = Handler(Looper.getMainLooper())
 
     /** The media router singleton. */
+    @SuppressLint("StaticFieldLeak")
     private var mediaRouter: MediaRouter? = null
 
     /** Indicates if the [OCastMediaRouteHelper] singleton has been initialized. */
@@ -113,8 +117,8 @@ object OCastMediaRouteHelper {
      * @return The associated OCast device.
      */
     fun getDeviceFromRoute(routeInfo: MediaRouter.RouteInfo?): Device? {
-        val mediaRouteDevice = routeInfo?.extras?.get(MediaRouteDevice.EXTRA_DEVICE) as? MediaRouteDevice
-        return deviceCenter.devices.firstOrNull { it.upnpID == mediaRouteDevice?.upnpID }
+        val device = routeInfo?.extras?.get(EXTRA_DEVICE) as? Device
+        return deviceCenter.devices.firstOrNull { it.upnpID == device?.upnpID }
     }
 
     /**

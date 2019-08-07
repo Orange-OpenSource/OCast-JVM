@@ -16,6 +16,7 @@
 
 package org.ocast.sdk.core;
 
+import java.io.Serializable;
 import java.net.URL;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,7 +45,7 @@ import org.ocast.sdk.discovery.models.UpnpDevice;
 /**
  * Represents a remote OCast device.
  */
-public abstract class Device implements CallbackWrapperOwner {
+public abstract class Device implements CallbackWrapperOwner, Serializable {
 
     /**
      * Represents the state of an OCast device.
