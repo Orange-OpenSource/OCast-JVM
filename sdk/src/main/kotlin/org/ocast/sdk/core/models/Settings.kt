@@ -119,7 +119,7 @@ class SendMouseEventCommandParams(
  */
 
 class SendGamepadEventCommandParams(
-    @JsonProperty("axes") val axes: List<Axe>,
+    @JsonProperty("axes") val axes: List<Axis>,
     @JsonSerialize(using = BitflagsSerializer::class)
     @JsonProperty("buttons") val buttons: EnumSet<Button>
 ) : OCastCommandParams("gamepadEvent") {
@@ -131,7 +131,7 @@ class SendGamepadEventCommandParams(
      * @param y
      * @param type
      */
-    class Axe(
+    class Axis(
         @JsonProperty("x") val x: Double,
         @JsonProperty("y") val y: Double,
         @JsonProperty("num") val type: Type
