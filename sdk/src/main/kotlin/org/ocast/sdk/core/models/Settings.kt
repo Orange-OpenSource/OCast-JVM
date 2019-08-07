@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.util.EnumSet
-import org.ocast.sdk.core.ReferenceDevice
 import org.ocast.sdk.core.utils.BitflagsSerializer
 
 //region Message
@@ -30,14 +29,14 @@ import org.ocast.sdk.core.utils.BitflagsSerializer
  *
  * @param data
  */
-class InputMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_SETTINGS_INPUT, data)
+class InputMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(SettingsService.INPUT, data)
 
 /**
  *
  *
  * @param data
  */
-class DeviceMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_SETTINGS_DEVICE, data)
+class DeviceMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(SettingsService.DEVICE, data)
 
 //endregion
 

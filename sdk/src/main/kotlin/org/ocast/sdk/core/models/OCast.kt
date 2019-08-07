@@ -26,6 +26,66 @@ import javax.net.ssl.X509TrustManager
 import org.json.JSONObject
 import org.ocast.sdk.core.utils.RawJsonDeserializer
 
+class SettingsService {
+
+    /**
+     * The companion object.
+     */
+    companion object {
+
+        /** The name of the device settings service. */
+        internal const val DEVICE = "org.ocast.settings.device"
+
+        /** The name of the input settings service. */
+        internal const val INPUT = "org.ocast.settings.input"
+    }
+}
+
+class Service {
+
+    /**
+     * The companion object.
+     */
+    companion object {
+
+        /** The name of the web application service. */
+        internal const val APPLICATION = "org.ocast.webapp"
+
+        /** The name of the media service. */
+        internal const val MEDIA = "org.ocast.media"
+    }
+}
+
+class Event {
+
+    class Media {
+
+        /**
+         * The companion object.
+         */
+        companion object {
+
+            /** The name of the media playback status event. */
+            internal const val PLAYBACK_STATUS = "playbackStatus"
+
+            /** The name of the media metadata changed event. */
+            internal const val METADATA_CHANGED = "metadataChanged"
+        }
+    }
+
+    class Device {
+
+        /**
+         * The companion object.
+         */
+        companion object {
+
+            /** The name of the firmware update status event. */
+            internal const val UPDATE_STATUS = "updateStatus"
+        }
+    }
+}
+
 /**
  * SSL configuration
  *
