@@ -27,8 +27,20 @@ import org.ocast.sdk.core.wrapper.SimpleCallbackWrapper
 import org.ocast.sdk.discovery.DeviceDiscovery
 import org.ocast.sdk.discovery.models.UpnpDevice
 
+/**
+ * This class is the entry point to discover and use OCast devices.
+ *
+ * In order to receive discovery events, you first need to register a device class by calling the
+ * `registerDevice(@NotNull Class deviceClass)` method. Then add a [DeviceListener] with
+ * `addDeviceListener(@NotNull DeviceListener listener)` and start the discovery with `resumeDiscovery()`.
+ *
+ * @constructor Creates an instance of [DeviceCenter].
+ */
 open class DeviceCenter : CallbackWrapperOwner {
 
+    /**
+     * The companion object.
+     */
     companion object {
 
         /** The default value for the discovery interval. */
@@ -44,23 +56,42 @@ open class DeviceCenter : CallbackWrapperOwner {
             devices.forEach { it.callbackWrapper = value }
         }
 
+    /** The object which manages the discovery of OCast devices. */
     private val deviceDiscovery = DeviceDiscovery()
 
+    /** The list of registered OCast event listeners. */
     private val eventListeners = mutableSetOf<EventListener>()
+
+    /** The list of registered device listeners. */
     private val deviceListeners = mutableSetOf<DeviceListener>()
 
+    /** A map of the registered device classes indexed by their manufacturer. */
     private val registeredDevicesByManufacturer = mutableMapOf<String, Class<out Device>>()
+
+    /** The list of detected OCast devices. This list is synchronized to avoid concurrency issues. */
     private val detectedDevices = Collections.synchronizedList(mutableListOf<Device>())
 
+    /** The list of detected OCast devices. */
     val devices: List<Device>
         get() = detectedDevices.toList()
 
+    /**
+     * The interval to refresh the devices, in milliseconds.
+     *
+     * Minimum value is 5000 milliseconds. Setting this property results in sending an SSDP M-SEARCH request immediately if discovery is on-going.
+     */
     var discoveryInterval: Long
         get() = deviceDiscovery.interval
         set(value) {
             deviceDiscovery.interval = value
         }
 
+    /**
+     * Creates an OCast device from the specified UPnP device and adds it to the list of detected devices.
+     *
+     * @param device The UPnP device to create the OCast device from.
+     * @return The created OCast device.
+     */
     private fun createDevice(device: UpnpDevice): Device? {
         return registeredDevicesByManufacturer[device.manufacturer]
             ?.getConstructor(UpnpDevice::class.java)
@@ -75,6 +106,11 @@ open class DeviceCenter : CallbackWrapperOwner {
             }
     }
 
+    /**
+     * Removes an OCast device from the list of detected devices.
+     *
+     * @param device The device to remove.
+     */
     private fun removeDevice(device: Device) {
         device.apply {
             deviceListener = null
@@ -85,52 +121,113 @@ open class DeviceCenter : CallbackWrapperOwner {
         }
     }
 
+    /**
+     * This method is called when an OCast device has been created and before it is added to the list of detected devices.
+     *
+     * Default implementation does nothing. This method is meant to be overridden by subclasses.
+     *
+     * @param device The device to add.
+     */
     protected open fun onCreateDevice(device: Device) {
     }
 
+    /**
+     * This method is called before an OCast device is removed from the list of detected devices.
+     *
+     * Default implementation does nothing. This method is meant to be overridden by subclasses.
+     *
+     * @param device The device to remove.
+     */
     protected open fun onRemoveDevice(device: Device) {
     }
 
+    /**
+     * Registers a class of devices to discover.
+     *
+     * @param deviceClass The class of devices that will be searched during the discovery process.
+     */
     fun registerDevice(deviceClass: Class<out Device>) {
         val device = deviceClass.getConstructor(UpnpDevice::class.java).newInstance(UpnpDevice())
         registeredDevicesByManufacturer[device.manufacturer] = deviceClass
         deviceDiscovery.searchTargets += device.searchTarget
     }
 
+    /**
+     * Adds a listener for the OCast protocol events.
+     *
+     * @param listener The listener to add.
+     */
     fun addEventListener(listener: EventListener) {
         eventListeners.add(listener)
     }
 
+    /**
+     * Removes a listener which has been previously added with the `addEventListener(@NotNull EventListener listener)` method.
+     *
+     * @param listener The listener to remove.
+     */
     fun removeEventListener(listener: EventListener) {
         eventListeners.remove(listener)
     }
 
+    /**
+     * Adds a listener for the device events.
+     *
+     * @param listener The listener to add.
+     */
     fun addDeviceListener(listener: DeviceListener) {
         deviceListeners.add(listener)
     }
 
+    /**
+     * Removes a listener which has been previously added with the `addDeviceListener(@NotNull EventListener listener)` method.
+     *
+     * @param listener The listener to remove.
+     */
     fun removeDeviceListener(listener: DeviceListener) {
         deviceListeners.remove(listener)
     }
 
+    /**
+     * Resumes the discovery process.
+     *
+     * Newly initialized instances of [DeviceCenter] begin in a paused state, so you need to call this method to start the discovery.
+     *
+     * @return `true` if the discovery was successfully resumed, `false` if there was an issue or if the discovery was already running.
+     */
     fun resumeDiscovery(): Boolean {
         deviceDiscovery.listener = deviceDiscoveryListener
 
         return deviceDiscovery.resume()
     }
 
+    /**
+     * Stops the discovery process.
+     *
+     * This clears the list of detected devices if the discovery was not in a paused state.
+     *
+     * @return `true` if the discovery was successfully stopped, `false` if the discovery was already stopped.
+     */
     fun stopDiscovery(): Boolean {
         deviceDiscovery.listener = null
 
         return deviceDiscovery.stop()
     }
 
+    /**
+     * Pauses the discovery process.
+     *
+     * This does not clear the list of detected devices.
+     *
+     * @return `true` if the discovery was successfully paused, `false` if the discovery was not running.
+     */
     fun pauseDiscovery(): Boolean {
         return deviceDiscovery.pause()
     }
 
     //region Discovery listener
 
+    /** The discovery listener. */
     private val deviceDiscoveryListener = object : DeviceDiscovery.Listener {
 
         override fun onDevicesAdded(devices: List<UpnpDevice>) {
@@ -173,6 +270,11 @@ open class DeviceCenter : CallbackWrapperOwner {
 
     //region Event listener
 
+    /**
+     * The actual event listener.
+     *
+     * This listener dispatches OCast protocol events to all listeners in `eventListeners`.
+     */
     private val eventListener = object : EventListener {
 
         override fun onMediaPlaybackStatus(device: Device, mediaPlaybackStatus: MediaPlaybackStatus) {
@@ -196,6 +298,11 @@ open class DeviceCenter : CallbackWrapperOwner {
 
     //region Device listener
 
+    /**
+     * The actual device listener.
+     *
+     * This listener dispatches device events to all listeners in `deviceListeners`.
+     */
     private val deviceListener = object : DeviceListener {
 
         override fun onDevicesAdded(devices: List<Device>) {

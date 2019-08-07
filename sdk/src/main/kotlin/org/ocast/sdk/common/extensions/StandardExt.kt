@@ -17,21 +17,24 @@
 package org.ocast.sdk.common.extensions
 
 /**
- * Calls the specified function [block] if [this] is not null.
+ * Calls the specified function [block] if `this` is not `null`.
+ *
  * This method is an alias to the [also] method from the standard library and is meant to be used in conjunction with the [orElse] method.
  *
- * @param block The function to execute if [this] is not null.
- * @return [this]s value.
+ * @param T The type of the receiver.
+ * @param block The function to execute if `this` is not null.
+ * @return `this` value.
  */
 inline fun <T> T?.ifNotNull(block: (T) -> Unit): T? {
     return this?.also(block)
 }
 
 /**
- * Calls the specified function [block] and returns its result is [this] is null.
+ * Calls the specified function [block] and returns its result if `this` is `null`.
  *
- * @param block The function to execute if [this] is null.
- * @return [this] if it is not null, or the [block] result if [this] is null.
+ * @param R The type of the receiver.
+ * @param block The function to execute if `this` is `null`.
+ * @return `this` if it is not `null`, or the [block] result if `this` is `null`.
  */
 inline fun <R> R?.orElse(block: () -> R): R {
     return this ?: run(block)

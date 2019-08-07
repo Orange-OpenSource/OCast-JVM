@@ -87,31 +87,41 @@ class Event {
 }
 
 /**
- * SSL configuration
+ * This class represents an SSL configuration.
  *
- * @param trustManager
- * @param socketFactory
- * @param hostnameVerifier
+ * @property trustManager The trust manager.
+ * @property socketFactory The SSL socket factory.
+ * @property hostnameVerifier The hostname verifier.
+ * @constructor Creates an instance of [SSLConfiguration].
  */
 class SSLConfiguration(val trustManager: X509TrustManager, val socketFactory: SSLSocketFactory, val hostnameVerifier: HostnameVerifier)
 
+/**
+ * Represents the OCast domains.
+ *
+ * @property value The domain raw value.
+ */
 enum class OCastDomain(val value: String) {
 
+    /** The browser domain. Used to send commands to web applications. */
     BROWSER("browser"),
+
+    /** The public settings domain. */
     SETTINGS("settings")
 }
 
 //region Device layer
 
 /**
- * OCast layer
+ * Represents an OCast device layer containing a raw message (i.e. the `data` property of `message` is a `String`).
  *
- * @param source
- * @param destination
- * @param type
- * @param status Status (REPLY only)
- * @param identifier
- * @param message
+ * @property source The component which sends the message.
+ * @property destination The component to which the message is sent to.
+ * @property type The type of message.
+ * @property status The device layer transport status. Equals to `null` for commands and events.
+ * @property identifier The message identifier.
+ * @property message The raw message to send.
+ * @constructor Creates an instance of [OCastRawDeviceLayer].
  */
 class OCastRawDeviceLayer(
     @JsonProperty("src") val source: String,
@@ -123,39 +133,58 @@ class OCastRawDeviceLayer(
 ) {
 
     /**
-     *
-     * OK : No errors were found while processing the command
-     * JSON_FORMAT_ERROR : There is an error in the JSON formatting
-     * VALUE_FORMAT_ERROR : This is an error in the packet, typically caused by a malformatted value
-     * MISSING_MANDATORY_FIELD : This is an error in the packet, typically caused by missing a field
-     * FORBIDDEN_UNSECURE_MODE : Packet has no right to access the required destination or service.
-     * INTERNAL_ERROR : All other cases
+     * Represents the transport status of an OCast device layer.
      */
     enum class Status {
+
+        /** No errors were found while processing the command. */
         @JsonProperty("ok") OK,
+
+        /** There is an error in the JSON format. */
         @JsonProperty("json_format_error") JSON_FORMAT_ERROR,
+
+        /** There is an error in the packet, typically caused by a wrongly formatted value. */
         @JsonProperty("value_format_error") VALUE_FORMAT_ERROR,
+
+        /** There is an error in the packet, typically caused by a missing field. */
         @JsonProperty("missing_mandatory_field ") MISSING_MANDATORY_FIELD,
+
+        /** The packet has no right to access the required destination or service. */
         @JsonProperty("forbidden_unsecure_mode ") FORBIDDEN_UNSECURE_MODE,
+
+        /** There is an internal error. */
         @JsonProperty("internal_error") INTERNAL_ERROR,
+
+        /** The status is unknown. */
         @JsonEnumDefaultValue
         @JsonProperty("unknown") UNKNOWN
     }
 
+    /**
+     * Represents the type of message being sent in a device layer.
+     */
     enum class Type {
+
+        /** The message is an event sent by a device. */
         @JsonProperty("event") EVENT,
+
+        /** The message is a reply sent by a device. */
         @JsonProperty("reply") REPLY,
+
+        /** The message is a command sent to a device. */
         @JsonProperty("command") COMMAND
     }
 }
 
 /**
+ * Represents an OCast device layer containing a command message.
  *
- *
- * @param source
- * @param destination
- * @param identifier
- * @param message
+ * @param T The type of the data parameters contained in the command message.
+ * @property source The component which sends the message.
+ * @property destination The component to which the message is sent to.
+ * @property identifier The message identifier.
+ * @property message The message to send.
+ * @constructor Creates an instance of [OCastCommandDeviceLayer].
  */
 class OCastCommandDeviceLayer<T>(
     @JsonProperty("src") val source: String,
@@ -172,10 +201,11 @@ class OCastCommandDeviceLayer<T>(
 //region Application layer
 
 /**
+ * Represents an OCast application layer containing raw data (i.e. the `data` property is a `String`).
  *
- *
- * @param service
- * @param data
+ * @property service The identifier of the service associated to the data.
+ * @property data The raw data.
+ * @constructor Creates an instance of [OCastRawApplicationLayer].
  */
 open class OCastRawApplicationLayer(
     @JsonProperty("service") val service: String,
@@ -184,10 +214,12 @@ open class OCastRawApplicationLayer(
 )
 
 /**
+ * Represents an OCast application layer containing data.
  *
- *
- * @param service
- * @param data
+ * @param T The type of the parameters contained in the data layer.
+ * @property service The identifier of the service associated to the data.
+ * @property data The data.
+ * @constructor Creates an instance of [OCastApplicationLayer].
  */
 open class OCastApplicationLayer<T>(
     @JsonProperty("service") val service: String,
@@ -199,11 +231,13 @@ open class OCastApplicationLayer<T>(
 //region Data layer
 
 /**
+ * Represents an OCast data layer.
  *
- *
- * @param name
- * @param params
- * @param options
+ * @param T The type of the data parameters.
+ * @property name The name of the data.
+ * @property params The data parameters.
+ * @property options The options associated with this data, if any.
+ * @constructor Creates an instance of [OCastDataLayer].
  */
 open class OCastDataLayer<T>(
     @JsonProperty("name") var name: String,
@@ -212,11 +246,12 @@ open class OCastDataLayer<T>(
 )
 
 /**
+ * Represents an OCast data layer containing raw parameters (i.e. the `params` property is a `String`).
  *
- *
- * @param name
- * @param params
- * @param options
+ * @property name The name of the data.
+ * @property params The raw data parameters.
+ * @property options The options associated with this data, if any.
+ * @constructor Creates an instance of [OCastRawDataLayer].
  */
 open class OCastRawDataLayer(
     @JsonProperty("name") var name: String,
@@ -230,41 +265,92 @@ open class OCastRawDataLayer(
 //region Params
 
 /**
+ * Represents parameters for the data layer of a reply or an event.
  *
- *
- * @param code
+ * @property code The code associated with the data. Equals `null` for events.
+ * @constructor Creates an instance of [OCastReplyEventParams].
  */
 open class OCastReplyEventParams(
     @JsonProperty("code") internal open val code: Int?
 )
 
+/**
+ * Represents parameters for the data layer of a command.
+ *
+ * @property name The name of the command.
+ * @constructor Creates an instance of [OCastCommandParams].
+ */
 open class OCastCommandParams(
     @JsonIgnore val name: String
 ) {
 
+    /** The data layer builder. */
     private val builder by lazy { OCastDataLayerBuilder(name, this) }
 
+    /**
+     * Builds an instance of [OCastDataLayer] from the command parameters and options.
+     *
+     * @return The built data layer.
+     */
     fun build(): OCastDataLayer<OCastCommandParams> {
         return builder.build()
     }
 
+    /**
+     * Apply the specified options to the command.
+     *
+     * @param options The options to apply.
+     * @return `this`.
+     */
     fun options(options: JSONObject?) = apply { builder.options(options) }
 }
 
+/**
+ * Represents a builder of [OCastDataLayer].
+ *
+ * @param T The type of parameters of the data layer to build.
+ * @property name The name of the data layer to build.
+ * @property params The parameters of the data layer to build.
+ * @property options The options of the data layer to build.
+ * @constructor Creates an instance of [OCastDataLayerBuilder].
+ */
 open class OCastDataLayerBuilder<T>(
     var name: String,
     var params: T,
     var options: JSONObject? = null
 ) {
 
+    /**
+     * Builds an instance of [OCastDataLayer] with the builder name, parameters and options.
+     *
+     * @return The built data layer.
+     */
     fun build(): OCastDataLayer<T> {
         return OCastDataLayer(name, params, options)
     }
 
+    /**
+     * Updates the name of the data layer to build.
+     *
+     * @param name The data layer name.
+     * @return `this`.
+     */
     fun name(name: String) = apply { this.name = name }
 
+    /**
+     * Updates the parameters of the data layer to build.
+     *
+     * @param params The data layer parameters.
+     * @return `this`.
+     */
     fun params(params: T) = apply { this.params = params }
 
+    /**
+     * Updates the options of the data layer to build.
+     *
+     * @param options The data layer options.
+     * @return `this`.
+     */
     fun options(options: JSONObject?) = apply { this.options = options }
 }
 

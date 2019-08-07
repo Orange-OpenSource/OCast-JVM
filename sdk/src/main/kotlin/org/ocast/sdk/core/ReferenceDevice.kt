@@ -75,9 +75,15 @@ import org.ocast.sdk.dial.DialClient
 import org.ocast.sdk.dial.models.DialApplication
 import org.ocast.sdk.discovery.models.UpnpDevice
 
+/**
+ * The reference OCast device.
+ *
+ * @constructor Creates an instance of [ReferenceDevice].
+ */
 open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSocket.Listener {
 
     override fun getSearchTarget() = "urn:cast-ocast-org:service:cast:1"
+
     override fun getManufacturer() = "Orange SA"
 
     override fun setApplicationName(applicationName: String?) {
@@ -96,16 +102,35 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         }
         super.setState(state)
     }
+
+    /** The identifier of the last OCast message sent. */
     private val sequenceID = AtomicLong(0)
+
+    /** An identifier which uniquely identifies the device when sending OCast messages. */
     protected var clientUuid = UUID.randomUUID().toString()
+
+    /** The web socket. */
     protected var webSocket: WebSocket? = null
+
+    /** The callback executed when the device connect process is complete. */
     protected var connectCallback: RunnableCallback? = null
+
+    /** The callback executed when the device disconnect process is complete. */
     protected var disconnectCallback: RunnableCallback? = null
+
+    /** The web socket URL for the settings. */
     private val settingsWebSocketURL = URI("wss://${dialURL.host}:4433/ocast")
 
+    /** A map of callbacks that will be executed when receiving reply messages, indexed by the identifier of their associated command message. */
     protected val replyCallbacksBySequenceID: MutableMap<Long, ReplyCallback<*>> = Collections.synchronizedMap(mutableMapOf())
+
+    /** The DIAL client. */
     private val dialClient = DialClient(dialURL)
+
+    /** A boolean which indicates if the web application specified by `applicationName` is currently running or not. */
     protected var isApplicationRunning = AtomicBoolean(false)
+
+    /** A semaphore to wait when starting a web application. */
     private var applicationSemaphore: Semaphore? = null
 
     //region RemoteDevice
@@ -123,6 +148,13 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         }
     }
 
+    /**
+     * Starts a web application.
+     *
+     * @param name The name of the application to start.
+     * @param onSuccess The operation executed if the application started successfully.
+     * @param onError The operation executed if there was an error while starting the application.
+     */
     private fun startApplication(name: String, onSuccess: Runnable, onError: Consumer<OCastError>) {
         dialClient.getApplication(name) { result ->
             result.onFailure { throwable ->
@@ -188,6 +220,14 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         }
     }
 
+    /**
+     * Connects to the device.
+     *
+     * @param webSocketURL The web socket URL.
+     * @param sslConfiguration The SSL configuration of the web socket used to connect to the device if it is secure, or `null` if the web socket is not secure.
+     * @param onSuccess The operation executed if the connection succeeded.
+     * @param onError The operation executed if the connection failed.
+     */
     private fun connect(webSocketURL: URI, sslConfiguration: SSLConfiguration?, onSuccess: Runnable, onError: Consumer<OCastError>) {
         webSocket = WebSocket(webSocketURL.toString(), sslConfiguration, this)
         state = State.CONNECTING
@@ -286,6 +326,12 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
 
     //region Events
 
+    /**
+     * Checks if the specified device layer embeds an OCast event.
+     *
+     * @param deviceLayer The device layer to analyze.
+     * @throws Exception If an error occurs while analyzing the device layer.
+     */
     @Throws(Exception::class)
     private fun analyzeEvent(deviceLayer: OCastRawDeviceLayer) {
         val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
@@ -427,6 +473,14 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
 
     //endregion
 
+    /**
+     * Sends a message on the web socket.
+     *
+     * @param id The identifier of the message to send.
+     * @param message The message to send.
+     * @param startApplicationIfNeeded Indicates if the web application should be started before sending the message.
+     * @param onError The operation executed if there was an error while sending the message.
+     */
     protected fun sendToWebSocket(id: Long, message: String, startApplicationIfNeeded: Boolean, onError: Consumer<OCastError>) {
         val send = {
             if (webSocket?.send(message) == false) {
@@ -446,6 +500,11 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         }
     }
 
+    /**
+     * Generates a message identifier.
+     *
+     * @return The message identifier.
+     */
     protected fun generateSequenceID(): Long {
         if (sequenceID.get() == Long.MAX_VALUE) {
             sequenceID.set(0)

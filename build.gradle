@@ -1,3 +1,5 @@
+apply plugin: 'org.jetbrains.dokka-android'
+
 buildscript {
     apply from: project.file('dependencies.gradle')
 
@@ -10,6 +12,7 @@ buildscript {
         classpath "com.android.tools.build:gradle:$android_gradle_plugin_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$bintray_plugin_version"
+        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokka_version"
     }
 }
 
@@ -22,4 +25,22 @@ allprojects {
 
 task clean(type: Delete, group: "build") {
     delete rootProject.buildDir
+}
+
+dokka {
+    outputFormat = 'javadoc'
+    outputDirectory = 'docs'
+    jdkVersion = 8
+    kotlinTasks {
+        defaultKotlinTasks() + [':sdk:compileKotlin', ':mediaroute:compileReleaseKotlin']
+    }
+    externalDocumentationLink {
+        url = new URL("https://square.github.io/okhttp/3.x/okhttp/")
+    }
+    externalDocumentationLink {
+        url = new URL("https://fasterxml.github.io/jackson-databind/javadoc/2.9/")
+    }
+    externalDocumentationLink {
+        url = new URL("https://developer.android.com/reference/androidx/")
+    }
 }
