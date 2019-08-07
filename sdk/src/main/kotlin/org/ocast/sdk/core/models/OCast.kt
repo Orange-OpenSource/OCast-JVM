@@ -26,6 +26,9 @@ import javax.net.ssl.X509TrustManager
 import org.json.JSONObject
 import org.ocast.sdk.core.utils.RawJsonDeserializer
 
+/**
+ * Represents an OCast settings service.
+ */
 class SettingsService {
 
     /**
@@ -41,6 +44,9 @@ class SettingsService {
     }
 }
 
+/**
+ * Represents an OCast service.
+ */
 class Service {
 
     /**
@@ -56,8 +62,14 @@ class Service {
     }
 }
 
+/**
+ * Represents an OCast event.
+ */
 class Event {
 
+    /**
+     * Represents a media event.
+     */
     class Media {
 
         /**
@@ -73,6 +85,9 @@ class Event {
         }
     }
 
+    /**
+     * Represents a device settings event.
+     */
     class Device {
 
         /**
