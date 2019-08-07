@@ -19,7 +19,6 @@ package org.ocast.sdk.core.models
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
-import org.ocast.sdk.core.ReferenceDevice
 
 //region Messages
 
@@ -30,7 +29,7 @@ import org.ocast.sdk.core.ReferenceDevice
  * @param data The data layer conveyed by the media message.
  * @constructor Creates an instance of [MediaMessage].
  */
-class MediaMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(ReferenceDevice.SERVICE_MEDIA, data)
+class MediaMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(Service.MEDIA, data)
 
 //endregion
 

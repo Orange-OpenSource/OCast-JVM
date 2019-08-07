@@ -20,7 +20,6 @@ import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-import org.ocast.sdk.core.ReferenceDevice
 import org.ocast.sdk.core.utils.JsonTools
 
 /**
@@ -61,7 +60,7 @@ class OCastTest {
         assertEquals(OCastDomain.BROWSER.value, deviceLayer.source)
         assertEquals(OCastRawDeviceLayer.Type.EVENT, deviceLayer.type)
         assertEquals(666L, deviceLayer.identifier)
-        assertEquals(ReferenceDevice.SERVICE_APPLICATION, deviceLayer.message.service)
+        assertEquals(Service.APPLICATION, deviceLayer.message.service)
 
         assertEquals("connectedStatus", oCastData.name)
 
@@ -114,7 +113,7 @@ class OCastTest {
         assertEquals(OCastDomain.BROWSER.value, deviceLayer.source)
         assertEquals(OCastRawDeviceLayer.Type.EVENT, deviceLayer.type)
         assertEquals(666L, deviceLayer.identifier)
-        assertEquals(ReferenceDevice.SERVICE_MEDIA, deviceLayer.message.service)
+        assertEquals(Service.MEDIA, deviceLayer.message.service)
 
         assertEquals("metadataChanged", oCastData.name)
 
@@ -175,7 +174,7 @@ class OCastTest {
         assertEquals(OCastDomain.BROWSER.value, deviceLayer.source)
         assertEquals(OCastRawDeviceLayer.Type.REPLY, deviceLayer.type)
         assertEquals(666L, deviceLayer.identifier)
-        assertEquals(ReferenceDevice.SERVICE_MEDIA, deviceLayer.message.service)
+        assertEquals(Service.MEDIA, deviceLayer.message.service)
 
         assertEquals("playbackStatus", oCastData.name)
 
