@@ -94,17 +94,18 @@ class OCastRawDeviceLayer(
  *
  * @param source
  * @param destination
- * @param type
  * @param identifier
  * @param message
  */
 class OCastCommandDeviceLayer<T>(
     @JsonProperty("src") val source: String,
     @JsonProperty("dst") val destination: String,
-    @JsonProperty("type") val type: OCastRawDeviceLayer.Type,
     @JsonProperty("id") val identifier: Long,
     @JsonProperty("message") val message: OCastApplicationLayer<T>
-)
+) {
+    @JsonProperty("type")
+    val type = OCastRawDeviceLayer.Type.COMMAND
+}
 
 //endregion
 
