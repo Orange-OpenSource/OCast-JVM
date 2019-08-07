@@ -83,8 +83,8 @@ object OCastMediaRouteHelper {
     }
 
     fun getDeviceFromRoute(routeInfo: MediaRouter.RouteInfo?): Device? {
-        val mediaRouteDevice = routeInfo?.extras?.get(EXTRA_DEVICE) as? Device
-        return deviceCenter.devices.firstOrNull { it.upnpID == mediaRouteDevice?.upnpID }
+        val device = routeInfo?.extras?.get(EXTRA_DEVICE) as? Device
+        return deviceCenter.devices.firstOrNull { it.upnpID == device?.upnpID }
     }
 
     fun isOCastRouteInfo(routeInfo: MediaRouter.RouteInfo?) = routeInfo?.matchesSelector(mediaRouteSelector) == true
