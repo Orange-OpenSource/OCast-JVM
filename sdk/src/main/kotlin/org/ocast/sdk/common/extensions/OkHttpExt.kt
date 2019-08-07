@@ -17,11 +17,11 @@
 package org.ocast.sdk.common.extensions
 
 import java.io.IOException
-import javax.xml.ws.http.HTTPException
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Headers
 import okhttp3.Response
+import org.ocast.sdk.common.models.HttpException
 
 /**
  * Schedules the OkHttp request to be executed at some point in the future.
@@ -40,7 +40,7 @@ fun Call.enqueue(onComplete: (Result<Response>) -> Unit) {
             if (response.isSuccessful) {
                 onComplete(Result.success(response))
             } else {
-                onComplete(Result.failure(HTTPException(response.code())))
+                onComplete(Result.failure(HttpException(response.code())))
             }
         }
     })

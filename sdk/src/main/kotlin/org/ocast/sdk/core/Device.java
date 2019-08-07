@@ -16,6 +16,7 @@
 
 package org.ocast.sdk.core;
 
+import java.io.Serializable;
 import java.net.URL;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,7 +42,7 @@ import org.ocast.sdk.core.wrapper.CallbackWrapperOwner;
 import org.ocast.sdk.core.wrapper.SimpleCallbackWrapper;
 import org.ocast.sdk.discovery.models.UpnpDevice;
 
-public abstract class Device implements CallbackWrapperOwner {
+public abstract class Device implements CallbackWrapperOwner, Serializable {
 
     public enum State {
 

@@ -31,7 +31,6 @@ import androidx.mediarouter.media.MediaRouteDiscoveryRequest
 import androidx.mediarouter.media.MediaRouteProvider
 import androidx.mediarouter.media.MediaRouteProviderDescriptor
 import java.util.Collections
-import org.ocast.mediaroute.models.MediaRouteDevice
 import org.ocast.sdk.core.Device
 import org.ocast.sdk.core.DeviceCenter
 import org.ocast.sdk.core.DeviceListener
@@ -52,9 +51,9 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
 
     private fun createMediaRouteDescriptor(device: Device): MediaRouteDescriptor {
         val bundledDevice = Bundle().apply {
-            putParcelable(
-                MediaRouteDevice.EXTRA_DEVICE,
-                MediaRouteDevice(device)
+            putSerializable(
+                OCastMediaRouteHelper.EXTRA_DEVICE,
+                device
             )
         }
         val controlFilter = IntentFilter().apply {
