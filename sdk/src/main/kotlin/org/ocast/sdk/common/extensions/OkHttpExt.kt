@@ -25,6 +25,7 @@ import org.ocast.sdk.common.models.HttpException
 
 /**
  * Schedules the OkHttp request to be executed at some point in the future.
+ *
  * This method is a convenience method which allows to write OkHttp calls in a more Kotlin way using [Result] and lambdas.
  *
  * @param onComplete The lambda that will be called when the request is completed.
@@ -48,7 +49,8 @@ fun Call.enqueue(onComplete: (Result<Response>) -> Unit) {
 
 /**
  * Converts [Headers] to a map.
- * [Headers] already has a toMultimap() method but the drawback is that it turns names to lowercase.
+ *
+ * [Headers] already has a `toMultimap()` method but the drawback is that it turns names to lowercase.
  *
  * @return The map of headers, where values are indexed by their names. Multiple values for a given name are separated by commas.
  */

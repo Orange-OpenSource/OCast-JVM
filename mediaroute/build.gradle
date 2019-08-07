@@ -5,7 +5,6 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'org.jetbrains.dokka-android'
 apply plugin: 'maven-publish'
 apply from: project.file('../ktlint.gradle')
-apply from: project.file('../dokka.gradle')
 apply from: project.file('../bintray.gradle')
 
 androidExtensions {
@@ -108,6 +107,24 @@ allprojects {
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
     classifier = 'sources'
+}
+
+dokka {
+    outputFormat = 'javadoc'
+    outputDirectory = "$buildDir/javadoc"
+    jdkVersion = 8
+    dependsOn ':sdk:dokka'
+    externalDocumentationLink {
+        url = new URL("file://${project(":sdk").buildDir}/javadoc/")
+    }
+    externalDocumentationLink {
+        url = new URL("https://developer.android.com/reference/androidx/")
+    }
+}
+
+task javadocJar(type: Jar, group: "build", dependsOn: dokka) {
+    classifier = 'javadoc'
+    from "$buildDir/javadoc"
 }
 
 publishing.publications {

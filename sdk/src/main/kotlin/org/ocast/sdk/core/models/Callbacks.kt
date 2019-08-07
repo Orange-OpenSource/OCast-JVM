@@ -17,26 +17,31 @@
 package org.ocast.sdk.core.models
 
 /**
- * Represents a callback for an asynchronous task, with a [Runnable] as the success lambda.
+ * Represents a callback for an asynchronous task, with a [Runnable] as the success operation.
  *
- * @param onSuccess The success lambda.
- * @param onError The error lambda.
+ * @property onSuccess The operation executed if the task succeeded.
+ * @property onError The operation executed if the task failed.
+ * @constructor Creates an instance of [RunnableCallback].
  */
 open class RunnableCallback(val onSuccess: Runnable, val onError: Consumer<OCastError>)
 
 /**
- * Represents a callback for an asynchronous task, with a [Consumer] of [T] as the success lambda.
+ * Represents a callback for an asynchronous task, with a [Consumer] of T as the success operation.
  *
- * @param onSuccess The success lambda.
- * @param onError The error lambda.
+ * @param T The type of the [Consumer] parameter.
+ * @property onSuccess The operation executed if the task succeeded.
+ * @property onError The operation executed if the task failed.
+ * @constructor Creates an instance of [ConsumerCallback].
  */
 open class ConsumerCallback<T>(val onSuccess: Consumer<T>, val onError: Consumer<OCastError>)
 
 /**
  * Represents a callback for an OCast reply.
  *
- * @param replyClass The expected class of the reply data.
- * @param onSuccess The success lambda.
- * @param onError The error lambda.
+ * @param T The type of the expected reply data.
+ * @property replyClass The expected class of the reply data.
+ * @property onSuccess The operation executed if the task succeeded.
+ * @property onError The operation executed if the task failed.
+ * @constructor Creates an instance of [ReplyCallback].
  */
 class ReplyCallback<T>(val replyClass: Class<T>, onSuccess: Consumer<T>, onError: Consumer<OCastError>) : ConsumerCallback<T>(onSuccess, onError)

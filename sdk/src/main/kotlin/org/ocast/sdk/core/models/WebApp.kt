@@ -21,17 +21,27 @@ import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
+ * Represents the connected status event of a web app.
  *
- *
- * @param status
+ * @property status The status of the web app.
+ * @constructor Creates an instance of [WebAppConnectedStatusEvent].
  */
 class WebAppConnectedStatusEvent(
     @JsonProperty("status") val status: WebAppStatus
 )
 
+/**
+ * Represents the status of a web app.
+ */
 enum class WebAppStatus {
+
+    /** The web app is connected to the web socket server. */
     @JsonProperty("connected") CONNECTED,
+
+    /** The web app is disconnected from the web socket server. */
     @JsonProperty("disconnected") DISCONNECTED,
+
+    /** The web app status is unknown. */
     @JsonEnumDefaultValue
     @JsonProperty("unknown") UNKNOWN
 }
