@@ -35,20 +35,44 @@ import org.ocast.sdk.core.Device
 import org.ocast.sdk.core.DeviceCenter
 import org.ocast.sdk.core.DeviceListener
 
+/**
+ * This class is a concrete implementation of [MediaRouteProvider] to discover OCast devices with the Android media route framework.
+ *
+ * @param context The context.
+ * @property deviceCenter The OCast device center which will perform the discovery under the hood.
+ * @property mainHandler A handler on the main thread.
+ * @constructor Creates an instance of [OCastMediaRouteProvider].
+ */
 internal class OCastMediaRouteProvider(context: Context, private val deviceCenter: DeviceCenter, private val mainHandler: Handler) : MediaRouteProvider(context) {
 
+    /**
+     * The companion object.
+     */
     internal companion object {
+
+        /** The name of the OCast media route category. */
         internal const val FILTER_CATEGORY_OCAST = "org.ocast.CATEGORY_OCAST"
+
+        /** The [OCastMediaRouteProvider] log tag. */
         private const val TAG = "OCastMediaRouteProvider"
     }
 
+    /** A map of media route descriptors indexed by the UPnP identifier of their associated OCast device. */
     private val routeDescriptorsByUpnpID = Collections.synchronizedMap(mutableMapOf<String, MediaRouteDescriptor>())
+
+    /** Indicates if the `wifiMonitorReceiver` has been registered as a `BroadcastReceiver`. */
     private var isWifiMonitorReceiverRegistered = false
 
     init {
         deviceCenter.addDeviceListener(OCastMediaRouteDeviceListener())
     }
 
+    /**
+     * Creates and returns a [MediaRouteDescriptor] from the specified OCast device.
+     *
+     * @param device The OCast device.
+     * @return The created [MediaRouteDescriptor].
+     */
     private fun createMediaRouteDescriptor(device: Device): MediaRouteDescriptor {
         val bundledDevice = Bundle().apply {
             putSerializable(
@@ -66,6 +90,9 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
             .build()
     }
 
+    /**
+     * Publishes the current OCast media routes.
+     */
     private fun publishRoutes() {
         mainHandler.post {
             descriptor = synchronized(routeDescriptorsByUpnpID) {
@@ -76,6 +103,11 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
         }
     }
 
+    /**
+     * Handles the WiFi connection state changed events of the Android device.
+     *
+     * @param isConnected `true` if the Android device is connected to a WiFi network, otherwise `false`.
+     */
     private fun onConnectionStateChanged(isConnected: Boolean) {
         if (isConnected) {
             // onConnectionStateChanged(false) is not necessarily called when changing WiFi network
@@ -112,6 +144,9 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
         }
     }
 
+    /**
+     * An implementation of [DeviceListener] for [OCastMediaRouteProvider].
+     */
     private inner class OCastMediaRouteDeviceListener : DeviceListener {
 
         override fun onDevicesAdded(devices: List<Device>) {
@@ -134,8 +169,10 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
         }
     }
 
+    /** The broadcast receiver for network state changed events. */
     private val wifiMonitorReceiver = object : BroadcastReceiver() {
 
+        /** Indicates if the Android device is connected to any WiFi network. */
         private var isConnected = false
 
         override fun onReceive(context: Context?, intent: Intent?) {

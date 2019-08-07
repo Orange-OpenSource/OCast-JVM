@@ -23,11 +23,16 @@ import org.xml.sax.InputSource
 
 /**
  * A simple XML parser which makes parsing more concise.
- * The [parse] method returns the root [XMLElement] where every child element can easily be accessed with a chain of brackets.
+ *
+ * The [parse] method returns the root [XMLElement] where every child element can easily be accessed with a chain of square brackets.
+ *
  * For instance:
- * val xml = <foo><bar><baz>BAZ</baz></bar></foo>
- * val rootXMLElement = XMLParser().parse(xml)
- * val bazXMLElement = rootXMLElement["foo"]["bar"]["baz"]
+ *
+ * `val xml = &lt;foo&gt;&lt;bar&gt;&lt;baz&gt;BAZ&lt;/baz&gt;&lt;/bar&gt;&lt;/foo&gt;`
+ *
+ * `val rootXMLElement = XMLParser().parse(xml)`
+ *
+ * `val bazXMLElement = rootXMLElement["foo"]["bar"]["baz"]`
  */
 object XMLParser {
 
@@ -89,10 +94,11 @@ object XMLParser {
 /**
  * This class represents an XML element.
  *
- * @param name The name of the XML element.
- * @param value The value of the XML element.
- * @param attributes The attributes associated with the XML element. The value of each attribute is indexed by its name.
- * @param children The children for this XML element.
+ * @property name The name of the XML element.
+ * @property value The value of the XML element.
+ * @property attributes The attributes associated with the XML element. The value of each attribute is indexed by its name.
+ * @property children The children for this XML element.
+ * @constructor Creates an instance of [XMLElement].
  */
 data class XMLElement(
     val name: String,

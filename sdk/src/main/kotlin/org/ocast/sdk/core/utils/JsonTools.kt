@@ -35,8 +35,12 @@ import java.util.EnumSet
 import org.ocast.sdk.common.extensions.orElse
 import org.ocast.sdk.core.models.Bitflag
 
+/**
+ * A singleton object that decodes and encodes JSON.
+ */
 object JsonTools {
 
+    /** The Jackson object mapper. */
     @PublishedApi
     internal val objectMapper = jacksonObjectMapper()
 
@@ -49,22 +53,49 @@ object JsonTools {
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
     }
 
+    /**
+     * Decodes a JSON string to an object.
+     *
+     * @param T The type of the object to decode the JSON string to.
+     * @param json The JSON string to decode.
+     * @return The JSON object.
+     * @throws Exception If an error occurs while decoding the JSON string.
+     */
     @Throws(Exception::class)
     inline fun <reified T : Any> decode(json: String): T {
         return objectMapper.readValue(json)
     }
 
+    /**
+     * Decodes a JSON string to an object.
+     *
+     * @param T The type of the object to decode the JSON string to.
+     * @param json The JSON string to decode.
+     * @param clazz The class of the object to decode the JSON string to.
+     * @return The decoded JSON object.
+     * @throws Exception If an error occurs while decoding the JSON string.
+     */
     @Throws(Exception::class)
     fun <T> decode(json: String, clazz: Class<T>): T {
         return objectMapper.readValue(json, clazz)
     }
 
+    /**
+     * Encodes a JSON object to a string.
+     *
+     * @param value The JSON object to encode.
+     * @return The JSON string.
+     * @throws Exception If an error occurs while encoding the JSON object.
+     */
     @Throws(Exception::class)
     fun encode(value: Any): String {
         return objectMapper.writeValueAsString(value)
     }
 }
 
+/**
+ * A Jackson [StdDeserializer] that deserializes a JSON object to a raw string.
+ */
 class RawJsonDeserializer : StdDeserializer<String>(String::class.java) {
 
     @Throws(Exception::class)

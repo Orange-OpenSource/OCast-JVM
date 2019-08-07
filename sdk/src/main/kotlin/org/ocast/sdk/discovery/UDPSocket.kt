@@ -25,18 +25,22 @@ import kotlin.concurrent.thread
 import org.ocast.sdk.common.extensions.orTrue
 
 /**
- * Instances of this class manage a UDP socket.
+ * This class represents a UDP socket.
  *
- * @param port The local port of the socket. Specify 0 to bind the socket on a random port.
+ * @property port The local port of the socket. Specify 0 to bind the socket on a random port.
+ * @constructor Creates an instance of [UDPSocket].
  */
 internal open class UDPSocket(private val port: Short = 0) {
 
+    /**
+     * The companion object.
+     */
     companion object {
 
         /** The name of the thread to receive datagrams. */
         private val RECEIVER_THREAD_NAME = "${UDPSocket::class.simpleName} Receiver Thread"
 
-        /** The size of the buffer to receive datagrams. */
+        /** The size of the buffer to receive datagrams in bytes. */
         private const val RECEIVER_BUFFER_SIZE = 4096
     }
 
@@ -131,12 +135,12 @@ internal open class UDPSocket(private val port: Short = 0) {
     }
 
     /**
-     * A listener of [UDPSocket] events.
+     * A listener of events on a [UDPSocket].
      */
     interface Listener {
 
         /**
-         * Callback method called when the socket received data from a host.
+         * Tells the listener that the socket received data from a host.
          *
          * @param socket The socket which informs the listener.
          * @param data The data.
@@ -145,10 +149,10 @@ internal open class UDPSocket(private val port: Short = 0) {
         fun onDataReceived(socket: UDPSocket, data: ByteArray, host: String)
 
         /**
-         * Callback method called when the socket closed.
+         * Tells the listener that the socket closed.
          *
          * @param socket The socket which informs the listener.
-         * @param error The error, or null if the socket closed normally.
+         * @param error The error, or `null` if the socket closed normally.
          */
         fun onSocketClosed(socket: UDPSocket, error: Throwable?)
     }
