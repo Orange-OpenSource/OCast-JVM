@@ -16,6 +16,7 @@
 
 package org.ocast.sdk.core.models
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -240,14 +241,15 @@ class OCastTest {
         assertEquals(JsonTools.objectMapper.readTree(oCastMessage), JsonTools.objectMapper.readTree(layerMessage))
     }
 
+    class CustomCommandParams(@JsonProperty("my param") val myParam: String) : OCastCommandParams("my command")
+
     @Test
     fun encodeCustomCommandSucceeds() {
 
         // Given
         val options = JSONObject(hashMapOf("my option" to "azertyuiop1234"))
-        val params = JSONObject(hashMapOf("my param" to "1234azertyuiop"))
 
-        val customMessage = OCastApplicationLayer("my service", OCastDataLayerBuilder("my command", params, options).build())
+        val customMessage = OCastApplicationLayer("my service", CustomCommandParams("1234azertyuiop").options(options).build())
 
         val uuid = "89cf41b8-ef40-48d9-99c3-2a1951abcde5"
         val identifier = 666L

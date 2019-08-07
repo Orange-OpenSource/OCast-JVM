@@ -46,7 +46,7 @@ data class UpnpDevice(
     /**
      * The companion object.
      */
-    companion object {
+    internal companion object {
 
         /**
          * Decodes an HTTP response to a [UpnpDevice].

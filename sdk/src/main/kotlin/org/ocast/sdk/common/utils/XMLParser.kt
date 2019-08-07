@@ -34,7 +34,7 @@ import org.xml.sax.InputSource
  *
  * `val bazXMLElement = rootXMLElement["foo"]["bar"]["baz"]`
  */
-object XMLParser {
+internal object XMLParser {
 
     /** The [javax.xml.parsers.DocumentBuilder] factory. */
     private val documentBuilderFactory = DocumentBuilderFactory.newInstance()
@@ -100,7 +100,7 @@ object XMLParser {
  * @property children The children for this XML element.
  * @constructor Creates an instance of [XMLElement].
  */
-data class XMLElement(
+internal data class XMLElement(
     val name: String,
     val value: String,
     val attributes: Map<String, String>,
