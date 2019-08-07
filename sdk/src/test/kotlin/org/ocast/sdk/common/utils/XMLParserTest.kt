@@ -69,7 +69,7 @@ class XMLParserTest {
         val xml = "<malformed></xml>"
 
         // When
-        val rootXMLElement = XMLParser.parse(xml)
+        XMLParser.parse(xml)
 
         // Then
         // An exception is thrown
