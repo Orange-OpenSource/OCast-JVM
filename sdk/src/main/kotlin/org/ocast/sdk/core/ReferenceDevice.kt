@@ -135,7 +135,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     //region RemoteDevice
 
     override fun startApplication(onSuccess: Runnable, onError: Consumer<OCastError>) {
-        applicationName?.ifNotNull { applicationName ->
+        applicationName.ifNotNull { applicationName ->
             when (state) {
                 State.CONNECTING -> onError.wrapRun(OCastError("Device is connecting, start cannot be processed yet"))
                 State.CONNECTED -> startApplication(applicationName, onSuccess, onError)
@@ -186,7 +186,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     }
 
     override fun stopApplication(onSuccess: Runnable, onError: Consumer<OCastError>) {
-        applicationName?.ifNotNull { applicationName ->
+        applicationName.ifNotNull { applicationName ->
             dialClient.stopApplication(applicationName) { result ->
                 result.onFailure { throwable ->
                     onError.wrapRun(OCastError("Failed to stop $applicationName, there was an error with the DIAL request", throwable))
@@ -207,7 +207,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             State.CONNECTED -> onSuccess.wrapRun()
             State.DISCONNECTING -> onError.wrapRun(OCastError("Device is disconnecting"))
             State.DISCONNECTED -> {
-                applicationName?.ifNotNull { applicationName ->
+                applicationName.ifNotNull { applicationName ->
                     dialClient.getApplication(applicationName) { result ->
                         val webSocketURL = result.getOrNull()?.additionalData?.webSocketURL ?: settingsWebSocketURL
                         connect(webSocketURL, sslConfiguration, onSuccess, onError)
@@ -256,10 +256,10 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 }
                 replyCallbacksBySequenceID.clear()
             }
-            connectCallback?.ifNotNull { connectCallback ->
+            connectCallback.ifNotNull { connectCallback ->
                 connectCallback.onError.wrapRun(OCastError("Socket did not connect", error))
             }
-            disconnectCallback?.ifNotNull { disconnectCallback ->
+            disconnectCallback.ifNotNull { disconnectCallback ->
                 if (error == null) {
                     disconnectCallback.onSuccess.wrapRun()
                 } else {
@@ -289,13 +289,13 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 OCastRawDeviceLayer.Type.EVENT -> analyzeEvent(deviceLayer)
                 OCastRawDeviceLayer.Type.REPLY -> {
                     replyCallback = replyCallbacksBySequenceID[deviceLayer.identifier]
-                    replyCallback?.ifNotNull {
+                    replyCallback.ifNotNull {
                         if (deviceLayer.status == OCastRawDeviceLayer.Status.OK) {
                             val replyData = JsonTools.decode<OCastDataLayer<OCastReplyEventParams>>(deviceLayer.message.data)
                             if (replyData.params.code == null || replyData.params.code == OCastError.Status.SUCCESS.code) {
                                 val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-                                val reply = if (replyCallback.replyClass != Unit::class.java) {
-                                    JsonTools.decode(oCastData.params, replyCallback.replyClass)
+                                val reply = if (it.replyClass != Unit::class.java) {
+                                    JsonTools.decode(oCastData.params, it.replyClass)
                                 } else {
                                     Unit
                                 }
@@ -315,7 +315,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         } catch (e: Exception) {
             replyCallback?.onError?.wrapRun(OCastError(OCastError.Status.DECODE_ERROR.code, "Receive a bad formatted message: $data"))
         } finally {
-            deviceLayer?.ifNotNull {
+            deviceLayer.ifNotNull {
                 // Remove callback
                 replyCallbacksBySequenceID.remove(it.identifier)
             }
