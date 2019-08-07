@@ -67,7 +67,6 @@ import org.ocast.sdk.core.models.UpdateStatus
 import org.ocast.sdk.core.models.WebAppConnectedStatusEvent
 import org.ocast.sdk.core.models.WebAppStatus
 import org.ocast.sdk.core.utils.JsonTools
-import org.ocast.sdk.core.utils.OCastLog
 import org.ocast.sdk.dial.DialClient
 import org.ocast.sdk.dial.models.DialApplication
 import org.ocast.sdk.discovery.models.UpnpDevice
@@ -307,12 +306,13 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
 
     override fun onDataReceived(webSocket: WebSocket, data: String) {
         var deviceLayer: OCastRawDeviceLayer? = null
+        var replyCallback: ReplyCallback<*>? = null
         try {
             deviceLayer = JsonTools.decode(data)
             when (deviceLayer.type) {
                 OCastRawDeviceLayer.Type.EVENT -> analyzeEvent(deviceLayer)
                 OCastRawDeviceLayer.Type.REPLY -> {
-                    val replyCallback = replyCallbacksBySequenceID[deviceLayer.identifier]
+                    replyCallback = replyCallbacksBySequenceID[deviceLayer.identifier]
                     replyCallback?.ifNotNull {
                         if (deviceLayer.status == OCastRawDeviceLayer.Status.OK) {
                             val replyData = JsonTools.decode<OCastDataLayer<OCastReplyEventParams>>(deviceLayer.message.data)
@@ -337,7 +337,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 OCastRawDeviceLayer.Type.COMMAND -> {}
             }
         } catch (e: Exception) {
-            OCastLog.error(e) { "Receive a bad formatted message: $data" }
+            replyCallback?.onError?.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Receive a bad formatted message: $data"))
         } finally {
             deviceLayer?.ifNotNull {
                 // Remove callback
