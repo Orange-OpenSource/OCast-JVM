@@ -101,7 +101,7 @@ open class DeviceCenter : CallbackWrapperOwner {
                 eventListener = this@DeviceCenter.eventListener
                 callbackWrapper = this@DeviceCenter.callbackWrapper
                 // Custom actions on custom device
-                onCreateDevice(this)
+                onAddDevice(this)
                 detectedDevices.add(this)
             }
     }
@@ -128,7 +128,7 @@ open class DeviceCenter : CallbackWrapperOwner {
      *
      * @param device The device to add.
      */
-    protected open fun onCreateDevice(device: Device) {
+    protected open fun onAddDevice(device: Device) {
     }
 
     /**
