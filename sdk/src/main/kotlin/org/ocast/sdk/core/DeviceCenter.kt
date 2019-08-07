@@ -70,7 +70,7 @@ open class DeviceCenter : CallbackWrapperOwner {
                 eventListener = this@DeviceCenter.eventListener
                 callbackWrapper = this@DeviceCenter.callbackWrapper
                 // Custom actions on custom device
-                onCreateDevice(this)
+                onAddDevice(this)
                 detectedDevices.add(this)
             }
     }
@@ -85,7 +85,7 @@ open class DeviceCenter : CallbackWrapperOwner {
         }
     }
 
-    protected open fun onCreateDevice(device: Device) {
+    protected open fun onAddDevice(device: Device) {
     }
 
     protected open fun onRemoveDevice(device: Device) {
