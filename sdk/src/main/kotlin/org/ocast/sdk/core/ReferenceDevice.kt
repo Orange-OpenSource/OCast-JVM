@@ -275,7 +275,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         }
     }
 
-    override fun onConnected(webSocket: WebSocket, url: String) {
+    override fun onConnected(webSocket: WebSocket) {
         state = State.CONNECTED
         connectCallback?.onSuccess?.wrapRun()
         connectCallback = null

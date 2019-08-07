@@ -167,7 +167,7 @@ class SendMouseEventCommandParams(
  * @constructor Creates an instance of [SendGamepadEventCommandParams].
  */
 class SendGamepadEventCommandParams(
-    @JsonProperty("axes") val axes: List<Axe>,
+    @JsonProperty("axes") val axes: List<Axis>,
     @JsonSerialize(using = BitflagsSerializer::class)
     @JsonProperty("buttons") val buttons: EnumSet<Button>
 ) : OCastCommandParams("gamepadEvent") {
@@ -179,7 +179,7 @@ class SendGamepadEventCommandParams(
      * @property y The vertical axis value, ranging from -1.0 (up) to 1.0 (down).
      * @property type The axis type.
      */
-    class Axe(
+    class Axis(
         @JsonProperty("x") val x: Double,
         @JsonProperty("y") val y: Double,
         @JsonProperty("num") val type: Type
