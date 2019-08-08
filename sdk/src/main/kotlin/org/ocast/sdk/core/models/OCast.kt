@@ -329,7 +329,7 @@ open class OCastCommandParams(
  * @property options The options of the data layer to build.
  * @constructor Creates an instance of [OCastDataLayerBuilder].
  */
-open class OCastDataLayerBuilder<T>(
+private class OCastDataLayerBuilder<T>(
     var name: String,
     var params: T,
     var options: JSONObject? = null

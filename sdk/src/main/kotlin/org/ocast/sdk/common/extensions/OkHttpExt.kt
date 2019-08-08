@@ -30,7 +30,7 @@ import org.ocast.sdk.common.models.HttpException
  *
  * @param onComplete The lambda that will be called when the request is completed.
  */
-fun Call.enqueue(onComplete: (Result<Response>) -> Unit) {
+internal fun Call.enqueue(onComplete: (Result<Response>) -> Unit) {
     enqueue(object : Callback {
 
         override fun onFailure(call: Call, e: IOException) {
@@ -54,6 +54,6 @@ fun Call.enqueue(onComplete: (Result<Response>) -> Unit) {
  *
  * @return The map of headers, where values are indexed by their names. Multiple values for a given name are separated by commas.
  */
-fun Headers.toMap(): Map<String, String> {
+internal fun Headers.toMap(): Map<String, String> {
     return names().associateWith { values(it).joinToString(",") }
 }
