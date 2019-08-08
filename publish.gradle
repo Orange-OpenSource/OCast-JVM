@@ -1,5 +1,5 @@
 ext {
-    version_name = '2.0.0'
+    version_name = '2.0.1'
     vendor_name = 'Orange'
     group_name = 'org.ocast'
     url_name = 'http://ocast.org'
