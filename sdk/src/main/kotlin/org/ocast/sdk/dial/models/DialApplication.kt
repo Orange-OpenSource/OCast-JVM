@@ -209,7 +209,7 @@ internal data class DialApplication(
                     val installationUrlString = try {
                         rawState.split("$XML_INSTALLABLE_STATE_TEXT_VALUE=").elementAt(1)
                     } catch (exception: Exception) {
-                        throw DialError("Unknown DIAL application state")
+                        throw DialError("Could not decode unknown DIAL application state")
                     }
                     State.Installable(URL(installationUrlString))
                 }

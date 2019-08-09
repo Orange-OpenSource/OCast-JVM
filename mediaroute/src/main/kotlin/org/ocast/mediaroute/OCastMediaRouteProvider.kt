@@ -122,7 +122,7 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
 
     override fun onDiscoveryRequestChanged(request: MediaRouteDiscoveryRequest?) {
         if (request != null) {
-            Log.d(TAG, "onDiscoveryRequest $request")
+            Log.d(TAG, "Discovery request changed: $request")
             deviceCenter.discoveryInterval = if (request.isActiveScan) DeviceCenter.MINIMUM_DISCOVERY_INTERVAL else DeviceCenter.DEFAULT_DISCOVERY_INTERVAL
             if (!isWifiMonitorReceiverRegistered) {
                 isWifiMonitorReceiverRegistered = true
