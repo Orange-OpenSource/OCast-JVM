@@ -296,7 +296,11 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             connectCallback = null
             disconnectCallback = null
             // Disconnect all other web sockets if any
-            webSocketsById.values.forEach { it.disconnect() }
+            webSocketsById.values.forEach { otherWebSocket ->
+                if (otherWebSocket != webSocket) {
+                    otherWebSocket.disconnect()
+                }
+            }
         }
     }
 
