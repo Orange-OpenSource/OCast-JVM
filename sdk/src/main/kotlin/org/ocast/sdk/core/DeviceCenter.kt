@@ -196,8 +196,6 @@ open class DeviceCenter : CallbackWrapperOwner {
      * @return `true` if the discovery was successfully resumed, `false` if there was an issue or if the discovery was already running.
      */
     fun resumeDiscovery(): Boolean {
-        deviceDiscovery.listener = deviceDiscoveryListener
-
         return deviceDiscovery.resume()
     }
 
@@ -209,8 +207,6 @@ open class DeviceCenter : CallbackWrapperOwner {
      * @return `true` if the discovery was successfully stopped, `false` if the discovery was already stopped.
      */
     fun stopDiscovery(): Boolean {
-        deviceDiscovery.listener = null
-
         return deviceDiscovery.stop()
     }
 
@@ -233,7 +229,7 @@ open class DeviceCenter : CallbackWrapperOwner {
         override fun onDevicesAdded(devices: List<UpnpDevice>) {
             val devicesAdded = devices.mapNotNull { createDevice(it) }
             if (devicesAdded.isNotEmpty()) {
-                this@DeviceCenter.deviceListener.onDevicesAdded(devicesAdded)
+                deviceListener.onDevicesAdded(devicesAdded)
             }
         }
 
@@ -245,7 +241,7 @@ open class DeviceCenter : CallbackWrapperOwner {
                         .ifNotNull { removeDevice(it) }
                 }
                 if (devicesRemoved.isNotEmpty()) {
-                    this@DeviceCenter.deviceListener.onDevicesRemoved(devicesRemoved)
+                    deviceListener.onDevicesRemoved(devicesRemoved)
                 }
             }
         }
@@ -257,12 +253,12 @@ open class DeviceCenter : CallbackWrapperOwner {
                         .ifNotNull { it.upnpDevice = device }
             }
             if (devicesChanged.isNotEmpty()) {
-                this@DeviceCenter.deviceListener.onDevicesChanged(devicesChanged)
+                deviceListener.onDevicesChanged(devicesChanged)
             }
         }
 
         override fun onDiscoveryStopped(error: Throwable?) {
-            this@DeviceCenter.deviceListener.onDiscoveryStopped(error)
+            deviceListener.onDiscoveryStopped(error)
         }
     }
 
@@ -327,4 +323,8 @@ open class DeviceCenter : CallbackWrapperOwner {
     }
 
     //endregion
+
+    init {
+        deviceDiscovery.listener = deviceDiscoveryListener
+    }
 }
