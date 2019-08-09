@@ -81,6 +81,19 @@ import org.ocast.sdk.discovery.models.UpnpDevice
  */
 open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSocket.Listener {
 
+    /**
+     * The companion object.
+     */
+    protected companion object {
+
+        /**
+         * The identifier of the web socket of the reference device.
+         *
+         * This web socket sends commands and receives replies and events.
+         */
+        const val REFERENCE_WEB_SOCKET_ID = "REFERENCE_WEB_SOCKET_ID"
+    }
+
     override fun getSearchTarget() = "urn:cast-ocast-org:service:cast:1"
 
     override fun getManufacturer() = "Orange SA"
@@ -108,17 +121,22 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     /** An identifier which uniquely identifies the device when sending OCast messages. */
     protected var clientUuid = UUID.randomUUID().toString()
 
-    /** The web socket. */
-    protected var webSocket: WebSocket? = null
+    /**
+     * A hash map of all the web sockets indexed by their identifier.
+     *
+     * There is only one web socket in the reference device.
+     * This web socket sends commands and receives replies and events.
+     */
+    private var webSocketsById = hashMapOf<String, WebSocket>()
+
+    /** The web socket URL for the settings. */
+    private val settingsWebSocketURL = URI("wss://${dialURL.host}:4433/ocast")
 
     /** The callback executed when the device connect process is complete. */
     protected var connectCallback: RunnableCallback? = null
 
     /** The callback executed when the device disconnect process is complete. */
     protected var disconnectCallback: RunnableCallback? = null
-
-    /** The web socket URL for the settings. */
-    private val settingsWebSocketURL = URI("wss://${dialURL.host}:4433/ocast")
 
     /** A map of callbacks that will be executed when receiving reply messages, indexed by the identifier of their associated command message. */
     protected val replyCallbacksBySequenceID: MutableMap<Long, ReplyCallback<*>> = Collections.synchronizedMap(mutableMapOf())
@@ -207,38 +225,44 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             State.CONNECTED -> onSuccess.wrapRun()
             State.DISCONNECTING -> onError.wrapRun(OCastError("Device is disconnecting"))
             State.DISCONNECTED -> {
-                applicationName.ifNotNull { applicationName ->
-                    dialClient.getApplication(applicationName) { result ->
-                        val webSocketURL = result.getOrNull()?.additionalData?.webSocketURL ?: settingsWebSocketURL
-                        connect(webSocketURL, sslConfiguration, onSuccess, onError)
-                    }
-                }.orElse {
-                    connect(settingsWebSocketURL, sslConfiguration, onSuccess, onError)
-                }
+                onCreateWebSockets(sslConfiguration, Consumer { webSocketsById ->
+                        this.webSocketsById = webSocketsById
+                        state = State.CONNECTING
+                        connectCallback = RunnableCallback(onSuccess, onError)
+                        webSocketsById.values.forEach { it.connect() }
+                })
             }
         }
-    }
-
-    /**
-     * Connects to the device.
-     *
-     * @param webSocketURL The web socket URL.
-     * @param sslConfiguration The SSL configuration of the web socket used to connect to the device if it is secure, or `null` if the web socket is not secure.
-     * @param onSuccess The operation executed if the connection succeeded.
-     * @param onError The operation executed if the connection failed.
-     */
-    private fun connect(webSocketURL: URI, sslConfiguration: SSLConfiguration?, onSuccess: Runnable, onError: Consumer<OCastError>) {
-        webSocket = WebSocket(webSocketURL.toString(), sslConfiguration, this)
-        state = State.CONNECTING
-        connectCallback = RunnableCallback(onSuccess, onError)
-        webSocket?.connect()
     }
 
     override fun disconnect(onSuccess: Runnable, onError: Consumer<OCastError>) {
         if (state != State.DISCONNECTING && state != State.DISCONNECTED) {
             state = State.DISCONNECTING
             disconnectCallback = RunnableCallback(onSuccess, onError)
-            webSocket?.disconnect()
+            webSocketsById.values.forEach { it.disconnect() }
+        }
+    }
+
+    /**
+     * Creates all the web sockets.
+     *
+     * Default behaviour creates only one web socket for the reference device.
+     * If you need to override this method to manages multiple web sockets,
+     * then you MUST call `onComplete` with a hash map of the created web sockets indexed by their identifier.
+     *
+     * @param sslConfiguration The SSL configuration if the web sockets to create are secure, or `null` if they are not secure.
+     * @param onComplete The operation called when the web sockets are created.
+     */
+    protected open fun onCreateWebSockets(sslConfiguration: SSLConfiguration?, onComplete: Consumer<HashMap<String, WebSocket>>) {
+        applicationName.ifNotNull { applicationName ->
+            dialClient.getApplication(applicationName) { result ->
+                val webSocketURL = result.getOrNull()?.additionalData?.webSocketURL ?: settingsWebSocketURL
+                val webSocket = WebSocket(webSocketURL.toString(), sslConfiguration, this)
+                onComplete.run(hashMapOf(REFERENCE_WEB_SOCKET_ID to webSocket))
+            }
+        }.orElse {
+            val webSocket = WebSocket(settingsWebSocketURL.toString(), sslConfiguration, this)
+            onComplete.run(hashMapOf(REFERENCE_WEB_SOCKET_ID to webSocket))
         }
     }
 
@@ -271,13 +295,21 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             }
             connectCallback = null
             disconnectCallback = null
+            // Disconnect all other web sockets if any
+            webSocketsById.values.forEach { otherWebSocket ->
+                if (otherWebSocket != webSocket) {
+                    otherWebSocket.disconnect()
+                }
+            }
         }
     }
 
     override fun onConnected(webSocket: WebSocket) {
-        state = State.CONNECTED
-        connectCallback?.onSuccess?.wrapRun()
-        connectCallback = null
+        if (webSocketsById.values.all { it.state == WebSocket.State.CONNECTED }) {
+            state = State.CONNECTED
+            connectCallback?.onSuccess?.wrapRun()
+            connectCallback = null
+        }
     }
 
     override fun onDataReceived(webSocket: WebSocket, data: String) {
@@ -483,7 +515,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
      */
     protected fun sendToWebSocket(id: Long, message: String, startApplicationIfNeeded: Boolean, onError: Consumer<OCastError>) {
         val send = {
-            if (webSocket?.send(message) == false) {
+            if (webSocketsById[REFERENCE_WEB_SOCKET_ID]?.send(message) == false) {
                 replyCallbacksBySequenceID.remove(id)
                 onError.wrapRun(OCastError("Unable to send message"))
             }
