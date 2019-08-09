@@ -79,7 +79,7 @@ internal class DialClient(private val baseURL: URL) {
                         onComplete(Result.failure(exception))
                     }
                 } else {
-                    onComplete(Result.failure(DialError("Could not stop application $name")))
+                    onComplete(Result.failure(DialError("Could not stop application $name on host ${baseURL.host}")))
                 }
             }
         }
