@@ -285,8 +285,8 @@ open class OCastRawDataLayer(
  * @property code The code associated with the data. Equals `null` for events.
  * @constructor Creates an instance of [OCastReplyEventParams].
  */
-open class OCastReplyEventParams(
-    @JsonProperty("code") internal open val code: Int?
+class OCastReplyEventParams(
+    @JsonProperty("code") val code: Int?
 )
 
 /**
