@@ -15,8 +15,12 @@
 <td><a href="https://bintray.com/orange-opensource/maven/ocast-jvm-sdk/_latestVersion"><img src="https://api.bintray.com/packages/orange-opensource/maven/ocast-jvm-sdk/images/download.svg"></a></td>
 </tr>
 <tr>
-<td> OCast media route module for Android</td>
+<td>OCast media route module for Android</td>
 <td><a href="https://bintray.com/orange-opensource/maven/ocast-jvm-mediaroute/_latestVersion"><img src="https://api.bintray.com/packages/orange-opensource/maven/ocast-jvm-mediaroute/images/download.svg"></a></td>
+</tr>
+<tr>
+<td>Documentation</td>
+<td><a href="https://orange-opensource.github.io/OCast-JVM/"><img src="https://img.shields.io/badge/javadoc-2.0.1-brightgreen"></a></td>
 </tr>
 </tbody>
 </table>
@@ -38,10 +42,10 @@ repositories {
 }
 
 dependencies {
-    implementation "org.ocast:sdk:2.0.0"
+    implementation "org.ocast:sdk:2.0.1"
     // The following line is only needed if you are using OCast on Android
     // and want to take advantage of the MediaRouter framework
-    implementation "org.ocast:mediaroute:2.0.0"
+    implementation "org.ocast:mediaroute:2.0.1"
 }
 ```
 

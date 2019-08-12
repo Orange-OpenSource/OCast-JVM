@@ -29,6 +29,7 @@ import org.ocast.sdk.common.extensions.orElse
 import org.ocast.sdk.core.models.Consumer
 import org.ocast.sdk.core.models.DeviceID
 import org.ocast.sdk.core.models.DeviceMessage
+import org.ocast.sdk.core.models.Event
 import org.ocast.sdk.core.models.GetDeviceIDCommandParams
 import org.ocast.sdk.core.models.GetMediaMetadataCommandParams
 import org.ocast.sdk.core.models.GetMediaPlaybackStatusCommandParams
@@ -60,34 +61,41 @@ import org.ocast.sdk.core.models.SeekMediaCommandParams
 import org.ocast.sdk.core.models.SendGamepadEventCommandParams
 import org.ocast.sdk.core.models.SendKeyEventCommandParams
 import org.ocast.sdk.core.models.SendMouseEventCommandParams
+import org.ocast.sdk.core.models.Service
 import org.ocast.sdk.core.models.SetMediaTrackCommandParams
 import org.ocast.sdk.core.models.SetMediaVolumeCommandParams
+import org.ocast.sdk.core.models.SettingsService
 import org.ocast.sdk.core.models.StopMediaCommandParams
 import org.ocast.sdk.core.models.UpdateStatus
 import org.ocast.sdk.core.models.WebAppConnectedStatusEvent
 import org.ocast.sdk.core.models.WebAppStatus
 import org.ocast.sdk.core.utils.JsonTools
-import org.ocast.sdk.core.utils.OCastLog
 import org.ocast.sdk.dial.DialClient
 import org.ocast.sdk.dial.models.DialApplication
 import org.ocast.sdk.discovery.models.UpnpDevice
 
+/**
+ * The reference OCast device.
+ *
+ * @constructor Creates an instance of [ReferenceDevice].
+ */
 open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSocket.Listener {
 
-    companion object {
+    /**
+     * The companion object.
+     */
+    protected companion object {
 
-        internal const val SERVICE_SETTINGS_DEVICE = "org.ocast.settings.device"
-        internal const val SERVICE_SETTINGS_INPUT = "org.ocast.settings.input"
-        internal const val SERVICE_MEDIA = "org.ocast.media"
-
-        internal const val SERVICE_APPLICATION = "org.ocast.webapp"
-
-        private const val EVENT_MEDIA_PLAYBACK_STATUS = "playbackStatus"
-        private const val EVENT_MEDIA_METADATA_CHANGED = "metadataChanged"
-        private const val EVENT_DEVICE_UPDATE_STATUS = "updateStatus"
+        /**
+         * The identifier of the web socket of the reference device.
+         *
+         * This web socket sends commands and receives replies and events.
+         */
+        const val REFERENCE_WEB_SOCKET_ID = "REFERENCE_WEB_SOCKET_ID"
     }
 
     override fun getSearchTarget() = "urn:cast-ocast-org:service:cast:1"
+
     override fun getManufacturer() = "Orange SA"
 
     override fun setApplicationName(applicationName: String?) {
@@ -106,37 +114,68 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         }
         super.setState(state)
     }
+
+    /** The identifier of the last OCast message sent. */
     private val sequenceID = AtomicLong(0)
+
+    /** An identifier which uniquely identifies the device when sending OCast messages. */
     protected var clientUuid = UUID.randomUUID().toString()
-    protected var webSocket: WebSocket? = null
-    protected var connectCallback: RunnableCallback? = null
-    protected var disconnectCallback: RunnableCallback? = null
+
+    /**
+     * A hash map of all the web sockets indexed by their identifier.
+     *
+     * There is only one web socket in the reference device.
+     * This web socket sends commands and receives replies and events.
+     */
+    private var webSocketsById = hashMapOf<String, WebSocket>()
+
+    /** The web socket URL for the settings. */
     private val settingsWebSocketURL = URI("wss://${dialURL.host}:4433/ocast")
 
+    /** The callback executed when the device connect process is complete. */
+    protected var connectCallback: RunnableCallback? = null
+
+    /** The callback executed when the device disconnect process is complete. */
+    protected var disconnectCallback: RunnableCallback? = null
+
+    /** A map of callbacks that will be executed when receiving reply messages, indexed by the identifier of their associated command message. */
     protected val replyCallbacksBySequenceID: MutableMap<Long, ReplyCallback<*>> = Collections.synchronizedMap(mutableMapOf())
+
+    /** The DIAL client. */
     private val dialClient = DialClient(dialURL)
+
+    /** A boolean which indicates if the web application specified by `applicationName` is currently running or not. */
     protected var isApplicationRunning = AtomicBoolean(false)
+
+    /** A semaphore to wait when starting a web application. */
     private var applicationSemaphore: Semaphore? = null
 
     //region RemoteDevice
 
     override fun startApplication(onSuccess: Runnable, onError: Consumer<OCastError>) {
-        applicationName?.ifNotNull { applicationName ->
+        applicationName.ifNotNull { applicationName ->
             when (state) {
-                State.CONNECTING -> onError.wrapRun(OCastError("Device is connecting, start cannot be processed yet"))
+                State.CONNECTING -> onError.wrapRun(OCastError("Failed to start $applicationName on $friendlyName, device is connecting"))
                 State.CONNECTED -> startApplication(applicationName, onSuccess, onError)
-                State.DISCONNECTING -> onError.wrapRun(OCastError("Device is connecting, start cannot be processed."))
-                State.DISCONNECTED -> onError.wrapRun(OCastError("Device is disconnected, start cannot be processed."))
+                State.DISCONNECTING -> onError.wrapRun(OCastError("Failed to start $applicationName on $friendlyName, device is disconnecting"))
+                State.DISCONNECTED -> onError.wrapRun(OCastError("Failed to start $applicationName on $friendlyName, device is disconnected"))
             }
         }.orElse {
-            onError.wrapRun(OCastError("Property applicationName is not defined"))
+            onError.wrapRun(OCastError("Failed to start application on $friendlyName, property applicationName is not defined"))
         }
     }
 
+    /**
+     * Starts a web application.
+     *
+     * @param name The name of the application to start.
+     * @param onSuccess The operation executed if the application started successfully.
+     * @param onError The operation executed if there was an error while starting the application.
+     */
     private fun startApplication(name: String, onSuccess: Runnable, onError: Consumer<OCastError>) {
         dialClient.getApplication(name) { result ->
             result.onFailure { throwable ->
-                onError.wrapRun(OCastError("Failed to start $name, there was an error with the DIAL application information request", throwable))
+                onError.wrapRun(OCastError("Failed to start $name on $friendlyName, there was an error with the DIAL application information request", throwable))
             }
             result.onSuccess { application ->
                 isApplicationRunning.set(application.state == DialApplication.State.Running)
@@ -145,7 +184,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 } else {
                     dialClient.startApplication(name) { result ->
                         result.onFailure { throwable ->
-                            onError.wrapRun(OCastError("Failed to start $name, there was an error with the DIAL request", throwable))
+                            onError.wrapRun(OCastError("Failed to start $name on $friendlyName, there was an error with the DIAL request", throwable))
                         }
                         result.onSuccess {
                             applicationSemaphore = Semaphore(0)
@@ -154,7 +193,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                             if (applicationSemaphore?.tryAcquire(60, TimeUnit.SECONDS) == true && applicationName == name && state == State.CONNECTED) {
                                 onSuccess.wrapRun()
                             } else {
-                                onError.wrapRun(OCastError("Failed to start $name, the web app connected status event was not received"))
+                                onError.wrapRun(OCastError("Failed to start $name on $friendlyName, the web app connected status event was not received"))
                             }
                             applicationSemaphore = null
                         }
@@ -165,10 +204,10 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     }
 
     override fun stopApplication(onSuccess: Runnable, onError: Consumer<OCastError>) {
-        applicationName?.ifNotNull { applicationName ->
+        applicationName.ifNotNull { applicationName ->
             dialClient.stopApplication(applicationName) { result ->
                 result.onFailure { throwable ->
-                    onError.wrapRun(OCastError("Failed to stop $applicationName, there was an error with the DIAL request", throwable))
+                    onError.wrapRun(OCastError("Failed to stop $applicationName on $friendlyName, there was an error with the DIAL request", throwable))
                 }
                 result.onSuccess {
                     isApplicationRunning.set(false)
@@ -176,40 +215,54 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 }
             }
         }.orElse {
-            onError.wrapRun(OCastError("Property applicationName is not defined"))
+            onError.wrapRun(OCastError("Failed to stop application on $friendlyName, property applicationName is not defined"))
         }
     }
 
     override fun connect(sslConfiguration: SSLConfiguration?, onSuccess: Runnable, onError: Consumer<OCastError>) {
         when (state) {
-            State.CONNECTING -> onError.wrapRun(OCastError("Device is already connecting"))
+            State.CONNECTING -> onError.wrapRun(OCastError("Failed to connect to $friendlyName, device is already connecting"))
             State.CONNECTED -> onSuccess.wrapRun()
-            State.DISCONNECTING -> onError.wrapRun(OCastError("Device is disconnecting"))
+            State.DISCONNECTING -> onError.wrapRun(OCastError("Failed to connect to $friendlyName, device is disconnecting"))
             State.DISCONNECTED -> {
-                applicationName?.ifNotNull { applicationName ->
-                    dialClient.getApplication(applicationName) { result ->
-                        val webSocketURL = result.getOrNull()?.additionalData?.webSocketURL ?: settingsWebSocketURL
-                        connect(webSocketURL, sslConfiguration, onSuccess, onError)
-                    }
-                }.orElse {
-                    connect(settingsWebSocketURL, sslConfiguration, onSuccess, onError)
-                }
+                onCreateWebSockets(sslConfiguration, Consumer { webSocketsById ->
+                        this.webSocketsById = webSocketsById
+                        state = State.CONNECTING
+                        connectCallback = RunnableCallback(onSuccess, onError)
+                        webSocketsById.values.forEach { it.connect() }
+                })
             }
         }
-    }
-
-    private fun connect(webSocketURL: URI, sslConfiguration: SSLConfiguration?, onSuccess: Runnable, onError: Consumer<OCastError>) {
-        webSocket = WebSocket(webSocketURL.toString(), sslConfiguration, this)
-        state = State.CONNECTING
-        connectCallback = RunnableCallback(onSuccess, onError)
-        webSocket?.connect()
     }
 
     override fun disconnect(onSuccess: Runnable, onError: Consumer<OCastError>) {
         if (state != State.DISCONNECTING && state != State.DISCONNECTED) {
             state = State.DISCONNECTING
             disconnectCallback = RunnableCallback(onSuccess, onError)
-            webSocket?.disconnect()
+            webSocketsById.values.forEach { it.disconnect() }
+        }
+    }
+
+    /**
+     * Creates all the web sockets.
+     *
+     * Default behaviour creates only one web socket for the reference device.
+     * If you need to override this method to manages multiple web sockets,
+     * then you MUST call `onComplete` with a hash map of the created web sockets indexed by their identifier.
+     *
+     * @param sslConfiguration The SSL configuration if the web sockets to create are secure, or `null` if they are not secure.
+     * @param onComplete The operation called when the web sockets are created.
+     */
+    protected open fun onCreateWebSockets(sslConfiguration: SSLConfiguration?, onComplete: Consumer<HashMap<String, WebSocket>>) {
+        applicationName.ifNotNull { applicationName ->
+            dialClient.getApplication(applicationName) { result ->
+                val webSocketURL = result.getOrNull()?.additionalData?.webSocketURL ?: settingsWebSocketURL
+                val webSocket = WebSocket(webSocketURL.toString(), sslConfiguration, this)
+                onComplete.run(hashMapOf(REFERENCE_WEB_SOCKET_ID to webSocket))
+            }
+        }.orElse {
+            val webSocket = WebSocket(settingsWebSocketURL.toString(), sslConfiguration, this)
+            onComplete.run(hashMapOf(REFERENCE_WEB_SOCKET_ID to webSocket))
         }
     }
 
@@ -223,18 +276,18 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             // Send error callback to all waiting commands
             synchronized(replyCallbacksBySequenceID) {
                 replyCallbacksBySequenceID.forEach { (_, callback) ->
-                    callback.onError.wrapRun(OCastError("Socket has been disconnected", error))
+                    callback.onError.wrapRun(OCastError("Socket with ID ${webSocket.id.orEmpty()} has been disconnected on $friendlyName", error))
                 }
                 replyCallbacksBySequenceID.clear()
             }
-            connectCallback?.ifNotNull { connectCallback ->
-                connectCallback.onError.wrapRun(OCastError("Socket did not connect", error))
+            connectCallback.ifNotNull { connectCallback ->
+                connectCallback.onError.wrapRun(OCastError("Socket with ID ${webSocket.id.orEmpty()} did not connect on $friendlyName", error))
             }
-            disconnectCallback?.ifNotNull { disconnectCallback ->
+            disconnectCallback.ifNotNull { disconnectCallback ->
                 if (error == null) {
                     disconnectCallback.onSuccess.wrapRun()
                 } else {
-                    disconnectCallback.onError.wrapRun(OCastError("Socket did not disconnect properly", error))
+                    disconnectCallback.onError.wrapRun(OCastError("Socket with ID ${webSocket.id.orEmpty()} did not disconnect properly on $friendlyName", error))
                 }
             }
             if (connectCallback == null && disconnectCallback == null) {
@@ -242,30 +295,39 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             }
             connectCallback = null
             disconnectCallback = null
+            // Disconnect all other web sockets if any
+            webSocketsById.values.forEach { otherWebSocket ->
+                if (otherWebSocket != webSocket) {
+                    otherWebSocket.disconnect()
+                }
+            }
         }
     }
 
-    override fun onConnected(webSocket: WebSocket, url: String) {
-        state = State.CONNECTED
-        connectCallback?.onSuccess?.wrapRun()
-        connectCallback = null
+    override fun onConnected(webSocket: WebSocket) {
+        if (webSocketsById.values.all { it.state == WebSocket.State.CONNECTED }) {
+            state = State.CONNECTED
+            connectCallback?.onSuccess?.wrapRun()
+            connectCallback = null
+        }
     }
 
     override fun onDataReceived(webSocket: WebSocket, data: String) {
         var deviceLayer: OCastRawDeviceLayer? = null
+        var replyCallback: ReplyCallback<*>? = null
         try {
             deviceLayer = JsonTools.decode(data)
             when (deviceLayer.type) {
                 OCastRawDeviceLayer.Type.EVENT -> analyzeEvent(deviceLayer)
                 OCastRawDeviceLayer.Type.REPLY -> {
-                    val replyCallback = replyCallbacksBySequenceID[deviceLayer.identifier]
-                    replyCallback?.ifNotNull {
+                    replyCallback = replyCallbacksBySequenceID[deviceLayer.identifier]
+                    replyCallback.ifNotNull {
                         if (deviceLayer.status == OCastRawDeviceLayer.Status.OK) {
                             val replyData = JsonTools.decode<OCastDataLayer<OCastReplyEventParams>>(deviceLayer.message.data)
                             if (replyData.params.code == null || replyData.params.code == OCastError.Status.SUCCESS.code) {
                                 val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-                                val reply = if (replyCallback.replyClass != Unit::class.java) {
-                                    JsonTools.decode(oCastData.params, replyCallback.replyClass)
+                                val reply = if (it.replyClass != Unit::class.java) {
+                                    JsonTools.decode(oCastData.params, it.replyClass)
                                 } else {
                                     Unit
                                 }
@@ -273,19 +335,19 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                                 (it as ReplyCallback<Any?>).onSuccess.wrapRun(reply)
                             } else {
                                 val code = replyData.params.code ?: OCastError.Status.UNKNOWN_ERROR.code
-                                it.onError.wrapRun(OCastError(code, "Command error code ${replyData.params.code}"))
+                                it.onError.wrapRun(OCastError(code, "Socket with ID ${webSocket.id.orEmpty()} received reply with params error code ${replyData.params.code} on $friendlyName"))
                             }
                         } else {
-                            it.onError.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Bad status value ${deviceLayer.status}"))
+                            it.onError.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Socket with ID ${webSocket.id.orEmpty()} received reply with device layer error status ${deviceLayer.status} on $friendlyName"))
                         }
                     }
                 }
                 OCastRawDeviceLayer.Type.COMMAND -> {}
             }
         } catch (e: Exception) {
-            OCastLog.error(e) { "Receive a bad formatted message: $data" }
+            replyCallback?.onError?.wrapRun(OCastError(OCastError.Status.DECODE_ERROR.code, "Socket with ID ${webSocket.id.orEmpty()} received a bad formatted message on $friendlyName: $data"))
         } finally {
-            deviceLayer?.ifNotNull {
+            deviceLayer.ifNotNull {
                 // Remove callback
                 replyCallbacksBySequenceID.remove(it.identifier)
             }
@@ -296,11 +358,17 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
 
     //region Events
 
+    /**
+     * Checks if the specified device layer embeds an OCast event.
+     *
+     * @param deviceLayer The device layer to analyze.
+     * @throws Exception If an error occurs while analyzing the device layer.
+     */
     @Throws(Exception::class)
     private fun analyzeEvent(deviceLayer: OCastRawDeviceLayer) {
         val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
         when (deviceLayer.message.service) {
-            SERVICE_APPLICATION -> {
+            Service.APPLICATION -> {
                 when (JsonTools.decode<WebAppConnectedStatusEvent>(oCastData.params).status) {
                     WebAppStatus.CONNECTED -> {
                         isApplicationRunning.set(true)
@@ -310,21 +378,21 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                     else -> {}
                 }
             }
-            SERVICE_MEDIA -> {
+            Service.MEDIA -> {
                 when (oCastData.name) {
-                    EVENT_MEDIA_PLAYBACK_STATUS -> {
+                    Event.Media.PLAYBACK_STATUS -> {
                         val playbackStatus = JsonTools.decode<MediaPlaybackStatus>(oCastData.params)
                         eventListener?.onMediaPlaybackStatus(this, playbackStatus)
                     }
-                    EVENT_MEDIA_METADATA_CHANGED -> {
+                    Event.Media.METADATA_CHANGED -> {
                         val metadataChanged = JsonTools.decode<MediaMetadata>(oCastData.params)
                         eventListener?.onMediaMetadataChanged(this, metadataChanged)
                     }
                 }
             }
-            SERVICE_SETTINGS_DEVICE -> {
+            SettingsService.DEVICE -> {
                 when (oCastData.name) {
-                    EVENT_DEVICE_UPDATE_STATUS -> {
+                    Event.Device.UPDATE_STATUS -> {
                         val updateStatus = JsonTools.decode<UpdateStatus>(oCastData.params)
                         eventListener?.onUpdateStatus(this, updateStatus)
                     }
@@ -425,23 +493,31 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         val id = generateSequenceID()
         try {
             replyCallbacksBySequenceID[id] = ReplyCallback(replyClass, onSuccess, onError)
-            val deviceLayer = OCastCommandDeviceLayer(clientUuid, domain.value, OCastRawDeviceLayer.Type.COMMAND, id, message)
+            val deviceLayer = OCastCommandDeviceLayer(clientUuid, domain.value, id, message)
             val deviveLayerString = JsonTools.encode(deviceLayer)
             // Do not start application when sending settings commands
             sendToWebSocket(id, deviveLayerString, domain == OCastDomain.BROWSER, onError)
         } catch (exception: Exception) {
             replyCallbacksBySequenceID.remove(id)
-            onError.wrapRun(OCastError("Unable to get string from data", exception))
+            onError.wrapRun(OCastError("Failed to send message on $friendlyName, unable to encode device layer", exception))
         }
     }
 
     //endregion
 
+    /**
+     * Sends a message on the web socket.
+     *
+     * @param id The identifier of the message to send.
+     * @param message The message to send.
+     * @param startApplicationIfNeeded Indicates if the web application should be started before sending the message.
+     * @param onError The operation executed if there was an error while sending the message.
+     */
     protected fun sendToWebSocket(id: Long, message: String, startApplicationIfNeeded: Boolean, onError: Consumer<OCastError>) {
         val send = {
-            if (webSocket?.send(message) == false) {
+            if (webSocketsById[REFERENCE_WEB_SOCKET_ID]?.send(message) == false) {
                 replyCallbacksBySequenceID.remove(id)
-                onError.wrapRun(OCastError("Unable to send message"))
+                onError.wrapRun(OCastError("Failed to send message on $friendlyName, socket with ID REFERENCE_WEB_SOCKET_ID could not send data"))
             }
         }
 
@@ -456,10 +532,22 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         }
     }
 
+    /**
+     * Generates a message identifier.
+     *
+     * @return The message identifier.
+     */
     protected fun generateSequenceID(): Long {
         if (sequenceID.get() == Long.MAX_VALUE) {
             sequenceID.set(0)
         }
         return sequenceID.incrementAndGet()
     }
+
+    /** Returns the identifier of a web socket, or `null` if it could not be found. */
+    private val WebSocket.id: String?
+        get() = webSocketsById
+            .entries
+            .firstOrNull { it.value == this }
+            ?.key
 }

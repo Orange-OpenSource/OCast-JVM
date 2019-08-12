@@ -19,7 +19,7 @@ package org.ocast.sdk.core.wrapper
 import org.ocast.sdk.core.models.Consumer
 
 /**
- * This interface is implemented by classes which have a callback wrapper.
+ * This interface is implemented by classes which have a [CallbackWrapper].
  */
 internal interface CallbackWrapperOwner {
 
@@ -29,6 +29,7 @@ internal interface CallbackWrapperOwner {
     /**
      * Wraps and invokes the lambda.
      *
+     * @param T The type of the lambda parameter.
      * @param param The parameter passed to the invoked method of the wrapped lambda.
      */
     @JvmDefault
@@ -39,6 +40,7 @@ internal interface CallbackWrapperOwner {
     /**
      * Wraps and runs the [Consumer].
      *
+     * @param T The type of the [Consumer] parameter.
      * @param param The parameter passed to the run method of the wrapped [Consumer].
      */
     @JvmDefault
@@ -55,8 +57,9 @@ internal interface CallbackWrapperOwner {
     }
 
     /**
-     * Wraps and performs the given [action] for each element in the sequence.
+     * Wraps and performs the given [action] for each element in the [Iterable].
      *
+     * @param T The type of the objects contained in the [Iterable].
      * @param action The lambda to wrap and perform.
      */
     @JvmDefault

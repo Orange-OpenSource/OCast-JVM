@@ -18,8 +18,10 @@ jobs:
     - stage: verification
       name: Kotlin linter
       script: ./gradlew ktlint
+    - name: Java linter
+      script: ./gradlew checkstyleMain
     - name: Unit tests
-      script: ./gradlew :ocast.sdk:test
+      script: ./gradlew :sdk:test
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/

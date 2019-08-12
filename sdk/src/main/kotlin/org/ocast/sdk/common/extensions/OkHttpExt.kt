@@ -17,19 +17,20 @@
 package org.ocast.sdk.common.extensions
 
 import java.io.IOException
-import javax.xml.ws.http.HTTPException
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Headers
 import okhttp3.Response
+import org.ocast.sdk.common.models.HttpException
 
 /**
  * Schedules the OkHttp request to be executed at some point in the future.
+ *
  * This method is a convenience method which allows to write OkHttp calls in a more Kotlin way using [Result] and lambdas.
  *
  * @param onComplete The lambda that will be called when the request is completed.
  */
-fun Call.enqueue(onComplete: (Result<Response>) -> Unit) {
+internal fun Call.enqueue(onComplete: (Result<Response>) -> Unit) {
     enqueue(object : Callback {
 
         override fun onFailure(call: Call, e: IOException) {
@@ -40,7 +41,7 @@ fun Call.enqueue(onComplete: (Result<Response>) -> Unit) {
             if (response.isSuccessful) {
                 onComplete(Result.success(response))
             } else {
-                onComplete(Result.failure(HTTPException(response.code())))
+                onComplete(Result.failure(HttpException(response.code())))
             }
         }
     })
@@ -48,10 +49,11 @@ fun Call.enqueue(onComplete: (Result<Response>) -> Unit) {
 
 /**
  * Converts [Headers] to a map.
- * [Headers] already has a toMultimap() method but the drawback is that it turns names to lowercase.
+ *
+ * [Headers] already has a `toMultimap()` method but the drawback is that it turns names to lowercase.
  *
  * @return The map of headers, where values are indexed by their names. Multiple values for a given name are separated by commas.
  */
-fun Headers.toMap(): Map<String, String> {
+internal fun Headers.toMap(): Map<String, String> {
     return names().associateWith { values(it).joinToString(",") }
 }

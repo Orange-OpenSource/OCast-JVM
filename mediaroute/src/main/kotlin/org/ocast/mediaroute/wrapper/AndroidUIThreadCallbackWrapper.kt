@@ -23,9 +23,10 @@ import org.ocast.sdk.core.wrapper.CallbackWrapper
 
 /**
  * This class is an implementation of [CallbackWrapper] for Android.
- * It wraps [Consumer]s and [Runnable]s to run them on the main thread.
+ *
+ * It wraps instances of [Consumer] and [Runnable] to run them on the main thread.
  */
-class AndroidUIThreadCallbackWrapper : CallbackWrapper {
+internal class AndroidUIThreadCallbackWrapper : CallbackWrapper {
 
     /** A handler on the main thread. */
     private val mainHandler = Handler(Looper.getMainLooper())

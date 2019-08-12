@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-package org.ocast.mediaroute.models
+package org.ocast.sdk.common.models
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
-import org.ocast.sdk.core.Device
+import java.lang.Exception
 
-@Parcelize
-data class MediaRouteDevice(
-    var upnpID: String,
-    var friendlyName: String,
-    var manufacturer: String,
-    var modelName: String
-) : Parcelable {
-
-    companion object {
-        const val EXTRA_DEVICE = "org.ocast.mediaroute.extra.DEVICE"
-    }
-
-    constructor(device: Device) : this(device.upnpID, device.friendlyName, device.manufacturer, device.modelName)
-}
+/**
+ * Represents an HTTP error.
+ *
+ * @property statusCode The HTTP status code.
+ * @constructor Creates an instance of [HttpException].
+ */
+class HttpException(val statusCode: Int) : Exception()

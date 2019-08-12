@@ -27,7 +27,8 @@ import org.ocast.sdk.dial.models.DialError
 /**
  * Instances of this class handle DIAL requests.
  *
- * @param baseURL The base URL of the DIAL service.
+ * @property baseURL The base URL of the DIAL service.
+ * @constructor Creates an instance of [DialClient].
  */
 internal class DialClient(private val baseURL: URL) {
 
@@ -78,7 +79,7 @@ internal class DialClient(private val baseURL: URL) {
                         onComplete(Result.failure(exception))
                     }
                 } else {
-                    onComplete(Result.failure(DialError("Could not stop application $name")))
+                    onComplete(Result.failure(DialError("Could not stop application $name on host ${baseURL.host}")))
                 }
             }
         }
@@ -86,6 +87,7 @@ internal class DialClient(private val baseURL: URL) {
 
     /**
      * Retrieves information about a DIAL application.
+     *
      * This method launches an application information request.
      *
      * @param name The name of the application to retrieve information from.

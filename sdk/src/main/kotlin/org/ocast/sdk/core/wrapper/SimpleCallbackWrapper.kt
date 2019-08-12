@@ -19,7 +19,9 @@ package org.ocast.sdk.core.wrapper
 import org.ocast.sdk.core.models.Consumer
 
 /**
- * This class is a simple implementation of a [CallbackWrapper].
+ * This class is a simple implementation of [CallbackWrapper].
+ *
+ * It does nothing else than returning consumers and runnables as they are.
  */
 class SimpleCallbackWrapper : CallbackWrapper {
 
