@@ -1,8 +1,6 @@
 org.ocast.mediaroute
-org.ocast.mediaroute.wrapper
 org.ocast.sdk.common.extensions
 org.ocast.sdk.common.models
-org.ocast.sdk.common.utils
 org.ocast.sdk.core
 org.ocast.sdk.core.models
 org.ocast.sdk.core.utils
