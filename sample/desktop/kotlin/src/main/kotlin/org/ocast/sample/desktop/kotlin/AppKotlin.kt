@@ -33,6 +33,7 @@ import org.ocast.sdk.core.utils.OCastLog
 class AppKotlin : EventListener, DeviceListener {
 
     companion object {
+
         @JvmStatic
         fun main(args: Array<String>) {
             val main = AppKotlin()
@@ -42,7 +43,6 @@ class AppKotlin : EventListener, DeviceListener {
 
     private val latch = CountDownLatch(1)
     private val logger = Logger.getLogger("sampleAppKotlin")
-
     private val deviceCenter = DeviceCenter()
 
     init {
@@ -57,9 +57,9 @@ class AppKotlin : EventListener, DeviceListener {
             logger.log(Level.INFO, "Application launched")
             deviceCenter.resumeDiscovery()
             latch.await()
-        } catch (e: Exception) {
+        } catch (exception: Exception) {
             deviceCenter.stopDiscovery()
-            logger.log(Level.WARNING, "error:", e)
+            logger.log(Level.SEVERE, "error:", exception)
             Thread.currentThread().interrupt()
         }
 
@@ -74,8 +74,8 @@ class AppKotlin : EventListener, DeviceListener {
                     { prepareMedia(device) },
                     { logger.log(Level.WARNING, "startApplication error: ${it.message}") }
                 )
-            }, { oCastError ->
-                logger.log(Level.WARNING, "connect error: ${oCastError.message}")
+            }, { error ->
+                logger.log(Level.WARNING, "connect error: ${error.message}")
             }
         )
     }
@@ -95,7 +95,7 @@ class AppKotlin : EventListener, DeviceListener {
     }
 
     override fun onMediaPlaybackStatus(device: Device, mediaPlaybackStatus: MediaPlaybackStatus) {
-        logger.log(Level.INFO, "[{${device.friendlyName}}] onMediaPlaybackStatus: progress=${mediaPlaybackStatus.position} state=${mediaPlaybackStatus.state}")
+        logger.log(Level.INFO, "[${device.friendlyName}] onMediaPlaybackStatus: position=${mediaPlaybackStatus.position} state=${mediaPlaybackStatus.state}")
     }
 
     override fun onDevicesAdded(devices: List<Device>) {
