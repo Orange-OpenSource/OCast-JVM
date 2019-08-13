@@ -334,8 +334,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                                 @Suppress("UNCHECKED_CAST")
                                 (it as ReplyCallback<Any?>).onSuccess.wrapRun(reply)
                             } else {
-                                val code = replyData.params.code ?: OCastError.Status.UNKNOWN_ERROR.code
-                                it.onError.wrapRun(OCastError(code, "Socket with ID ${webSocket.id.orEmpty()} received reply with params error code ${replyData.params.code} on $friendlyName"))
+                                it.onError.wrapRun(OCastError(replyData.params.code, "Socket with ID ${webSocket.id.orEmpty()} received reply with params error code ${replyData.params.code} on $friendlyName"))
                             }
                         } else {
                             it.onError.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Socket with ID ${webSocket.id.orEmpty()} received reply with device layer error status ${deviceLayer.status} on $friendlyName"))
