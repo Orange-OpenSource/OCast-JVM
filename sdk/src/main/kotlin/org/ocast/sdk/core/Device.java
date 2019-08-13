@@ -47,6 +47,8 @@ import org.ocast.sdk.discovery.models.UpnpDevice;
  */
 public abstract class Device implements CallbackWrapperOwner, Serializable {
 
+    private static final long serialVersionUID = 1;
+
     /**
      * Represents the state of an OCast device.
      */

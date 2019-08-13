@@ -16,5 +16,10 @@ checkstyle {
     maxWarnings = 0
 }
 
+compileJava {
+    // -classfile disables unexplained warnings which seems to be related to Kotlin and Java interoperability
+    options.compilerArgs << "-Xlint:all,-classfile" << "-Werror"
+}
+
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
