@@ -52,11 +52,6 @@ class OCastLog {
         internal val tag: String
             get() = callingStackFrame?.className.orEmpty()
 
-        /** The name of the method which called an [OCastLog] method. */
-        @PublishedApi
-        internal val methodName: String
-            get() = callingStackFrame?.methodName.orEmpty()
-
         /** The calling stack frame. */
         private val callingStackFrame: StackTraceElement?
             get() = Thread
@@ -111,7 +106,7 @@ class OCastLog {
         @PublishedApi
         internal inline fun log(level: Level, throwable: Throwable?, message: () -> String) {
             if (DEBUG && this.level.loggerLevel.intValue() <= level.loggerLevel.intValue()) {
-                Logger.getLogger(tag).log(level.loggerLevel, "$tag: $methodName: ${message()}", throwable)
+                Logger.getLogger(tag).log(level.loggerLevel, message(), throwable)
             }
         }
     }
