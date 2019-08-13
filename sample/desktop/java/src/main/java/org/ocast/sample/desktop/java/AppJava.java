@@ -16,9 +16,11 @@
 
 package org.ocast.sample.desktop.java;
 
+import java.io.FileInputStream;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.ocast.sdk.core.Device;
@@ -47,6 +49,12 @@ public class AppJava implements EventListener, DeviceListener {
         deviceCenter.addDeviceListener(this);
         deviceCenter.addEventListener(this);
         deviceCenter.registerDevice(ReferenceDevice.class);
+        try {
+            FileInputStream inputStream = new FileInputStream("logging.properties");
+            LogManager.getLogManager().readConfiguration(inputStream);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
         OCastLog.setLevel(OCastLog.Level.ALL);
     }
 

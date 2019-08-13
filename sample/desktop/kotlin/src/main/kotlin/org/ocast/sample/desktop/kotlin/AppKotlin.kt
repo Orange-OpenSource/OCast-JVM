@@ -16,8 +16,10 @@
 
 package org.ocast.sample.desktop.kotlin
 
+import java.io.FileInputStream
 import java.util.concurrent.CountDownLatch
 import java.util.logging.Level
+import java.util.logging.LogManager
 import java.util.logging.Logger
 import kotlin.system.exitProcess
 import org.ocast.sdk.core.Device
@@ -49,6 +51,12 @@ class AppKotlin : EventListener, DeviceListener {
         deviceCenter.addEventListener(this)
         deviceCenter.addDeviceListener(this)
         deviceCenter.registerDevice(ReferenceDevice::class.java)
+        try {
+            val inputStream = FileInputStream("logging.properties")
+            LogManager.getLogManager().readConfiguration(inputStream)
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+        }
         OCastLog.level = OCastLog.Level.ALL
     }
 

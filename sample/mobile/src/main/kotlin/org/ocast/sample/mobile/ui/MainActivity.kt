@@ -37,6 +37,8 @@ import org.ocast.sdk.core.models.Media
 import org.ocast.sdk.core.models.MediaMetadata
 import org.ocast.sdk.core.models.MediaPlaybackStatus
 import org.ocast.sdk.core.models.PrepareMediaCommandParams
+import org.ocast.sdk.core.utils.OCastLog
+import java.util.logging.LogManager
 
 class MainActivity : AppCompatActivity(), EventListener {
 
@@ -58,6 +60,13 @@ class MainActivity : AppCompatActivity(), EventListener {
             viewModel = mainViewModel
         }
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+        try {
+            val inputStream = resources.openRawResource(R.raw.logging)
+            LogManager.getLogManager().readConfiguration(inputStream)
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+        }
+        OCastLog.level = OCastLog.Level.ALL
         OCastMediaRouteHelper.initialize(this, listOf(ReferenceDevice::class.java))
     }
 
