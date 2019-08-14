@@ -123,19 +123,39 @@ class OCastLog {
      */
     enum class Level(@PublishedApi internal val loggerLevel: java.util.logging.Level) {
 
-        /** Indicates that the log message will not be displayed. */
+        /**
+         * Indicates that the log message will not be displayed.
+         *
+         * This level corresponds to [java.util.logging.Level.OFF].
+         */
         OFF(java.util.logging.Level.OFF),
 
-        /** Indicates that the log is an error message. */
+        /**
+         *  Indicates that the log is an error message.
+         *
+         *  This level corresponds to [java.util.logging.Level.SEVERE].
+         */
         ERROR(java.util.logging.Level.SEVERE),
 
-        /** Indicates that the log is an informational message. */
+        /**
+         * Indicates that the log is an informational message.
+         *
+         * This level corresponds to [java.util.logging.Level.INFO].
+         */
         INFO(java.util.logging.Level.INFO),
 
-        /** Indicates that the log is a debug message. */
+        /**
+         *  Indicates that the log is a debug message.
+         *
+         *  This level corresponds to [java.util.logging.Level.FINEST].
+         */
         DEBUG(java.util.logging.Level.FINEST),
 
-        /** Indicates that the log message is always displayed. */
+        /**
+         * Indicates that the log message is always displayed.
+         *
+         * This level corresponds to [java.util.logging.Level.ALL].
+         */
         ALL(java.util.logging.Level.ALL);
     }
 }

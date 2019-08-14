@@ -446,6 +446,20 @@ The Android media route module automatically sets the `discoverInterval` propert
 
 Both Java and Kotlin desktop sample applications as well as a Kotlin Android application are available.
 
+## Logs
+
+The Orange OCast SDK includes specific log messages which can be enabled by changing the `DEBUG` constant of the `OCastLog.Companion` class to `true` and by recompiling the SDK.
+
+These logs rely on the native Java logging framework, thus you will need to configure the log level of your handlers. If you are working on Android, you will also need to type the following command in a terminal to enable logs with level lower than `INFO`:
+
+```
+adb shell setprop log.tag.WebSocket VERBOSE
+```
+
+Where `WebSocket` should be replaced by the name of the class which contains the logs to display.
+
+Please note that logs are not enabled on [JFrog Bintray](https://bintray.com/orange-opensource/maven) releases.
+
 ## Author
 
 Orange
