@@ -16,7 +16,6 @@
 
 package org.ocast.sdk.core.models
 
-import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
@@ -168,11 +167,7 @@ class OCastRawDeviceLayer(
         @JsonProperty("forbidden_unsecure_mode ") FORBIDDEN_UNSECURE_MODE,
 
         /** There is an internal error. */
-        @JsonProperty("internal_error") INTERNAL_ERROR,
-
-        /** The status is unknown. */
-        @JsonEnumDefaultValue
-        @JsonProperty("unknown") UNKNOWN
+        @JsonProperty("internal_error") INTERNAL_ERROR
     }
 
     /**
