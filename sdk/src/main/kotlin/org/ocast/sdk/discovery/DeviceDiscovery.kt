@@ -115,6 +115,7 @@ internal class DeviceDiscovery constructor(
             if (!socket.isClosed) {
                 refreshDevices()
             }
+            OCastLog.info { "Set discovery interval to $field" }
         }
 
     /** The current discovery state. */
@@ -149,11 +150,14 @@ internal class DeviceDiscovery constructor(
                 socket.open()
                 state = State.RUNNING
                 refreshDevices()
+                OCastLog.info { "Discovery resumed" }
                 true
             } catch (exception: IOException) {
+                OCastLog.error(exception) { "Failed to resume discovery" }
                 false
             }
         } else {
+            OCastLog.info { "Discovery already resumed" }
             false
         }
     }
@@ -169,8 +173,10 @@ internal class DeviceDiscovery constructor(
         return if (state != State.STOPPED) {
             state = State.STOPPED
             stop(true)
+            OCastLog.info { "Discovery stopped" }
             true
         } else {
+            OCastLog.info { "Discovery already stopped" }
             false
         }
     }
@@ -186,8 +192,10 @@ internal class DeviceDiscovery constructor(
         return if (state == State.RUNNING) {
             state = State.PAUSED
             stop(false)
+            OCastLog.info { "Discovery paused" }
             true
         } else {
+            OCastLog.info { "Discovery already paused" }
             false
         }
     }
@@ -210,6 +218,9 @@ internal class DeviceDiscovery constructor(
             ssdpDatesByUuid.clear()
             devicesByUuid.clear()
             if (devices.isNotEmpty()) {
+                devices.forEach { upnpDevice ->
+                    OCastLog.info { "Removed UPnP device ${upnpDevice.friendlyName}" }
+                }
                 listener?.onDevicesRemoved(devices)
             }
             listener?.onDiscoveryStopped(error)
@@ -242,7 +253,7 @@ internal class DeviceDiscovery constructor(
                 try {
                     socket.send(request.data, SSDP_MULTICAST_ADDRESS, SSDP_MULTICAST_PORT)
                 } catch (exception: IOException) {
-                    OCastLog.error(exception) { "Could not send SSDP M-SEARCH request" }
+                    OCastLog.error(exception) { "Failed to send SSDP M-SEARCH request" }
                 }
             }
         }
@@ -277,11 +288,11 @@ internal class DeviceDiscovery constructor(
         }
 
         if (devicesByUuidToRemove.isNotEmpty()) {
-            devicesByUuidToRemove.keys.forEach {
-                devicesByUuid.remove(it)
-                ssdpDatesByUuid.remove(it)
+            devicesByUuidToRemove.entries.forEach { entry ->
+                devicesByUuid.remove(entry.key)
+                ssdpDatesByUuid.remove(entry.key)
+                OCastLog.info { "Removed UPnP device ${entry.value.friendlyName}" }
             }
-
             listener?.onDevicesRemoved(devicesByUuidToRemove.values.toList())
         }
     }
@@ -302,9 +313,11 @@ internal class DeviceDiscovery constructor(
                             val existingDevice = devicesByUuid[uuid]
                             if (existingDevice == null) {
                                 devicesByUuid[uuid] = device
+                                OCastLog.info { "Added UPnP device ${device.friendlyName}" }
                                 listener?.onDevicesAdded(listOf(device))
                             } else if (device != existingDevice) {
                                 devicesByUuid[uuid] = device
+                                OCastLog.info { "UPnP device ${device.friendlyName} changed" }
                                 listener?.onDevicesChanged(listOf(device))
                             }
                             return@onSuccess
@@ -366,6 +379,7 @@ internal class DeviceDiscovery constructor(
         override fun onSocketClosed(socket: UDPSocket, error: Throwable?) {
             if (error != null) {
                 stop(true, error)
+                OCastLog.error(error) { "Discovery stopped unexpectedly" }
             }
         }
     }

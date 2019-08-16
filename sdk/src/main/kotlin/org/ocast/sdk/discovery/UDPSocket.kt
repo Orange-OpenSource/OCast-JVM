@@ -23,6 +23,7 @@ import java.net.MulticastSocket
 import java.net.SocketException
 import kotlin.concurrent.thread
 import org.ocast.sdk.common.extensions.orTrue
+import org.ocast.sdk.core.utils.OCastLog
 
 /**
  * This class represents a UDP socket.
@@ -66,6 +67,7 @@ internal open class UDPSocket(private val port: Short = 0) {
     fun open() {
         if (socket == null || socket?.isClosed == true) {
             socket = createSocket(port)
+            OCastLog.debug { "UDP socket with port $port is opened" }
             startReceiverThread()
         }
     }
@@ -77,6 +79,7 @@ internal open class UDPSocket(private val port: Short = 0) {
         receiverThread = null
         // Closing the socket will terminate the receiver thread
         socket?.close()
+        OCastLog.debug { "UDP socket with port $port is closed" }
     }
 
     /**
@@ -90,12 +93,15 @@ internal open class UDPSocket(private val port: Short = 0) {
     @Throws(IOException::class)
     open fun send(payload: ByteArray, host: String, port: Short) {
         if (socket == null) {
-            throw SocketException("Socket is not opened")
+            throw SocketException("Socket is not opened").also { exception ->
+                OCastLog.error(exception) { "Failed to send payload on UDP socket with port $port" }
+            }
         }
 
         val address = InetAddress.getByName(host)
         val packet = DatagramPacket(payload, payload.size, address, port.toInt())
         socket?.send(packet)
+        OCastLog.debug { "Sent payload on UDP socket with port $port:\n${String(payload)}" }
     }
 
     /**
@@ -117,17 +123,23 @@ internal open class UDPSocket(private val port: Short = 0) {
                 try {
                     val buffer = ByteArray(RECEIVER_BUFFER_SIZE)
                     val packet = DatagramPacket(buffer, buffer.size)
-
                     while (true) {
                         socket?.receive(packet)
                         // Take only the needed bytes because packet is reused and old data could be appended at the end
                         val data = packet.data.take(packet.length).toByteArray()
+                        OCastLog.debug { "Received data on UDP socket with port $port:\n${String(data)}" }
                         listener?.onDataReceived(this, data, packet.address.hostName)
                     }
                 } catch (exception: SocketException) {
                     val error = if (socket?.isClosed == true) null else exception
+                    if (error != null) {
+                        OCastLog.error(exception) { "UDP socket with port $port did close" }
+                    } else {
+                        OCastLog.debug { "UDP socket with port $port did close successfully" }
+                    }
                     listener?.onSocketClosed(this, error)
                 } catch (exception: IOException) {
+                    OCastLog.error(exception) { "UDP socket with port $port did close" }
                     listener?.onSocketClosed(this, exception)
                 }
             }

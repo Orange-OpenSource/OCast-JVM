@@ -154,3 +154,24 @@ class OCastLog {
         ALL(java.util.logging.Level.ALL);
     }
 }
+
+/**
+ * An interface implemented by errors which can be logged using the OCast logs.
+ */
+interface LoggableError {
+
+    /** The error message. */
+    val message: String?
+
+    /** The cause of the error, if any. */
+    val cause: Throwable?
+}
+
+/**
+ * Logs an error.
+ *
+ * @param T The type of the loggable error.
+ */
+fun <T> T.log(): T where T : LoggableError {
+    return also { OCastLog.error(cause) { message.orEmpty() } }
+}
