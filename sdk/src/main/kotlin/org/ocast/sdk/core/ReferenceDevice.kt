@@ -374,7 +374,6 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                         applicationSemaphore?.release()
                     }
                     WebAppStatus.DISCONNECTED -> isApplicationRunning.set(false)
-                    else -> {}
                 }
             }
             Service.MEDIA -> {

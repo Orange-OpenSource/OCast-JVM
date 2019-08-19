@@ -17,7 +17,6 @@
 
 package org.ocast.sdk.core.models
 
-import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 import com.fasterxml.jackson.annotation.JsonProperty
 
 /**
@@ -39,9 +38,5 @@ enum class WebAppStatus {
     @JsonProperty("connected") CONNECTED,
 
     /** The web app is disconnected from the web socket server. */
-    @JsonProperty("disconnected") DISCONNECTED,
-
-    /** The web app status is unknown. */
-    @JsonEnumDefaultValue
-    @JsonProperty("unknown") UNKNOWN
+    @JsonProperty("disconnected") DISCONNECTED
 }
