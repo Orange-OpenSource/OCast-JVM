@@ -45,7 +45,7 @@ class OCastLog {
         var level = Level.OFF
 
         /** The list of FQCNs (Fully Qualified Class Names) that should be ignored when parsing the stacktrace to get the log tag.  */
-        private val fqcnIgnore = listOf(Thread::class.java.name, Companion::class.java.name, OCastLog::class.java.name)
+        private val fqcnIgnore = listOf(Thread::class.java.name, Companion::class.java.name, OCastLog::class.java.name, "dalvik.system.VMStack")
 
         /** The log tag. */
         @PublishedApi
