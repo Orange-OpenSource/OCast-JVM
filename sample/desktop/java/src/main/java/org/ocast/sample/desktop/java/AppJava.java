@@ -16,9 +16,11 @@
 
 package org.ocast.sample.desktop.java;
 
+import java.io.FileInputStream;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.ocast.sdk.core.Device;
@@ -35,7 +37,6 @@ public class AppJava implements EventListener, DeviceListener {
 
     private final CountDownLatch latch = new CountDownLatch(1);
     private final Logger logger = Logger.getLogger("sampleAppJava");
-
     private final DeviceCenter deviceCenter;
 
     public static void main(String[] args) {
@@ -48,6 +49,12 @@ public class AppJava implements EventListener, DeviceListener {
         deviceCenter.addDeviceListener(this);
         deviceCenter.addEventListener(this);
         deviceCenter.registerDevice(ReferenceDevice.class);
+        try {
+            FileInputStream inputStream = new FileInputStream("logging.properties");
+            LogManager.getLogManager().readConfiguration(inputStream);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
         OCastLog.setLevel(OCastLog.Level.ALL);
     }
 
@@ -56,9 +63,9 @@ public class AppJava implements EventListener, DeviceListener {
             logger.log(Level.INFO, "Application launched");
             deviceCenter.resumeDiscovery();
             latch.await();
-        } catch (Exception e) {
+        } catch (Exception exception) {
             deviceCenter.stopDiscovery();
-            logger.log(Level.WARNING, "error:", e);
+            logger.log(Level.SEVERE, "error:", exception);
             Thread.currentThread().interrupt();
         }
         System.exit(0);
@@ -70,9 +77,9 @@ public class AppJava implements EventListener, DeviceListener {
             null,
             () -> device.startApplication(
                 () -> prepareMedia(device),
-                ocastError -> logger.log(Level.WARNING, "startApplication error: " + ocastError.getMessage())
+                error -> logger.log(Level.WARNING, "startApplication error: " + error.getMessage())
             ),
-            ocastError -> logger.log(Level.WARNING, "connect error: " + ocastError.getMessage())
+            error -> logger.log(Level.WARNING, "connect error: " + error.getMessage())
         );
     }
 
@@ -91,19 +98,19 @@ public class AppJava implements EventListener, DeviceListener {
             params,
             null,
             () -> {},
-            ocastError -> logger.log(Level.WARNING, "prepareMedia error: " + ocastError.getStatus())
+            error -> logger.log(Level.WARNING, "prepareMedia error: " + error.getStatus())
         );
     }
 
     @Override
     public void onMediaPlaybackStatus(@NotNull Device device, @NotNull MediaPlaybackStatus mediaPlaybackStatus) {
-        logger.log(Level.INFO, "[" + device.getFriendlyName() + "]" + "onMediaPlaybackStatus: progress=" + mediaPlaybackStatus.getPosition() + " state=" + mediaPlaybackStatus.getState());
+        logger.log(Level.INFO, "[" + device.getFriendlyName() + "]" + "onMediaPlaybackStatus: position=" + mediaPlaybackStatus.getPosition() + " state=" + mediaPlaybackStatus.getState());
     }
 
     @Override
     public void onDevicesAdded(@NotNull List<? extends Device> devices) {
         for (Device device : devices) {
-            logger.log(Level.INFO, "onDeviceAdded: " + device.getFriendlyName() + "]");
+            logger.log(Level.INFO, "onDeviceAdded: " + device.getFriendlyName());
             startApplication(device);
         }
     }
