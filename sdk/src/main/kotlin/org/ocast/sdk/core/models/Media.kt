@@ -111,7 +111,7 @@ class SetMediaVolumeCommandParams(
 class SetMediaTrackCommandParams(
     @JsonProperty("type") val type: Type,
     @JsonProperty("trackId") val trackID: String,
-    @get:JsonIgnore @field:JsonProperty("enable") val isEnabled: Boolean
+    @get:JsonIgnore @field:JsonProperty("enabled") val isEnabled: Boolean
 ) : OCastCommandParams("track") {
 
     /**
