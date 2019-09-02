@@ -41,7 +41,7 @@ interface ErrorStatus {
          * @return An enum value corresponding to the given error code.
          */
         inline fun <reified T> fromCode(code: Int): T where T : Enum<T>, T : ErrorStatus {
-            return enumValues<T>().firstOrNull { it.code == code }.orElse { enumValueOf<T>("UNKNOWN_ERROR") }
+            return enumValues<T>().firstOrNull { it.code == code }.orElse { enumValueOf("UNKNOWN_ERROR") }
         }
     }
 }
@@ -61,7 +61,7 @@ data class OCastError(val code: Int, val message: String, val throwable: Throwab
      * @property throwable The throwable associated with the error, if any.
      * @constructor Creates an [OCastError] with a `CLIENT_ERROR` status.
      */
-    constructor(message: String, throwable: Throwable? = null) : this(OCastError.Status.CLIENT_ERROR.code, message, throwable)
+    constructor(message: String, throwable: Throwable? = null) : this(Status.CLIENT_ERROR.code, message, throwable)
 
     /**
      * Represents the status of an [OCastError].
