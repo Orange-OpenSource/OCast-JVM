@@ -276,7 +276,10 @@ class Media {
         @JsonProperty("image") IMAGE,
 
         /** The media is a video. */
-        @JsonProperty("video") VIDEO
+        @JsonProperty("video") VIDEO,
+
+        /** The media is unknown. */
+        @JsonProperty("unknown") UNKNOWN
     }
 
     /**
