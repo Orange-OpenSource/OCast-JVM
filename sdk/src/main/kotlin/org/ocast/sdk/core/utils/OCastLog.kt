@@ -160,7 +160,7 @@ class OCastLog {
  */
 interface LoggableError {
 
-    /** The error message. */
+    /** The error message, if any. */
     val message: String?
 
     /** The cause of the error, if any. */

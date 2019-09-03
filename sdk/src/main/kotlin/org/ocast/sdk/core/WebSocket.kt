@@ -117,7 +117,7 @@ open class WebSocket(val webSocketURL: String, private val sslConfiguration: SSL
                 true
             } else {
                 state = State.DISCONNECTED
-                OCastLog.error { "Failed to properly disconnect web socket with URL $webSocketURL" }
+                OCastLog.error { "Failed to disconnect web socket with URL $webSocketURL" }
                 listener.onDisconnected(this, null)
                 false
             }

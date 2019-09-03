@@ -304,9 +304,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 }
             }
             if (connectCallback == null && disconnectCallback == null) {
-                with("Disconnected from $friendlyName") {
-                    if (error != null) OCastLog.error(error) { this } else OCastLog.info { this }
-                }
+                if (error != null) OCastLog.error(error) { "Disconnected from $friendlyName" } else OCastLog.info { "Disconnected from $friendlyName" }
                 deviceListener?.onDeviceDisconnected(this, error)
             }
             connectCallback = null
@@ -362,7 +360,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 OCastRawDeviceLayer.Type.COMMAND -> {}
             }
         } catch (e: Exception) {
-            replyCallback?.onError?.wrapRun(OCastError(OCastError.Status.DECODE_ERROR.code, "Received a bad formatted message from $friendlyName:\n${data.prependIndent()}"))
+            replyCallback?.onError?.wrapRun(OCastError(OCastError.Status.DECODE_ERROR.code, "Received bad formatted message from $friendlyName:\n${data.prependIndent()}").log())
         } finally {
             deviceLayer.ifNotNull {
                 // Remove callback
