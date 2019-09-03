@@ -86,7 +86,7 @@ internal open class UpnpClient {
                         UpnpDevice.decode(xml.orEmpty(), headers)
                     }
                     .onFailure { OCastLog.error(it) { "Failed to retrieve description for UPnP device at location $location" } }
-                    .onSuccess { OCastLog.debug { "Retrieved description for UPnP device at location $location:\n${xml.orEmpty()}" } }
+                    .onSuccess { OCastLog.debug { "Retrieved description for UPnP device at location $location:\n${xml.orEmpty().prependIndent()}" } }
                 onComplete(result)
             }
         } catch (exception: Exception) {

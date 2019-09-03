@@ -101,7 +101,7 @@ internal open class UDPSocket(private val port: Short = 0) {
         val address = InetAddress.getByName(host)
         val packet = DatagramPacket(payload, payload.size, address, port.toInt())
         socket?.send(packet)
-        OCastLog.debug { "Sent payload on UDP socket with port $port:\n${String(payload)}" }
+        OCastLog.debug { "Sent payload on UDP socket with port $port:\n${String(payload).prependIndent()}" }
     }
 
     /**
@@ -127,7 +127,7 @@ internal open class UDPSocket(private val port: Short = 0) {
                         socket?.receive(packet)
                         // Take only the needed bytes because packet is reused and old data could be appended at the end
                         val data = packet.data.take(packet.length).toByteArray()
-                        OCastLog.debug { "Received data on UDP socket with port $port:\n${String(data)}" }
+                        OCastLog.debug { "Received data on UDP socket with port $port:\n${String(data).prependIndent()}" }
                         listener?.onDataReceived(this, data, packet.address.hostName)
                     }
                 } catch (exception: SocketException) {

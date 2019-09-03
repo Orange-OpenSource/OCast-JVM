@@ -348,7 +348,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                                 } else {
                                     Unit
                                 }
-                                OCastLog.info { "Received reply of type ${it.replyClass.name} from $friendlyName:\n${deviceLayer.message.data}" }
+                                OCastLog.info { "Received reply of type ${it.replyClass.name} from $friendlyName:\n${deviceLayer.message.data.prependIndent()}" }
                                 @Suppress("UNCHECKED_CAST")
                                 (it as ReplyCallback<Any?>).onSuccess.wrapRun(reply)
                             } else {
@@ -362,7 +362,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                 OCastRawDeviceLayer.Type.COMMAND -> {}
             }
         } catch (e: Exception) {
-            replyCallback?.onError?.wrapRun(OCastError(OCastError.Status.DECODE_ERROR.code, "Received a bad formatted message from $friendlyName:\n$data"))
+            replyCallback?.onError?.wrapRun(OCastError(OCastError.Status.DECODE_ERROR.code, "Received a bad formatted message from $friendlyName:\n${data.prependIndent()}"))
         } finally {
             deviceLayer.ifNotNull {
                 // Remove callback
@@ -387,7 +387,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         when (deviceLayer.message.service) {
             Service.APPLICATION -> {
                 val webAppConnectedStatus = JsonTools.decode<WebAppConnectedStatusEvent>(oCastData.params).status
-                OCastLog.info { "Received web app connected status event from $friendlyName: ${deviceLayer.message.data}" }
+                OCastLog.info { "Received web app connected status event from $friendlyName:\n${deviceLayer.message.data.prependIndent()}" }
                 when (webAppConnectedStatus) {
                     WebAppStatus.CONNECTED -> {
                         isApplicationRunning.set(true)
@@ -399,12 +399,12 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             Service.MEDIA -> {
                 when (oCastData.name) {
                     Event.Media.PLAYBACK_STATUS -> {
-                        OCastLog.info { "Received media playback status event from $friendlyName: ${deviceLayer.message.data}" }
+                        OCastLog.info { "Received media playback status event from $friendlyName:\n${deviceLayer.message.data.prependIndent()}" }
                         val playbackStatus = JsonTools.decode<MediaPlaybackStatus>(oCastData.params)
                         eventListener?.onMediaPlaybackStatus(this, playbackStatus)
                     }
                     Event.Media.METADATA_CHANGED -> {
-                        OCastLog.info { "Received media metadata changed event from $friendlyName: ${deviceLayer.message.data}" }
+                        OCastLog.info { "Received media metadata changed event from $friendlyName:\n${deviceLayer.message.data.prependIndent()}" }
                         val metadataChanged = JsonTools.decode<MediaMetadata>(oCastData.params)
                         eventListener?.onMediaMetadataChanged(this, metadataChanged)
                     }
@@ -413,7 +413,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             SettingsService.DEVICE -> {
                 when (oCastData.name) {
                     Event.Device.UPDATE_STATUS -> {
-                        OCastLog.info { "Received update status event from $friendlyName: ${deviceLayer.message.data}" }
+                        OCastLog.info { "Received update status event from $friendlyName:\n${deviceLayer.message.data.prependIndent()}" }
                         val updateStatus = JsonTools.decode<UpdateStatus>(oCastData.params)
                         eventListener?.onUpdateStatus(this, updateStatus)
                     }
@@ -421,7 +421,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             }
             else -> {
                 // Custom event
-                OCastLog.info { "Received custom event from $friendlyName: ${deviceLayer.message.data}" }
+                OCastLog.info { "Received custom event from $friendlyName:\n${deviceLayer.message.data.prependIndent()}" }
                 eventListener?.onCustomEvent(this, oCastData.name, oCastData.params)
             }
         }
@@ -539,9 +539,9 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         val send = {
             if (webSocketsById[REFERENCE_WEB_SOCKET_ID]?.send(message) == false) {
                 replyCallbacksBySequenceID.remove(id)
-                onError.wrapRun(OCastError("Failed to send command with ID $id to $friendlyName:\n$message").log())
+                onError.wrapRun(OCastError("Failed to send command with ID $id to $friendlyName:\n${message.prependIndent()}").log())
             } else {
-                OCastLog.info { "Sent command with ID $id to $friendlyName:\n$message" }
+                OCastLog.info { "Sent command with ID $id to $friendlyName:\n${message.prependIndent()}" }
             }
         }
 
