@@ -74,7 +74,7 @@ class DeviceDiscoveryTest {
     //region Resume
 
     @Test
-    fun receiveMSearchResponseCallsListenerOnDeviceAdded() {
+    fun receiveMSearchResponseCallsListenerOnDevicesAdded() {
         // Given
         val firstMSearchResponseString = "HTTP/1.1 200 OK\r\n" +
             "LOCATION: http://10.0.0.28:56790/device-desc.xml\r\n" +
@@ -120,7 +120,7 @@ class DeviceDiscoveryTest {
     }
 
     @Test
-    fun mSearchResponseTimeoutCallsListenerOnDeviceRemoved() {
+    fun mSearchResponseTimeoutCallsListenerOnDevicesRemoved() {
         // Given
         val firstMSearchResponseString = "HTTP/1.1 200 OK\r\n" +
             "LOCATION: http://10.0.0.28:56790/device-desc.xml\r\n" +
@@ -174,7 +174,7 @@ class DeviceDiscoveryTest {
     }
 
     @Test
-    fun receiveChangedDeviceDescriptionCallsListenerOnDeviceChanged() {
+    fun receiveChangedDeviceDescriptionCallsListenerOnDevicesChanged() {
         // Given
         val oldMSearchResponseString = "HTTP/1.1 200 OK\r\n" +
                 "LOCATION: http://10.0.0.28:56790/old-device-desc.xml\r\n" +
