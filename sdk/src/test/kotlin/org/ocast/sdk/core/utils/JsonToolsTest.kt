@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ocast.sdk.core
+package org.ocast.sdk.core.utils
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
@@ -22,10 +22,6 @@ import java.util.EnumSet
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.ocast.sdk.core.models.Bitflag
-import org.ocast.sdk.core.utils.BitflagsDeserializer
-import org.ocast.sdk.core.utils.BitflagsSerializer
-import org.ocast.sdk.core.utils.JsonTools
-import org.ocast.sdk.core.utils.RawJsonDeserializer
 
 /**
  * Unit tests for the JsonTools object.
@@ -79,7 +75,6 @@ class JsonToolsTest {
      * This class represents a container of bitflags.
      */
     class BitflagsContainer(
-
         /** The bitflags. */
         @JsonSerialize(using = BitflagsSerializer::class)
         @JsonDeserialize(using = TestBitflagsDeserializer::class)
