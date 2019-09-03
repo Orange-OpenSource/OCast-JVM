@@ -26,7 +26,6 @@ import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.SocketPolicy
-import org.junit.Assert
 import org.junit.Test
 import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
@@ -111,6 +110,48 @@ internal class UpnpClientTest {
         }
 
         @Test
+        fun getDeviceWithSuccessfulResponseAndAlternateApplicationURLHeaderSucceeds() {
+            // Given
+            val response = """
+                <root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:r="urn:restful-tv-org:schemas:upnp-dd">
+                  <specVersion>
+                    <major>1</major>
+                    <minor>0</minor>
+                    </specVersion>
+                  <device>
+                    <deviceType>urn:schemas-upnp-org:device:tvdevice:1</deviceType>
+                    <friendlyName>LaCléTV-32F7</friendlyName>
+                    <manufacturer>Innopia</manufacturer>
+                    <modelName>cléTV</modelName>
+                    <UDN>uuid:b042f955-9ae7-44a8-ba6c-0009743932f7</UDN>
+                  </device>
+                </root>
+            """.trimIndent()
+
+            server.enqueue(
+                MockResponse()
+                    .setHeader("Application-URL", "http://127.0.0.1:8008/apps") // Alternate application URL header
+                    .setBody(response)
+            )
+            val callback = mock<(Result<UpnpDevice>) -> Unit>()
+            val synchronizedCallback = SynchronizedFunction1(callback)
+
+            // When
+            upnpClient.getDevice(server.url("/").toString(), synchronizedCallback)
+
+            // Then
+            synchronizedCallback.await(5, TimeUnit.SECONDS)
+            val resultCaptor = argumentCaptor<Result<UpnpDevice>>()
+            verify(callback, times(1)).invoke(resultCaptor.capture())
+            val device = resultCaptor.firstValue.getOrNull()
+            assertEquals("http://127.0.0.1:8008/apps", device?.dialURL.toString())
+            assertEquals("LaCléTV-32F7", device?.friendlyName)
+            assertEquals("Innopia", device?.manufacturer)
+            assertEquals("cléTV", device?.modelName)
+            assertEquals("b042f955-9ae7-44a8-ba6c-0009743932f7", device?.id)
+        }
+
+        @Test
         fun getDeviceWithUnsuccessfulResponseFails() {
             // Given
             server.enqueue(MockResponse().setResponseCode(404)) // Unsuccessful response
@@ -165,7 +206,7 @@ internal class UpnpClientTest {
         }
 
         @Test
-        fun getDeviceWithMissingApplicationUrlHeaderFails() {
+        fun getDeviceWithMissingApplicationURLHeaderFails() {
             // Given
             val response = """
                 <root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:r="urn:restful-tv-org:schemas:upnp-dd">
@@ -252,7 +293,7 @@ internal class UpnpClientTest {
             val uuid = UpnpClient.extractUuid(usn)
 
             // Then
-            Assert.assertEquals("device-UUID", uuid)
+            assertEquals("device-UUID", uuid)
         }
 
         @Test
@@ -264,7 +305,7 @@ internal class UpnpClientTest {
             val uuid = UpnpClient.extractUuid(usn)
 
             // Then
-            Assert.assertEquals("device-UUID", uuid)
+            assertEquals("device-UUID", uuid)
         }
 
         @Test
@@ -276,7 +317,7 @@ internal class UpnpClientTest {
             val uuid = UpnpClient.extractUuid(usn)
 
             // Then
-            Assert.assertEquals("device-UUID", uuid)
+            assertEquals("device-UUID", uuid)
         }
 
         @Test
@@ -288,7 +329,7 @@ internal class UpnpClientTest {
             val uuid = UpnpClient.extractUuid(usn)
 
             // Then
-            Assert.assertEquals("device-UUID", uuid)
+            assertEquals("device-UUID", uuid)
         }
 
         @Test
@@ -300,7 +341,7 @@ internal class UpnpClientTest {
             val uuid = UpnpClient.extractUuid(usn)
 
             // Then
-            Assert.assertNull(uuid)
+            assertNull(uuid)
         }
     }
 
