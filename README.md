@@ -114,7 +114,7 @@ By default, the list of devices is refreshed every 30 seconds. You can decrease 
 
 ### 3. Connect to the device
 
-To connect to the device and use OCast media commands on your own application, you must set the device `applicationName` property. When you connect to the device, the application is started automatically if needed. You can also manage the application state manually. See [Manage application state](#8-manage-application-state).
+To connect to the device and use OCast media commands on your own application, you must set the device `applicationName` property. Once you are connected to the device, the application is started automatically when you send a media command. You can also manage the application state manually. See [Manage application state](#8-manage-application-state).
 
 :small_orange_diamond: Java
 ```java
