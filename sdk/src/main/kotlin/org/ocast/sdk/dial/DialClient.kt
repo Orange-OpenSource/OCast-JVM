@@ -21,6 +21,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import org.ocast.sdk.common.extensions.enqueue
+import org.ocast.sdk.core.utils.OCastLog
+import org.ocast.sdk.core.utils.log
 import org.ocast.sdk.dial.models.DialApplication
 import org.ocast.sdk.dial.models.DialError
 
@@ -47,10 +49,15 @@ internal class DialClient(private val baseURL: URL) {
                 .url(URL("$baseURL/$name"))
                 .post(RequestBody.create(null, byteArrayOf()))
                 .build()
-            client.newCall(request).enqueue { result ->
-                onComplete(result.map {})
+            client.newCall(request).enqueue { startApplicationResult ->
+                val result = startApplicationResult
+                    .map {}
+                    .onFailure { OCastLog.error(it) { "Failed to start DIAL application $name on host ${baseURL.host}" } }
+                    .onSuccess { OCastLog.debug { "Started DIAL application $name on host ${baseURL.host}" } }
+                onComplete(result)
             }
         } catch (exception: Exception) {
+            OCastLog.error(exception) { "Failed to start DIAL application $name on host ${baseURL.host}" }
             onComplete(Result.failure(exception))
         }
     }
@@ -73,13 +80,18 @@ internal class DialClient(private val baseURL: URL) {
                             .delete()
                             .build()
                         client.newCall(request).enqueue { stopApplicationResult ->
-                            onComplete(stopApplicationResult.map {})
+                            val result = stopApplicationResult
+                                .map {}
+                                .onFailure { OCastLog.error(it) { "Failed to stop DIAL application $name on host ${baseURL.host}" } }
+                                .onSuccess { OCastLog.debug { "Stopped DIAL application $name on host ${baseURL.host}" } }
+                            onComplete(result)
                         }
                     } catch (exception: Exception) {
+                        OCastLog.error(exception) { "Failed to stop DIAL application $name on host ${baseURL.host}" }
                         onComplete(Result.failure(exception))
                     }
                 } else {
-                    onComplete(Result.failure(DialError("Could not stop application $name on host ${baseURL.host}")))
+                    onComplete(Result.failure(DialError("Failed to stop DIAL application $name on host ${baseURL.host}").log()))
                 }
             }
         }
@@ -98,12 +110,19 @@ internal class DialClient(private val baseURL: URL) {
             val request = Request.Builder()
                 .url(URL("$baseURL/$name"))
                 .build()
-            client.newCall(request).enqueue { result ->
-                onComplete(result.mapCatching { response ->
-                    DialApplication.decode(response.body()?.string().orEmpty())
-                })
+            client.newCall(request).enqueue { getApplicationResult ->
+                var xml: String? = null
+                val result = getApplicationResult
+                    .mapCatching {
+                        xml = it.body()?.string()
+                        DialApplication.decode(xml.orEmpty())
+                    }
+                    .onFailure { OCastLog.error(it) { "Failed to retrieve information for DIAL application $name on host ${baseURL.host}" } }
+                    .onSuccess { OCastLog.debug { "Retrieved information for DIAL application $name on host ${baseURL.host}:\n${xml.orEmpty().prependIndent()}" } }
+                onComplete(result)
             }
         } catch (exception: Exception) {
+            OCastLog.error(exception) { "Failed to retrieve information for DIAL application $name on host ${baseURL.host}" }
             onComplete(Result.failure(exception))
         }
     }

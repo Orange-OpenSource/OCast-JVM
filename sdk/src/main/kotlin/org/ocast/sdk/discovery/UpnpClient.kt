@@ -24,6 +24,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.ocast.sdk.common.extensions.enqueue
 import org.ocast.sdk.common.extensions.toMap
+import org.ocast.sdk.core.utils.OCastLog
 import org.ocast.sdk.discovery.models.UpnpDevice
 
 /**
@@ -76,14 +77,20 @@ internal open class UpnpClient {
                 .header("Date", iso8601DateFormat.format(Date()))
                 .url(location)
                 .build()
-            client.newCall(request).enqueue { result ->
-                onComplete(result.mapCatching { response ->
-                    val xml = response.body()?.string().orEmpty()
-                    val headers = response.headers().toMap()
-                    UpnpDevice.decode(xml, headers)
-                })
+            client.newCall(request).enqueue { getDeviceResult ->
+                var xml: String? = null
+                val result = getDeviceResult
+                    .mapCatching { response ->
+                        xml = response.body()?.string()
+                        val headers = response.headers().toMap()
+                        UpnpDevice.decode(xml.orEmpty(), headers)
+                    }
+                    .onFailure { OCastLog.error(it) { "Failed to retrieve description for UPnP device at location $location" } }
+                    .onSuccess { OCastLog.debug { "Retrieved description for UPnP device at location $location:\n${xml.orEmpty().prependIndent()}" } }
+                onComplete(result)
             }
         } catch (exception: Exception) {
+            OCastLog.error(exception) { "Failed to retrieve description for UPnP device at location $location" }
             onComplete(Result.failure(exception))
         }
     }

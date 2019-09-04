@@ -16,14 +16,16 @@
 
 package org.ocast.sdk.dial.models
 
+import org.ocast.sdk.core.utils.LoggableError
+
 /**
  * This class represents a DIAL error.
  *
  * @param message The error message.
- * @param cause The cause of the error.
+ * @param cause The cause of the error, if any.
  * @constructor Creates an instance of [DialError] with the specified message and cause.
  */
-internal class DialError(message: String?, cause: Throwable?) : Throwable(message, cause) {
+internal class DialError(message: String?, cause: Throwable?) : Throwable(message, cause), LoggableError {
 
     /**
      * @param message The error message.

@@ -52,11 +52,6 @@ class OCastLog {
         internal val tag: String
             get() = callingStackFrame?.className.orEmpty()
 
-        /** The name of the method which called an [OCastLog] method. */
-        @PublishedApi
-        internal val methodName: String
-            get() = callingStackFrame?.methodName.orEmpty()
-
         /** The calling stack frame. */
         private val callingStackFrame: StackTraceElement?
             get() = Thread
@@ -111,7 +106,7 @@ class OCastLog {
         @PublishedApi
         internal inline fun log(level: Level, throwable: Throwable?, message: () -> String) {
             if (DEBUG && this.level.loggerLevel.intValue() <= level.loggerLevel.intValue()) {
-                Logger.getLogger(tag).log(level.loggerLevel, "$tag: $methodName: ${message()}", throwable)
+                Logger.getLogger(tag).log(level.loggerLevel, message(), throwable)
             }
         }
     }
@@ -123,19 +118,60 @@ class OCastLog {
      */
     enum class Level(@PublishedApi internal val loggerLevel: java.util.logging.Level) {
 
-        /** Indicates that the log message will not be displayed. */
+        /**
+         * Indicates that the log message will not be displayed.
+         *
+         * This level corresponds to [java.util.logging.Level.OFF].
+         */
         OFF(java.util.logging.Level.OFF),
 
-        /** Indicates that the log is an error message. */
+        /**
+         *  Indicates that the log is an error message.
+         *
+         *  This level corresponds to [java.util.logging.Level.SEVERE].
+         */
         ERROR(java.util.logging.Level.SEVERE),
 
-        /** Indicates that the log is an informational message. */
+        /**
+         * Indicates that the log is an informational message.
+         *
+         * This level corresponds to [java.util.logging.Level.INFO].
+         */
         INFO(java.util.logging.Level.INFO),
 
-        /** Indicates that the log is a debug message. */
+        /**
+         *  Indicates that the log is a debug message.
+         *
+         *  This level corresponds to [java.util.logging.Level.FINEST].
+         */
         DEBUG(java.util.logging.Level.FINEST),
 
-        /** Indicates that the log message is always displayed. */
+        /**
+         * Indicates that the log message is always displayed.
+         *
+         * This level corresponds to [java.util.logging.Level.ALL].
+         */
         ALL(java.util.logging.Level.ALL);
     }
+}
+
+/**
+ * An interface implemented by errors which can be logged using the OCast logs.
+ */
+interface LoggableError {
+
+    /** The error message, if any. */
+    val message: String?
+
+    /** The cause of the error, if any. */
+    val cause: Throwable?
+}
+
+/**
+ * Logs an error.
+ *
+ * @param T The type of the loggable error.
+ */
+fun <T> T.log(): T where T : LoggableError {
+    return also { OCastLog.error(cause) { message.orEmpty() } }
 }

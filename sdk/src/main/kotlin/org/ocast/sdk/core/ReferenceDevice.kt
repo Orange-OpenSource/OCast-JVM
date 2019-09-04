@@ -70,6 +70,8 @@ import org.ocast.sdk.core.models.UpdateStatus
 import org.ocast.sdk.core.models.WebAppConnectedStatusEvent
 import org.ocast.sdk.core.models.WebAppStatus
 import org.ocast.sdk.core.utils.JsonTools
+import org.ocast.sdk.core.utils.OCastLog
+import org.ocast.sdk.core.utils.log
 import org.ocast.sdk.dial.DialClient
 import org.ocast.sdk.dial.models.DialApplication
 import org.ocast.sdk.discovery.models.UpnpDevice
@@ -113,6 +115,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             applicationSemaphore?.release()
         }
         super.setState(state)
+        OCastLog.debug { "Set state of $friendlyName to ${state.name}" }
     }
 
     /** The identifier of the last OCast message sent. */
@@ -155,13 +158,13 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     override fun startApplication(onSuccess: Runnable, onError: Consumer<OCastError>) {
         applicationName.ifNotNull { applicationName ->
             when (state) {
-                State.CONNECTING -> onError.wrapRun(OCastError("Failed to start $applicationName on $friendlyName, device is connecting"))
+                State.CONNECTING -> onError.wrapRun(OCastError("Failed to start application $applicationName on $friendlyName, device is connecting").log())
                 State.CONNECTED -> startApplication(applicationName, onSuccess, onError)
-                State.DISCONNECTING -> onError.wrapRun(OCastError("Failed to start $applicationName on $friendlyName, device is disconnecting"))
-                State.DISCONNECTED -> onError.wrapRun(OCastError("Failed to start $applicationName on $friendlyName, device is disconnected"))
+                State.DISCONNECTING -> onError.wrapRun(OCastError("Failed to start application $applicationName on $friendlyName, device is disconnecting").log())
+                State.DISCONNECTED -> onError.wrapRun(OCastError("Failed to start application $applicationName on $friendlyName, device is disconnected").log())
             }
         }.orElse {
-            onError.wrapRun(OCastError("Failed to start application on $friendlyName, property applicationName is not defined"))
+            onError.wrapRun(OCastError("Failed to start application on $friendlyName, property applicationName is not defined").log())
         }
     }
 
@@ -175,25 +178,27 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     private fun startApplication(name: String, onSuccess: Runnable, onError: Consumer<OCastError>) {
         dialClient.getApplication(name) { result ->
             result.onFailure { throwable ->
-                onError.wrapRun(OCastError("Failed to start $name on $friendlyName, there was an error with the DIAL application information request", throwable))
+                onError.wrapRun(OCastError("Failed to start application $name on $friendlyName", throwable).log())
             }
             result.onSuccess { application ->
                 isApplicationRunning.set(application.state == DialApplication.State.Running)
                 if (isApplicationRunning.get()) {
+                    OCastLog.info { "Application $name is already running on $friendlyName" }
                     onSuccess.wrapRun()
                 } else {
                     dialClient.startApplication(name) { result ->
                         result.onFailure { throwable ->
-                            onError.wrapRun(OCastError("Failed to start $name on $friendlyName, there was an error with the DIAL request", throwable))
+                            onError.wrapRun(OCastError("Failed to start application $name on $friendlyName", throwable).log())
                         }
                         result.onSuccess {
                             applicationSemaphore = Semaphore(0)
                             // Semaphore is released when state or application name changes
                             // In these cases onError must be called
                             if (applicationSemaphore?.tryAcquire(60, TimeUnit.SECONDS) == true && applicationName == name && state == State.CONNECTED) {
+                                OCastLog.info { "Started application $name on $friendlyName" }
                                 onSuccess.wrapRun()
                             } else {
-                                onError.wrapRun(OCastError("Failed to start $name on $friendlyName, the web app connected status event was not received"))
+                                onError.wrapRun(OCastError("Failed to start application $name on $friendlyName, the web app connected status event was not received").log())
                             }
                             applicationSemaphore = null
                         }
@@ -207,29 +212,36 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         applicationName.ifNotNull { applicationName ->
             dialClient.stopApplication(applicationName) { result ->
                 result.onFailure { throwable ->
-                    onError.wrapRun(OCastError("Failed to stop $applicationName on $friendlyName, there was an error with the DIAL request", throwable))
+                    onError.wrapRun(OCastError("Failed to stop application $applicationName on $friendlyName", throwable).log())
                 }
                 result.onSuccess {
                     isApplicationRunning.set(false)
+                    OCastLog.info { "Stopped application $applicationName on $friendlyName" }
                     onSuccess.wrapRun()
                 }
             }
         }.orElse {
-            onError.wrapRun(OCastError("Failed to stop application on $friendlyName, property applicationName is not defined"))
+            onError.wrapRun(OCastError("Failed to stop application on $friendlyName, property applicationName is not defined").log())
         }
     }
 
     override fun connect(sslConfiguration: SSLConfiguration?, onSuccess: Runnable, onError: Consumer<OCastError>) {
         when (state) {
-            State.CONNECTING -> onError.wrapRun(OCastError("Failed to connect to $friendlyName, device is already connecting"))
-            State.CONNECTED -> onSuccess.wrapRun()
-            State.DISCONNECTING -> onError.wrapRun(OCastError("Failed to connect to $friendlyName, device is disconnecting"))
+            State.CONNECTING -> onError.wrapRun(OCastError("Failed to connect to $friendlyName, device is already connecting").log())
+            State.CONNECTED -> {
+                OCastLog.info { "Already connected to $friendlyName" }
+                onSuccess.wrapRun()
+            }
+            State.DISCONNECTING -> onError.wrapRun(OCastError("Failed to connect to $friendlyName, device is disconnecting").log())
             State.DISCONNECTED -> {
                 onCreateWebSockets(sslConfiguration, Consumer { webSocketsById ->
-                        this.webSocketsById = webSocketsById
-                        state = State.CONNECTING
-                        connectCallback = RunnableCallback(onSuccess, onError)
-                        webSocketsById.values.forEach { it.connect() }
+                    this.webSocketsById = webSocketsById
+                    state = State.CONNECTING
+                    connectCallback = RunnableCallback(onSuccess, onError)
+                    webSocketsById.values.forEach { webSocket ->
+                        OCastLog.debug { "Created web socket with ID ${webSocket.id} and url ${webSocket.webSocketURL} for $friendlyName" }
+                        webSocket.connect()
+                    }
                 })
             }
         }
@@ -275,22 +287,24 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             state = State.DISCONNECTED
             // Send error callback to all waiting commands
             synchronized(replyCallbacksBySequenceID) {
-                replyCallbacksBySequenceID.forEach { (_, callback) ->
-                    callback.onError.wrapRun(OCastError("Socket with ID ${webSocket.id.orEmpty()} has been disconnected on $friendlyName", error))
+                replyCallbacksBySequenceID.forEach { (identifier, callback) ->
+                    callback.onError.wrapRun(OCastError("Failed to receive reply for command with ID $identifier from $friendlyName", error).log())
                 }
                 replyCallbacksBySequenceID.clear()
             }
             connectCallback.ifNotNull { connectCallback ->
-                connectCallback.onError.wrapRun(OCastError("Socket with ID ${webSocket.id.orEmpty()} did not connect on $friendlyName", error))
+                connectCallback.onError.wrapRun(OCastError("Failed to connect to $friendlyName", error).log())
             }
             disconnectCallback.ifNotNull { disconnectCallback ->
                 if (error == null) {
+                    OCastLog.info { "Disconnected from $friendlyName" }
                     disconnectCallback.onSuccess.wrapRun()
                 } else {
-                    disconnectCallback.onError.wrapRun(OCastError("Socket with ID ${webSocket.id.orEmpty()} did not disconnect properly on $friendlyName", error))
+                    disconnectCallback.onError.wrapRun(OCastError("Failed to disconnect from $friendlyName", error).log())
                 }
             }
             if (connectCallback == null && disconnectCallback == null) {
+                if (error != null) OCastLog.error(error) { "Disconnected from $friendlyName" } else OCastLog.info { "Disconnected from $friendlyName" }
                 deviceListener?.onDeviceDisconnected(this, error)
             }
             connectCallback = null
@@ -307,6 +321,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     override fun onConnected(webSocket: WebSocket) {
         if (webSocketsById.values.all { it.state == WebSocket.State.CONNECTED }) {
             state = State.CONNECTED
+            OCastLog.info { "Connected to $friendlyName" }
             connectCallback?.onSuccess?.wrapRun()
             connectCallback = null
         }
@@ -331,20 +346,21 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                                 } else {
                                     Unit
                                 }
+                                OCastLog.info { "Received reply of type ${it.replyClass.name} from $friendlyName:\n${deviceLayer.message.data.prependIndent()}" }
                                 @Suppress("UNCHECKED_CAST")
                                 (it as ReplyCallback<Any?>).onSuccess.wrapRun(reply)
                             } else {
-                                it.onError.wrapRun(OCastError(replyData.params.code, "Socket with ID ${webSocket.id.orEmpty()} received reply with params error code ${replyData.params.code} on $friendlyName"))
+                                it.onError.wrapRun(OCastError(replyData.params.code, "Received reply with params error code ${replyData.params.code} from $friendlyName").log())
                             }
                         } else {
-                            it.onError.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Socket with ID ${webSocket.id.orEmpty()} received reply with device layer error status ${deviceLayer.status} on $friendlyName"))
+                            it.onError.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Received reply with device layer error status ${deviceLayer.status} from $friendlyName").log())
                         }
                     }
                 }
                 OCastRawDeviceLayer.Type.COMMAND -> {}
             }
         } catch (e: Exception) {
-            replyCallback?.onError?.wrapRun(OCastError(OCastError.Status.DECODE_ERROR.code, "Socket with ID ${webSocket.id.orEmpty()} received a bad formatted message on $friendlyName: $data"))
+            replyCallback?.onError?.wrapRun(OCastError(OCastError.Status.DECODE_ERROR.code, "Received bad formatted message from $friendlyName:\n${data.prependIndent()}").log())
         } finally {
             deviceLayer.ifNotNull {
                 // Remove callback
@@ -368,7 +384,9 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
         when (deviceLayer.message.service) {
             Service.APPLICATION -> {
-                when (JsonTools.decode<WebAppConnectedStatusEvent>(oCastData.params).status) {
+                val webAppConnectedStatus = JsonTools.decode<WebAppConnectedStatusEvent>(oCastData.params).status
+                OCastLog.info { "Received web app connected status event from $friendlyName:\n${deviceLayer.message.data.prependIndent()}" }
+                when (webAppConnectedStatus) {
                     WebAppStatus.CONNECTED -> {
                         isApplicationRunning.set(true)
                         applicationSemaphore?.release()
@@ -379,10 +397,12 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             Service.MEDIA -> {
                 when (oCastData.name) {
                     Event.Media.PLAYBACK_STATUS -> {
+                        OCastLog.info { "Received media playback status event from $friendlyName:\n${deviceLayer.message.data.prependIndent()}" }
                         val playbackStatus = JsonTools.decode<MediaPlaybackStatus>(oCastData.params)
                         eventListener?.onMediaPlaybackStatus(this, playbackStatus)
                     }
                     Event.Media.METADATA_CHANGED -> {
+                        OCastLog.info { "Received media metadata changed event from $friendlyName:\n${deviceLayer.message.data.prependIndent()}" }
                         val metadataChanged = JsonTools.decode<MediaMetadata>(oCastData.params)
                         eventListener?.onMediaMetadataChanged(this, metadataChanged)
                     }
@@ -391,6 +411,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             SettingsService.DEVICE -> {
                 when (oCastData.name) {
                     Event.Device.UPDATE_STATUS -> {
+                        OCastLog.info { "Received update status event from $friendlyName:\n${deviceLayer.message.data.prependIndent()}" }
                         val updateStatus = JsonTools.decode<UpdateStatus>(oCastData.params)
                         eventListener?.onUpdateStatus(this, updateStatus)
                     }
@@ -398,6 +419,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             }
             else -> {
                 // Custom event
+                OCastLog.info { "Received custom event from $friendlyName:\n${deviceLayer.message.data.prependIndent()}" }
                 eventListener?.onCustomEvent(this, oCastData.name, oCastData.params)
             }
         }
@@ -497,7 +519,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             sendToWebSocket(id, deviveLayerString, domain == OCastDomain.BROWSER, onError)
         } catch (exception: Exception) {
             replyCallbacksBySequenceID.remove(id)
-            onError.wrapRun(OCastError("Failed to send message on $friendlyName, unable to encode device layer", exception))
+            onError.wrapRun(OCastError("Failed to send command with params ${message.data.params} to $friendlyName, unable to encode device layer", exception).log())
         }
     }
 
@@ -515,7 +537,9 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         val send = {
             if (webSocketsById[REFERENCE_WEB_SOCKET_ID]?.send(message) == false) {
                 replyCallbacksBySequenceID.remove(id)
-                onError.wrapRun(OCastError("Failed to send message on $friendlyName, socket with ID REFERENCE_WEB_SOCKET_ID could not send data"))
+                onError.wrapRun(OCastError("Failed to send command with ID $id to $friendlyName:\n${message.prependIndent()}").log())
+            } else {
+                OCastLog.info { "Sent command with ID $id to $friendlyName:\n${message.prependIndent()}" }
             }
         }
 
@@ -524,8 +548,8 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         } else {
             startApplication({
                 send()
-            }, {
-                onError.wrapRun(it)
+            }, { error ->
+                onError.wrapRun(error.log())
             })
         }
     }
