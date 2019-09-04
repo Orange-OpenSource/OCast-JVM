@@ -239,7 +239,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                     state = State.CONNECTING
                     connectCallback = RunnableCallback(onSuccess, onError)
                     webSocketsById.values.forEach { webSocket ->
-                        OCastLog.debug { "Created web socket with ID ${webSocket.id.orEmpty()} and url ${webSocket.webSocketURL} for $friendlyName" }
+                        OCastLog.debug { "Created web socket with ID ${webSocket.id} and url ${webSocket.webSocketURL} for $friendlyName" }
                         webSocket.connect()
                     }
                 })
