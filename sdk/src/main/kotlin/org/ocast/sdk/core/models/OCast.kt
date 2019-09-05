@@ -170,7 +170,7 @@ class OCastRawDeviceLayer(
         @JsonProperty("password_too_short") WIFI_PASSWORD_TOO_SHORT,
 
         /** There is an internal error. */
-        @JsonProperty("internal_error") INTERNAL_ERROR,
+        @JsonProperty("internal_error") INTERNAL_ERROR
     }
 
     /**
