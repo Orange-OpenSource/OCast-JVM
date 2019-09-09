@@ -134,7 +134,7 @@ internal class DeviceDiscovery constructor(
     private var removeDevicesTimer: Timer? = null
 
     init {
-        socket.listener = SsdpSocketListener()
+        socket.listener = UDPSocketListener()
     }
 
     /**
@@ -365,9 +365,9 @@ internal class DeviceDiscovery constructor(
     /**
      * An implementation of the [UDPSocket.Listener] interface for the discovery.
      *
-     * @constructor Creates an instance of [SsdpSocketListener].
+     * @constructor Creates an instance of [UDPSocketListener].
      */
-    private inner class SsdpSocketListener : UDPSocket.Listener {
+    private inner class UDPSocketListener : UDPSocket.Listener {
 
         override fun onDataReceived(socket: UDPSocket, data: ByteArray, host: String) {
             val ssdpMSearchResponse = SsdpMessage.fromData(data) as? SsdpMSearchResponse
@@ -378,6 +378,7 @@ internal class DeviceDiscovery constructor(
 
         override fun onSocketClosed(socket: UDPSocket, error: Throwable?) {
             if (error != null) {
+                state = State.STOPPED
                 stop(true, error)
                 OCastLog.error(error) { "Discovery stopped unexpectedly" }
             }

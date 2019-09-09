@@ -489,6 +489,24 @@ class DeviceDiscoveryTest {
         verify(listener, times(2)).onDiscoveryStopped(isNull())
     }
 
+    @Test
+    fun stopDiscoveryAfterUnexpectedStopFails() {
+        // Given
+        doAnswer {
+            Timer().schedule(100L) {
+                socket.listener?.onSocketClosed(socket, Throwable())
+            }
+        }.whenever(socket).send(any(), any(), any())
+
+        // When
+        discovery.resume()
+        Thread.sleep(200)
+        val success = discovery.stop()
+
+        // Then
+        assert(!success)
+    }
+
     //endregion
 
     /**
@@ -522,9 +540,9 @@ class DeviceDiscoveryTest {
      */
     private fun stubDeviceDescriptionResponses(devicesByLocation: HashMap<String, UpnpDevice>) {
         devicesByLocation.forEach { (location, device) ->
-            whenever(upnpClient.getDevice(eq(location), any())).doAnswer {
+            whenever(upnpClient.getDevice(eq(location), any())).doAnswer { invocationOnMock ->
                 // Directly invoke the callback with the desired device
-                val callback = it.getArgument<(Result<UpnpDevice>) -> Unit>(1)
+                val callback = invocationOnMock.getArgument<(Result<UpnpDevice>) -> Unit>(1)
                 callback.invoke(Result.success(device))
             }
         }
