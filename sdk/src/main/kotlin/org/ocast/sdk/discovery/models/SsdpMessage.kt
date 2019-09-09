@@ -81,6 +81,9 @@ internal sealed class SsdpMessage(private val startLine: StartLine) {
         /** Carriage Return Line Feed characters. */
         private const val CRLF = "\r\n"
 
+        /** The list of all newline characters. */
+        private val newlineCharacters = arrayOf("\u000D\u000A", "\u000A", "\u000B", "\u000C", "\u000D", "\u0085", "\u2028", "\u2029")
+
         /**
          * Converts data into an SSDP message.
          *
@@ -90,7 +93,7 @@ internal sealed class SsdpMessage(private val startLine: StartLine) {
         fun fromData(data: ByteArray): SsdpMessage? {
             var message: SsdpMessage? = null
             val lines = String(data)
-                .split("\\R".toRegex()) // Use regex to match every kind of linebreak character
+                .split(*newlineCharacters) // Do not use a regex with the \R linebreak matcher because it is not available on some platforms
                 .filter { it.isNotBlank() }
                 .map { it.trim() }
                 .toMutableList()
