@@ -220,7 +220,7 @@ The custom command must subclass `OCastCommandParams`.
 
 :small_orange_diamond: Java
 ```java
-class CustomCommandParams extends OCastCommandParams {
+class CustomCommandParams extends OCastCommandParams<CustomCommandParams> {
 
     @NotNull
     private String myParameter;
@@ -251,8 +251,8 @@ class CustomReplyParams {
     }
 }
 
-OCastDataLayer<OCastCommandParams> data = new CustomCommandParams("paramValue").build();
-OCastApplicationLayer<OCastCommandParams> message = new OCastApplicationLayer<>("CustomService", data);
+OCastDataLayer<CustomCommandParams> data = new CustomCommandParams("paramValue").build();
+OCastApplicationLayer<CustomCommandParams> message = new OCastApplicationLayer<>("CustomService", data);
 device.send(message, OCastDomain.BROWSER, CustomReplyParams.class, customReplyParams -> {
     // ...
 }, oCastError -> {
@@ -262,7 +262,7 @@ device.send(message, OCastDomain.BROWSER, CustomReplyParams.class, customReplyPa
 
 :small_blue_diamond: Kotlin
 ```kotlin
-class CustomCommandParams(val myParameter: String) : OCastCommandParams("customCommand")
+class CustomCommandParams(val myParameter: String) : OCastCommandParams<CustomCommandParams>("customCommand")
 class CustomReplyParams(myValue: String)
 
 val data = CustomCommandParams("paramValue").build()

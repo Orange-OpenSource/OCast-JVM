@@ -43,28 +43,28 @@ class MediaMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(Servic
  */
 class PlayMediaCommandParams(
     @JsonProperty("position") val position: Double = 0.0
-) : OCastCommandParams("play")
+) : OCastCommandParams<PlayMediaCommandParams>("play")
 
 /**
  * Represents the parameters of a `stop` command.
  *
  * @constructor Creates an instance of [StopMediaCommandParams].
  */
-class StopMediaCommandParams : OCastCommandParams("stop")
+class StopMediaCommandParams : OCastCommandParams<StopMediaCommandParams>("stop")
 
 /**
  * Represents the parameters of a `pause` command.
  *
  * @constructor Creates an instance of [PauseMediaCommandParams].
  */
-class PauseMediaCommandParams : OCastCommandParams("pause")
+class PauseMediaCommandParams : OCastCommandParams<PauseMediaCommandParams>("pause")
 
 /**
  * Represents the parameters of a `resume` command.
  *
  * @constructor Creates an instance of [ResumeMediaCommandParams].
  */
-class ResumeMediaCommandParams : OCastCommandParams("resume")
+class ResumeMediaCommandParams : OCastCommandParams<ResumeMediaCommandParams>("resume")
 
 /**
  * Represents the parameters of a `prepare` command.
@@ -88,7 +88,7 @@ class PrepareMediaCommandParams(
     @JsonProperty("mediaType")val mediaType: Media.Type,
     @JsonProperty("transferMode") val transferMode: Media.TransferMode,
     @JsonProperty("autoplay") val autoplay: Boolean = true
-) : OCastCommandParams("prepare")
+) : OCastCommandParams<PrepareMediaCommandParams>("prepare")
 
 /**
  * Represents the parameters of a `volume` command.
@@ -98,7 +98,7 @@ class PrepareMediaCommandParams(
  */
 class SetMediaVolumeCommandParams(
     @JsonProperty("volume") val volume: Double
-) : OCastCommandParams("volume")
+) : OCastCommandParams<SetMediaVolumeCommandParams>("volume")
 
 /**
  * Represents the parameters of a `track` command.
@@ -112,7 +112,7 @@ class SetMediaTrackCommandParams(
     @JsonProperty("type") val type: Type,
     @JsonProperty("trackId") val trackID: String,
     @get:JsonIgnore @field:JsonProperty("enabled") val isEnabled: Boolean
-) : OCastCommandParams("track") {
+) : OCastCommandParams<SetMediaTrackCommandParams>("track") {
 
     /**
      * Represents the different types of [MediaMetadata.Track].
@@ -138,7 +138,7 @@ class SetMediaTrackCommandParams(
  */
 class SeekMediaCommandParams(
     @JsonProperty("position") val position: Double
-) : OCastCommandParams("seek")
+) : OCastCommandParams<SeekMediaCommandParams>("seek")
 
 /**
  * Represents the parameters of a `mute` command.
@@ -148,21 +148,21 @@ class SeekMediaCommandParams(
  */
 class MuteMediaCommandParams(
     @get:JsonIgnore @field:JsonProperty("mute") val isMuted: Boolean
-) : OCastCommandParams("mute")
+) : OCastCommandParams<MuteMediaCommandParams>("mute")
 
 /**
  * Represents the parameters of a `getPlaybackStatus` command.
  *
  * @constructor Creates an instance of [GetMediaPlaybackStatusCommandParams].
  */
-class GetMediaPlaybackStatusCommandParams : OCastCommandParams("getPlaybackStatus")
+class GetMediaPlaybackStatusCommandParams : OCastCommandParams<GetMediaPlaybackStatusCommandParams>("getPlaybackStatus")
 
 /**
  * Represents the parameters of a `getMetadata` command.
  *
  * @constructor Creates an instance of [GetMediaMetadataCommandParams].
  */
-class GetMediaMetadataCommandParams : OCastCommandParams("getMetadata")
+class GetMediaMetadataCommandParams : OCastCommandParams<GetMediaMetadataCommandParams>("getMetadata")
 
 //endregion
 
