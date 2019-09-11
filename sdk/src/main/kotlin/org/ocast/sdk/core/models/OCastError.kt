@@ -37,12 +37,15 @@ interface ErrorStatus {
         /**
          * Returns an [ErrorStatus] from the given code.
          *
-         * @param T The type of enum value to return.
+         * @param T The type of the status enum value to return.
          * @param code The error code.
+         * @param statusClass The class of the status enum value to return.
          * @return An enum value corresponding to the given error code.
          */
-        inline fun <reified T> fromCode(code: Int): T where T : Enum<T>, T : ErrorStatus {
-            return enumValues<T>().firstOrNull { it.code == code }.orElse { enumValueOf("UNKNOWN_ERROR") }
+        fun <T> fromCode(code: Int, statusClass: Class<T>): T where T : Enum<T>, T : ErrorStatus {
+            return with(statusClass.enumConstants) {
+                firstOrNull { it.code == code }.orElse { first { it.name == "UNKNOWN_ERROR" } }
+            }
         }
     }
 }
@@ -87,6 +90,25 @@ data class OCastError(val code: Int, override val message: String, override val 
 }
 
 /**
+ * An abstract class which represents an error from an OCast service.
+ *
+ * @param error The OCast error to create the service error from.
+ * @param statusClass The class of the status enum associated with this error.
+ * @constructor Creates an instance of [ServiceError].
+ */
+abstract class ServiceError<T> internal constructor(error: OCastError, statusClass: Class<T>) where T : Enum<T>, T : ErrorStatus {
+
+    /** The error status. */
+    val status = ErrorStatus.fromCode(error.code, statusClass)
+
+    /** The error message. */
+    val message = error.message
+
+    /** The cause of the error, if any. */
+    val cause = error.cause
+}
+
+/**
  * Represents an error from the device settings service.
  *
  * @property status The error status.
@@ -94,13 +116,7 @@ data class OCastError(val code: Int, override val message: String, override val 
  * @property cause The cause of the error, if any.
  * @constructor Creates an instance of [OCastDeviceSettingsError].
  */
-data class OCastDeviceSettingsError(val status: Status, override val message: String, override val cause: Throwable? = null) : LoggableError {
-
-    /**
-     * @param error The generic OCast error.
-     * @constructor Creates an instance of [OCastDeviceSettingsError] from a generic [OCastError].
-     */
-    constructor(error: OCastError) : this(ErrorStatus.fromCode(error.code), error.message, error.cause)
+class OCastDeviceSettingsError internal constructor(error: OCastError) : ServiceError<OCastDeviceSettingsError.Status>(error, Status::class.java), LoggableError {
 
     /**
      * Represents the status of an [OCastDeviceSettingsError].
@@ -132,13 +148,7 @@ data class OCastDeviceSettingsError(val status: Status, override val message: St
  * @property cause The cause of the error, if any.
  * @constructor Creates an [OCastInputSettingsError].
  */
-data class OCastInputSettingsError(val status: Status, override val message: String, override val cause: Throwable? = null) : LoggableError {
-
-    /**
-     * @param error The generic OCast error.
-     * @constructor Creates an instance of [OCastInputSettingsError] from a generic [OCastError].
-     */
-    constructor(error: OCastError) : this(ErrorStatus.fromCode(error.code), error.message, error.cause)
+class OCastInputSettingsError internal constructor(error: OCastError) : ServiceError<OCastInputSettingsError.Status>(error, Status::class.java), LoggableError {
 
     /**
      * Represents the status of an [OCastInputSettingsError].
@@ -170,13 +180,7 @@ data class OCastInputSettingsError(val status: Status, override val message: Str
  * @property cause The cause of the error, if any.
  * @constructor Creates an [OCastMediaError].
  */
-data class OCastMediaError(val status: Status, override val message: String, override val cause: Throwable? = null) : LoggableError {
-
-    /**
-     * @param error The generic OCast error.
-     * @constructor Creates an instance of [OCastMediaError] from a generic [OCastError].
-     */
-    constructor(error: OCastError) : this(ErrorStatus.fromCode(error.code), error.message, error.cause)
+class OCastMediaError internal constructor(error: OCastError) : ServiceError<OCastMediaError.Status>(error, Status::class.java), LoggableError {
 
     /**
      * Represents the status of an [OCastMediaError].
