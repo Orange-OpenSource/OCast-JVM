@@ -22,6 +22,7 @@ import org.junit.Test
 import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
+import org.ocast.sdk.common.Assert.assertSsdpMessageEquals
 
 /**
  * Unit tests for the [SsdpMessage] class.
@@ -180,26 +181,6 @@ class SsdpMessageTest {
             // Then
             assertNull(message)
         }
-
-        /**
-         * Asserts that two SSDP messages are equal.
-         *
-         * @param expected Expected SSDP message.
-         * @param actual The SSDP message to check against [expected].
-         */
-        private fun assertSsdpMessageEquals(expected: String, actual: String) {
-            val newlineRegex = "\\R".toRegex()
-            val expectedLines = expected.split(newlineRegex).toMutableList()
-            val actualLines = actual.split(newlineRegex).toMutableList()
-
-            // Assert start lines are the same
-            val expectedStartLine = expectedLines.removeAt(0)
-            val actualStartLine = actualLines.removeAt(0)
-            assertEquals(expectedStartLine, actualStartLine)
-
-            // Assert other lines are the same, possibly in a different order
-            assertEquals(expectedLines.sort(), actualLines.sort())
-        }
     }
 
     @RunWith(Parameterized::class)
@@ -213,7 +194,7 @@ class SsdpMessageTest {
         }
 
         @Test
-        fun parseMSearchResponseWithParameterizedNewlinesSucceeds() {
+        fun parseMSearchResponseWithParameterizedNewlineSucceeds() {
             // Given
             val mSearchResponseString = "HTTP/1.1 200 OK$newline" +
                     "LOCATION: http://10.0.0.28:56790/device-desc.xml$newline" +
