@@ -248,10 +248,18 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     }
 
     override fun disconnect(onSuccess: Runnable, onError: Consumer<OCastError>) {
-        if (state != State.DISCONNECTING && state != State.DISCONNECTED) {
-            state = State.DISCONNECTING
-            disconnectCallback = RunnableCallback(onSuccess, onError)
-            webSocketsById.values.forEach { it.disconnect() }
+        when (state) {
+            State.CONNECTING -> onError.wrapRun(OCastError("Failed to disconnect from $friendlyName, device is connecting").log())
+            State.CONNECTED -> {
+                state = State.DISCONNECTING
+                disconnectCallback = RunnableCallback(onSuccess, onError)
+                webSocketsById.values.forEach { it.disconnect() }
+            }
+            State.DISCONNECTING -> onError.wrapRun(OCastError("Failed to disconnect from $friendlyName, device is already disconnecting").log())
+            State.DISCONNECTED -> {
+                OCastLog.info { "Already disconnected from $friendlyName" }
+                onSuccess.wrapRun()
+            }
         }
     }
 
