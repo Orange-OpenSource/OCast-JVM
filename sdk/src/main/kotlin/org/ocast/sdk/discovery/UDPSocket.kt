@@ -51,6 +51,9 @@ internal open class UDPSocket(private val port: Short = 0) {
     /** The socket. */
     private var socket: MulticastSocket? = null
 
+    /** The actual port of the socket. Can be different from `port` if a random port is used. */
+    private var actualPort: Int? = null
+
     /** The thread to receive datagrams. */
     private var receiverThread: Thread? = null
 
@@ -67,7 +70,8 @@ internal open class UDPSocket(private val port: Short = 0) {
     fun open() {
         if (socket == null || socket?.isClosed == true) {
             socket = createSocket(port)
-            OCastLog.debug { "UDP socket with port $port is opened" }
+            actualPort = socket?.localPort
+            OCastLog.debug { "UDP socket with port $actualPort is opened" }
             startReceiverThread()
         }
     }
@@ -79,7 +83,7 @@ internal open class UDPSocket(private val port: Short = 0) {
         receiverThread = null
         // Closing the socket will terminate the receiver thread
         socket?.close()
-        OCastLog.debug { "UDP socket with port $port is closed" }
+        OCastLog.debug { "UDP socket with port $actualPort is closed" }
     }
 
     /**
@@ -94,14 +98,14 @@ internal open class UDPSocket(private val port: Short = 0) {
     open fun send(payload: ByteArray, host: String, port: Short) {
         if (socket == null) {
             throw SocketException("Socket is not opened").also { exception ->
-                OCastLog.error(exception) { "Failed to send payload on UDP socket with port $port" }
+                OCastLog.error(exception) { "Failed to send payload on UDP socket with port $actualPort" }
             }
         }
 
         val address = InetAddress.getByName(host)
         val packet = DatagramPacket(payload, payload.size, address, port.toInt())
         socket?.send(packet)
-        OCastLog.debug { "Sent payload on UDP socket with port $port:\n${String(payload).prependIndent()}" }
+        OCastLog.debug { "Sent payload on UDP socket with port $actualPort:\n${String(payload).prependIndent()}" }
     }
 
     /**
@@ -127,19 +131,19 @@ internal open class UDPSocket(private val port: Short = 0) {
                         socket?.receive(packet)
                         // Take only the needed bytes because packet is reused and old data could be appended at the end
                         val data = packet.data.take(packet.length).toByteArray()
-                        OCastLog.debug { "Received data on UDP socket with port $port:\n${String(data).prependIndent()}" }
+                        OCastLog.debug { "Received data on UDP socket with port $actualPort:\n${String(data).prependIndent()}" }
                         listener?.onDataReceived(this, data, packet.address.hostName)
                     }
                 } catch (exception: SocketException) {
                     val error = if (socket?.isClosed == true) null else exception
                     if (error != null) {
-                        OCastLog.error(exception) { "UDP socket with port $port did close" }
+                        OCastLog.error(exception) { "UDP socket with port $actualPort did close" }
                     } else {
-                        OCastLog.debug { "UDP socket with port $port did close successfully" }
+                        OCastLog.debug { "UDP socket with port $actualPort did close successfully" }
                     }
                     listener?.onSocketClosed(this, error)
                 } catch (exception: IOException) {
-                    OCastLog.error(exception) { "UDP socket with port $port did close" }
+                    OCastLog.error(exception) { "UDP socket with port $actualPort did close" }
                     listener?.onSocketClosed(this, exception)
                 }
             }
