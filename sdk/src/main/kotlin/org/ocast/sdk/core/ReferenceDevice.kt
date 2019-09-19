@@ -234,9 +234,9 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
             }
             State.DISCONNECTING -> onError.wrapRun(OCastError("Failed to connect to $friendlyName, device is disconnecting").log())
             State.DISCONNECTED -> {
+                state = State.CONNECTING
                 onCreateWebSockets(sslConfiguration, Consumer { webSocketsById ->
                     this.webSocketsById = webSocketsById
-                    state = State.CONNECTING
                     connectCallback = RunnableCallback(onSuccess, onError)
                     webSocketsById.values.forEach { webSocket ->
                         OCastLog.debug { "Created web socket with ID ${webSocket.id} and url ${webSocket.webSocketURL} for $friendlyName" }
