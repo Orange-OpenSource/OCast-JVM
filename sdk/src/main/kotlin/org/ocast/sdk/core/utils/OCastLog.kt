@@ -50,7 +50,10 @@ class OCastLog {
         /** The log tag. */
         @PublishedApi
         internal val tag: String
-            get() = callingStackFrame?.className.orEmpty()
+            get() = callingStackFrame
+                    ?.className
+                    ?.substringBefore("$")
+                    .orEmpty()
 
         /** The calling stack frame. */
         private val callingStackFrame: StackTraceElement?
