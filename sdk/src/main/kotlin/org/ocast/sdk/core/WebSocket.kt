@@ -143,9 +143,9 @@ open class WebSocket(val webSocketURL: String, private val sslConfiguration: SSL
             false
         }.also { success ->
             if (success) {
-                OCastLog.debug { "Sent message on web socket with URL $webSocketURL:\n${message.prependIndent()}" }
+                OCastLog.debug { "Sent message on web socket with URL $webSocketURL:\n${message.trim().prependIndent()}" }
             } else {
-                OCastLog.error { "Failed to send message on web socket with URL $webSocketURL:\n${message.prependIndent()}" }
+                OCastLog.error { "Failed to send message on web socket with URL $webSocketURL:\n${message.trim().prependIndent()}" }
             }
         }
     }
@@ -160,7 +160,7 @@ open class WebSocket(val webSocketURL: String, private val sslConfiguration: SSL
 
     override fun onMessage(webSocket: okhttp3.WebSocket, text: String) {
         if (this.webSocket == webSocket) {
-            OCastLog.debug { "Received message on web socket with URL $webSocketURL:\n${text.prependIndent()}" }
+            OCastLog.debug { "Received message on web socket with URL $webSocketURL:\n${text.trim().prependIndent()}" }
             listener.onDataReceived(this, text)
         }
     }

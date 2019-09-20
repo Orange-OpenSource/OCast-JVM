@@ -118,7 +118,7 @@ internal class DialClient(private val baseURL: URL) {
                         DialApplication.decode(xml.orEmpty())
                     }
                     .onFailure { OCastLog.error(it) { "Failed to retrieve information for DIAL application $name on host ${baseURL.host}" } }
-                    .onSuccess { OCastLog.debug { "Retrieved information for DIAL application $name on host ${baseURL.host}:\n${xml.orEmpty().prependIndent()}" } }
+                    .onSuccess { OCastLog.debug { "Retrieved information for DIAL application $name on host ${baseURL.host}:\n${xml.orEmpty().trim().prependIndent()}" } }
                 onComplete(result)
             }
         } catch (exception: Exception) {
