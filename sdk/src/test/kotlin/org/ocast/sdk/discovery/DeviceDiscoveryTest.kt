@@ -492,10 +492,13 @@ class DeviceDiscoveryTest {
     @Test
     fun stopDiscoveryAfterUnexpectedStopFails() {
         // Given
+        val throwable = Throwable()
         doAnswer {
             Timer().schedule(100L) {
-                socket.listener?.onSocketClosed(socket, Throwable())
+                socket.listener?.onSocketClosed(socket, throwable)
             }
+        }.doAnswer {
+            // Following calls do nothing
         }.whenever(socket).send(any(), any(), any())
 
         // When
@@ -505,6 +508,7 @@ class DeviceDiscoveryTest {
 
         // Then
         assert(!success)
+        verify(listener, times(1)).onDiscoveryStopped(eq(throwable))
     }
 
     //endregion
