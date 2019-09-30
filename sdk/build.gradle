@@ -51,6 +51,7 @@ dependencies {
     api "com.squareup.okhttp3:okhttp:$okhttp_version"
     api "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version"
     api "com.fasterxml.jackson.datatype:jackson-datatype-json-org:$jackson_version"
+    api "com.intellij:annotations:$annotations_version"
 
     testImplementation "junit:junit:$junit_version"
     testImplementation "org.mockito:mockito-core:$mockito_core_version"
