@@ -82,11 +82,9 @@ android {
 
 dependencies {
     api project(':sdk')
+    api "androidx.mediarouter:mediarouter:$media_router_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation "androidx.legacy:legacy-support-v4:$legacy_support_version"
-    implementation "androidx.appcompat:appcompat:$app_compat_version"
-    implementation "androidx.mediarouter:mediarouter:$media_router_version"
-    implementation "androidx.multidex:multidex:$multidex_version"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     androidTestImplementation "androidx.test:runner:$runner_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
