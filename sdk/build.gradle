@@ -47,9 +47,9 @@ jar {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-json-org:$jackson_version"
+    api "com.squareup.okhttp3:okhttp:$okhttp_version"
+    api "com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_version"
+    api "com.fasterxml.jackson.datatype:jackson-datatype-json-org:$jackson_version"
 
     testImplementation "junit:junit:$junit_version"
     testImplementation "org.mockito:mockito-core:$mockito_core_version"

@@ -50,8 +50,8 @@ android {
 }
 
 dependencies {
-    implementation project(':sdk')
-    implementation project(':mediaroute')
+    api project(':sdk')
+    api project(':mediaroute')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "androidx.mediarouter:mediarouter:$media_router_version"
     implementation "androidx.legacy:legacy-support-v4:$legacy_support_version"

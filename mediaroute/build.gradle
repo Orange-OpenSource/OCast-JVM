@@ -81,7 +81,7 @@ android {
 }
 
 dependencies {
-    implementation project(':sdk')
+    api project(':sdk')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "androidx.legacy:legacy-support-v4:$legacy_support_version"
     implementation "androidx.appcompat:appcompat:$app_compat_version"
