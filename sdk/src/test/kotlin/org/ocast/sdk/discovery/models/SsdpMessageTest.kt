@@ -29,7 +29,7 @@ import org.ocast.sdk.common.Assert.assertSsdpMessageEquals
  * Please note that newlines in raw strings literals are encoded as "\n" and not "\r\n".
  */
 @RunWith(Enclosed::class)
-class SsdpMessageTest {
+internal class SsdpMessageTest {
 
     class NotParameterized {
 

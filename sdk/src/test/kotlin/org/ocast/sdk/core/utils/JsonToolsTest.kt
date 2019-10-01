@@ -26,7 +26,7 @@ import org.ocast.sdk.core.models.Bitflag
 /**
  * Unit tests for the JsonTools object.
  */
-class JsonToolsTest {
+internal class JsonToolsTest {
 
     //region RawJsonDeserializer
 

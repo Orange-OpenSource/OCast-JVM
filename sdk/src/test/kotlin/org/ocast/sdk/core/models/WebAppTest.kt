@@ -23,7 +23,7 @@ import org.ocast.sdk.core.utils.JsonTools
 /**
  * Unit tests for model classes related to web app service.
  */
-class WebAppTest {
+internal class WebAppTest {
 
     @Test
     fun decodeWebAppConnectedStatusEventSucceeds() {

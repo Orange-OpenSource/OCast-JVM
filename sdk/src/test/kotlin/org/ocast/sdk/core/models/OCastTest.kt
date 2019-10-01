@@ -25,7 +25,7 @@ import org.ocast.sdk.core.utils.JsonTools
 /**
  * Unit tests for the OCast model.
  */
-class OCastTest {
+internal class OCastTest {
 
     //region Device layer
 

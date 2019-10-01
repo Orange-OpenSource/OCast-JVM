@@ -22,7 +22,7 @@ import org.junit.Test
 /**
  * Unit tests for the [XMLParser] class.
  */
-class XMLParserTest {
+internal class XMLParserTest {
 
     @Test
     fun parseXMLSucceeds() {
