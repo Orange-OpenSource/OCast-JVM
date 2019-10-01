@@ -290,22 +290,30 @@ class OCastReplyEventParams(
 /**
  * Represents parameters for the data layer of a command.
  *
+ * @param T The type of the class derived from this class. This class uses recursive generics as a trick to implement self type.
  * @property name The name of the command.
  * @constructor Creates an instance of [OCastCommandParams].
  */
-open class OCastCommandParams(
+abstract class OCastCommandParams<T>(
     @JsonIgnore val name: String
-) {
+) where T : OCastCommandParams<T> {
 
     /** The data layer builder. */
-    private val builder by lazy { OCastDataLayerBuilder(name, this) }
+    private val builder by lazy { OCastDataLayerBuilder(name, self) }
+
+    /** Returns `this` cast as `T`. */
+    @Suppress("UNCHECKED_CAST")
+    private val self: T
+        // The cast is safe provid`ing that T is the type of the class derived from this class
+        // This is a hole that is inherent to recursive generics and self typed classes
+        get() = this as T
 
     /**
      * Builds an instance of [OCastDataLayer] from the command parameters and options.
      *
      * @return The built data layer.
      */
-    fun build(): OCastDataLayer<OCastCommandParams> {
+    fun build(): OCastDataLayer<T> {
         return builder.build()
     }
 
@@ -315,7 +323,11 @@ open class OCastCommandParams(
      * @param options The options to apply.
      * @return `this`.
      */
-    fun options(options: JSONObject?) = apply { builder.options(options) }
+    fun options(options: JSONObject?): T {
+        builder.options(options)
+
+        return self
+    }
 }
 
 /**

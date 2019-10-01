@@ -51,14 +51,14 @@ class DeviceMessage<T>(data: OCastDataLayer<T>) : OCastApplicationLayer<T>(Setti
  *
  * @constructor Creates an instance of [GetUpdateStatusCommandParams].
  */
-class GetUpdateStatusCommandParams : OCastCommandParams("getUpdateStatus")
+class GetUpdateStatusCommandParams : OCastCommandParams<GetUpdateStatusCommandParams>("getUpdateStatus")
 
 /**
  * Represents the parameters of a `getDeviceID` command.
  *
  * @constructor Creates an instance of [GetDeviceIDCommandParams].
  */
-class GetDeviceIDCommandParams : OCastCommandParams("getDeviceID")
+class GetDeviceIDCommandParams : OCastCommandParams<GetDeviceIDCommandParams>("getDeviceID")
 
 /**
  * Represents the parameters of a `keyPressed` command.
@@ -80,7 +80,7 @@ class SendKeyEventCommandParams(
     @JsonProperty("shift") val shift: Boolean,
     @JsonProperty("meta") val meta: Boolean,
     @JsonProperty("location") val location: DOMKeyLocation
-) : OCastCommandParams("keyPressed") {
+) : OCastCommandParams<SendKeyEventCommandParams>("keyPressed") {
 
     /**
      * Represents the location of a key on the keyboard.
@@ -135,7 +135,7 @@ class SendMouseEventCommandParams(
     @JsonProperty("y") val y: Int,
     @JsonSerialize(using = BitflagsSerializer::class)
     @JsonProperty("buttons") val buttons: EnumSet<Button>
-) : OCastCommandParams("mouseEvent") {
+) : OCastCommandParams<SendMouseEventCommandParams>("mouseEvent") {
 
     /**
      * Represents a mouse button.
@@ -170,7 +170,7 @@ class SendGamepadEventCommandParams(
     @JsonProperty("axes") val axes: List<Axis>,
     @JsonSerialize(using = BitflagsSerializer::class)
     @JsonProperty("buttons") val buttons: EnumSet<Button>
-) : OCastCommandParams("gamepadEvent") {
+) : OCastCommandParams<SendGamepadEventCommandParams>("gamepadEvent") {
 
     /**
      * Represents a gamepad axis.

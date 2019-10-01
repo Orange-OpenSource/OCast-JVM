@@ -241,7 +241,22 @@ class OCastTest {
         assertEquals(JsonTools.objectMapper.readTree(oCastMessage), JsonTools.objectMapper.readTree(layerMessage))
     }
 
-    class CustomCommandParams(@JsonProperty("my param") val myParam: String) : OCastCommandParams("my command")
+    class CustomCommandParams(@JsonProperty("my param") val myParam: String) : OCastCommandParams<CustomCommandParams>("my command")
+
+    @Test
+    fun buildDataLayerSucceeds() {
+        // Given
+        val params = CustomCommandParams("1234azertyuiop")
+        val options = JSONObject(hashMapOf("my option" to "azertyuiop1234"))
+
+        // When
+        val dataLayer = params.options(options).build()
+
+        // Then
+        assertEquals("my command", dataLayer.name)
+        assertEquals("1234azertyuiop", dataLayer.params.myParam)
+        assertEquals("azertyuiop1234", dataLayer.options?.get("my option"))
+    }
 
     @Test
     fun encodeCustomCommandSucceeds() {
