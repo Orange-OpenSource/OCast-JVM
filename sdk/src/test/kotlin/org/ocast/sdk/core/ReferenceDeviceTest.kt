@@ -382,7 +382,7 @@ internal class ReferenceDeviceTest : HttpClientTest() {
     }
 
     @Test
-    fun unexpectedDisconnectCallsDeviceListenerOnDeviceDisconnected() {
+    fun webSocketFailureCallsDeviceListenerOnDeviceDisconnectedWithError() {
         // Given
         awaitDeviceConnected()
 

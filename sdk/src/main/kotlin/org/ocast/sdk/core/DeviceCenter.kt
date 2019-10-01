@@ -36,9 +36,15 @@ import org.ocast.sdk.discovery.models.UpnpDevice
  * `registerDevice(@NotNull Class deviceClass)` method. Then add a [DeviceListener] with
  * `addDeviceListener(@NotNull DeviceListener listener)` and start the discovery with `resumeDiscovery()`.
  *
- * @constructor Creates an instance of [DeviceCenter].
+ * @property deviceDiscovery The object which manages the discovery of OCast devices.
+ * @constructor Creates an instance of [DeviceCenter] with a device discovery.
  */
-open class DeviceCenter : CallbackWrapperOwner {
+open class DeviceCenter internal constructor(private val deviceDiscovery: DeviceDiscovery) : CallbackWrapperOwner {
+
+    /**
+     * @constructor Creates an instance of [DeviceCenter].
+     */
+    constructor() : this(DeviceDiscovery())
 
     /**
      * The companion object.
@@ -57,9 +63,6 @@ open class DeviceCenter : CallbackWrapperOwner {
             field = value
             devices.forEach { it.callbackWrapper = value }
         }
-
-    /** The object which manages the discovery of OCast devices. */
-    private val deviceDiscovery = DeviceDiscovery()
 
     /** The list of registered OCast event listeners. */
     private val eventListeners = mutableSetOf<EventListener>()
