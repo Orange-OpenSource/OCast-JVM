@@ -34,7 +34,6 @@ internal class JsonToolsTest {
      * This class represents a container of a raw JSON string.
      */
     class RawJsonContainer(
-
         /** The raw JSON string */
         @JsonDeserialize(using = RawJsonDeserializer::class)
         val rawJson: String

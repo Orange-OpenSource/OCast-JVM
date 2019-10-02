@@ -157,7 +157,7 @@ internal class DeviceCenterTest {
         val devicesCaptor = argumentCaptor<List<Device>>()
         verify(deviceListeners[0], times(1)).onDevicesChanged(devicesCaptor.capture())
         verify(deviceListeners[1], times(1)).onDevicesChanged(devicesCaptor.capture())
-        verify(deviceListeners[2], never()).onDevicesRemoved(any())
+        verify(deviceListeners[2], never()).onDevicesChanged(any())
         assertEquals(1, devicesCaptor.firstValue.size)
         val changedDevice = devicesCaptor.firstValue.firstOrNull()
         assertEquals(addedDevice.upnpID, changedDevice?.upnpID)

@@ -58,6 +58,7 @@ internal class WebSocketTest {
 
     /** The web socket. */
     private val webSocket = object : WebSocket("wss://localhost", null, listener) {
+
         override fun createWebSocket(): okhttp3.WebSocket {
             // The connect method is called in the RealWebSocket constructor
             return realWebSocket.apply { connect(mock()) }
@@ -92,7 +93,7 @@ internal class WebSocketTest {
 
         // When
         webSocket.connect()
-        webSocket.connect() // Also test that onSocketConnected is called only once
+        webSocket.connect() // Also test that onConnected is called only once
 
         // Then
         Thread.sleep(200)
@@ -128,7 +129,7 @@ internal class WebSocketTest {
         // When
         Thread.sleep(200)
         webSocket.disconnect()
-        webSocket.disconnect() // Also test that onSocketDisconnected is called only once
+        webSocket.disconnect() // Also test that onDisconnected is called only once
 
         // Then
         Thread.sleep(200)

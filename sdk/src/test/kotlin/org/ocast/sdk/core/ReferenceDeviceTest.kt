@@ -296,6 +296,7 @@ internal class ReferenceDeviceTest : HttpClientTest() {
         val onSuccess = mock<Runnable>()
         val synchronizedOnSuccess = SynchronizedRunnable(onSuccess)
         val onError = mock<Consumer<OCastError>>()
+        assertEquals(Device.State.DISCONNECTED, referenceDevice.state)
 
         // When
         referenceDevice.disconnect(synchronizedOnSuccess, onError)
@@ -378,7 +379,6 @@ internal class ReferenceDeviceTest : HttpClientTest() {
         assertEquals(OCastError.Status.CLIENT_ERROR.code, errorCaptor.firstValue.code)
         assertEquals(throwable, errorCaptor.firstValue.cause)
         assertEquals(Device.State.DISCONNECTED, referenceDevice.state)
-        verify(deviceListener, never()).onDeviceDisconnected(any(), anyOrNull())
     }
 
     @Test
@@ -844,7 +844,6 @@ internal class ReferenceDeviceTest : HttpClientTest() {
 
         // When
         referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
-        Thread.sleep(200)
         referenceDevice.disconnect({}, {})
 
         // Then
@@ -998,7 +997,7 @@ internal class ReferenceDeviceTest : HttpClientTest() {
     fun sendMessageWithEncodeErrorFails() {
         // Given
         awaitDeviceConnected()
-        val data = OCastDataLayer("commandName", Object(), null) // Jackson cannot encode empty beans
+        val data = OCastDataLayer("commandName", Object(), null) // Jackson cannot encode empty beans like Object
         val message = OCastApplicationLayer("org.ocast.service", data)
         val onSuccess = mock<Consumer<TestReplyParams>>()
         val onError = mock<Consumer<OCastError>>()
@@ -1209,7 +1208,7 @@ internal class ReferenceDeviceTest : HttpClientTest() {
         scheduleReceivedMessages(receivedMessage to 100)
 
         // Then
-        Thread.sleep(2000) // For some reason decoding JSON on a background thread takes a lot of time
+        Thread.sleep(2000) // Decoding JSON on a background thread for the first time takes a lot of time
         val playbackStatusCaptor = argumentCaptor<MediaPlaybackStatus>()
         verify(eventListener, times(1)).onMediaPlaybackStatus(eq(referenceDevice), playbackStatusCaptor.capture())
         val playbackStatus = playbackStatusCaptor.firstValue
@@ -1260,7 +1259,7 @@ internal class ReferenceDeviceTest : HttpClientTest() {
         scheduleReceivedMessages(receivedMessage to 100)
 
         // Then
-        Thread.sleep(2000) // For some reason decoding JSON on a background thread takes a lot of time
+        Thread.sleep(2000) // Decoding JSON on a background thread for the first time takes a lot of time
         val metadataCaptor = argumentCaptor<MediaMetadata>()
         verify(eventListener, times(1)).onMediaMetadataChanged(eq(referenceDevice), metadataCaptor.capture())
         val metadata = metadataCaptor.firstValue
@@ -1307,7 +1306,7 @@ internal class ReferenceDeviceTest : HttpClientTest() {
         scheduleReceivedMessages(receivedMessage to 100)
 
         // Then
-        Thread.sleep(2000) // For some reason decoding JSON on a background thread takes a lot of time
+        Thread.sleep(2000) // Decoding JSON on a background thread for the first time takes a lot of time
         val updateStatusCaptor = argumentCaptor<UpdateStatus>()
         verify(eventListener, times(1)).onUpdateStatus(eq(referenceDevice), updateStatusCaptor.capture())
         val updateStatus = updateStatusCaptor.firstValue
@@ -1343,7 +1342,7 @@ internal class ReferenceDeviceTest : HttpClientTest() {
         scheduleReceivedMessages(receivedMessage to 100)
 
         // Then
-        Thread.sleep(2000) // For some reason decoding JSON on a background thread takes a lot of time
+        Thread.sleep(2000) // Decoding JSON on a background thread for the first time takes a lot of time
         verify(eventListener, times(1)).onCustomEvent(eq(referenceDevice), eq("customEvent"), eq("{\"paramName\":\"paramValue\"}"))
     }
 
