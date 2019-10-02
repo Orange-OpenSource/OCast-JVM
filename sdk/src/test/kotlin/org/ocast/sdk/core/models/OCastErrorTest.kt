@@ -28,7 +28,7 @@ import org.junit.runners.Parameterized
  * Unit tests for OCast error classes.
  */
 @RunWith(Enclosed::class)
-internal class OCastErrorTest {
+class OCastErrorTest {
 
     @RunWith(Parameterized::class)
     class WithParameterizedStatusEnumClasses<T>(private val statusEnumClass: Class<T>) where T : Enum<T>, T : ErrorStatus {

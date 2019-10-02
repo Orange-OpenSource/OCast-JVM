@@ -73,7 +73,7 @@ import org.powermock.modules.junit4.PowerMockRunner
 @RunWith(PowerMockRunner::class)
 @PowerMockIgnore("javax.net.ssl.*") // This fixes a java.lang.AssertionError with OkHttp and PowerMock
 @PrepareForTest(fullyQualifiedNames = ["okhttp3.internal.ws.RealWebSocket", "org.ocast.sdk.core.*"])
-internal class ReferenceDeviceTest : HttpClientTest() {
+class ReferenceDeviceTest : HttpClientTest() {
 
     /** The reference device. */
     private val referenceDevice = ReferenceDevice(UpnpDevice(), DialClient(baseURL), 5)
@@ -1208,7 +1208,7 @@ internal class ReferenceDeviceTest : HttpClientTest() {
         scheduleReceivedMessages(receivedMessage to 100)
 
         // Then
-        Thread.sleep(2000) // Decoding JSON on a background thread for the first time takes a lot of time
+        Thread.sleep(3000) // Decoding JSON on a background thread for the first time takes a lot of time
         val playbackStatusCaptor = argumentCaptor<MediaPlaybackStatus>()
         verify(eventListener, times(1)).onMediaPlaybackStatus(eq(referenceDevice), playbackStatusCaptor.capture())
         val playbackStatus = playbackStatusCaptor.firstValue
@@ -1259,7 +1259,7 @@ internal class ReferenceDeviceTest : HttpClientTest() {
         scheduleReceivedMessages(receivedMessage to 100)
 
         // Then
-        Thread.sleep(2000) // Decoding JSON on a background thread for the first time takes a lot of time
+        Thread.sleep(3000) // Decoding JSON on a background thread for the first time takes a lot of time
         val metadataCaptor = argumentCaptor<MediaMetadata>()
         verify(eventListener, times(1)).onMediaMetadataChanged(eq(referenceDevice), metadataCaptor.capture())
         val metadata = metadataCaptor.firstValue
@@ -1306,7 +1306,7 @@ internal class ReferenceDeviceTest : HttpClientTest() {
         scheduleReceivedMessages(receivedMessage to 100)
 
         // Then
-        Thread.sleep(2000) // Decoding JSON on a background thread for the first time takes a lot of time
+        Thread.sleep(3000) // Decoding JSON on a background thread for the first time takes a lot of time
         val updateStatusCaptor = argumentCaptor<UpdateStatus>()
         verify(eventListener, times(1)).onUpdateStatus(eq(referenceDevice), updateStatusCaptor.capture())
         val updateStatus = updateStatusCaptor.firstValue
@@ -1342,7 +1342,7 @@ internal class ReferenceDeviceTest : HttpClientTest() {
         scheduleReceivedMessages(receivedMessage to 100)
 
         // Then
-        Thread.sleep(2000) // Decoding JSON on a background thread for the first time takes a lot of time
+        Thread.sleep(3000) // Decoding JSON on a background thread for the first time takes a lot of time
         verify(eventListener, times(1)).onCustomEvent(eq(referenceDevice), eq("customEvent"), eq("{\"paramName\":\"paramValue\"}"))
     }
 

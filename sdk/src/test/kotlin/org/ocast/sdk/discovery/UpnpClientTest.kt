@@ -43,7 +43,7 @@ import org.powermock.modules.junit4.PowerMockRunner
  * Unit tests for the [UpnpClient] class.
  */
 @RunWith(Enclosed::class)
-internal class UpnpClientTest {
+class UpnpClientTest {
 
     @RunWith(PowerMockRunner::class)
     @PowerMockIgnore("javax.net.ssl.*") // This fixes a java.lang.AssertionError with OkHttp and PowerMock

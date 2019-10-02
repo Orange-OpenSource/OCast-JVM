@@ -42,7 +42,7 @@ import org.ocast.sdk.dial.models.DialApplication
  * Unit tests for the [DialClient] class.
  */
 @RunWith(Enclosed::class)
-internal class DialClientTest {
+class DialClientTest {
 
     class NotParameterized : HttpClientTest() {
 
@@ -456,7 +456,7 @@ internal class DialClientTest {
     }
 
     @RunWith(Parameterized::class)
-    class WithParameterizedStates(private val state: Pair<String, DialApplication.State>) : HttpClientTest() {
+    class WithParameterizedStates internal constructor(private val state: Pair<String, DialApplication.State>) : HttpClientTest() {
 
         /** The instance of [DialClient] to test. */
         private val dialClient = DialClient(baseURL)
@@ -465,7 +465,7 @@ internal class DialClientTest {
 
             @JvmStatic
             @Parameterized.Parameters
-            fun data() = listOf(
+            internal fun data() = listOf(
                 "running" to DialApplication.State.Running,
                 "stopped" to DialApplication.State.Stopped,
                 "installable=http://" to DialApplication.State.Installable(URL("http://")),

@@ -44,7 +44,7 @@ import org.ocast.sdk.discovery.models.UpnpDevice
 /**
  * Unit tests for the [DeviceDiscovery] class.
  */
-internal class DeviceDiscoveryTest {
+class DeviceDiscoveryTest {
 
     /** The mocked socket. */
     private val socket = spy<UDPSocket>()

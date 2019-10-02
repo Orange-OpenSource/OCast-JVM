@@ -45,7 +45,7 @@ import org.powermock.modules.junit4.PowerMockRunner
  */
 @RunWith(PowerMockRunner::class)
 @PrepareForTest(RealWebSocket::class)
-internal class WebSocketTest {
+class WebSocketTest {
 
     /** The socket listener. */
     private val listener = mock<WebSocket.Listener>()

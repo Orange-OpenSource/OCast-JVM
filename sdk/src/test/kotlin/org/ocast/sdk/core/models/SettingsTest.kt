@@ -25,7 +25,7 @@ import org.ocast.sdk.core.utils.JsonTools
 /**
  * Unit tests for model classes related to settings services.
  */
-internal class SettingsTest {
+class SettingsTest {
 
     //region Commands
 

@@ -25,7 +25,7 @@ import org.ocast.sdk.core.utils.JsonTools
 /**
  * Unit tests for model classes related to media service.
  */
-internal class MediaTest {
+class MediaTest {
 
     //region Commands
 

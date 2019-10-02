@@ -47,7 +47,7 @@ import org.ocast.sdk.discovery.models.UpnpDevice
 /**
  * Unit tests for the [DeviceCenter] class.
  */
-internal class DeviceCenterTest {
+class DeviceCenterTest {
 
     /** The UDP socket used for the discovery. */
     private val socket = spy<UDPSocket>()

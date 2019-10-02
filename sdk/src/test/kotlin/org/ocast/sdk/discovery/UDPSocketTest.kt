@@ -42,7 +42,7 @@ import org.mockito.stubbing.Answer
 /**
  * Unit tests for the [UDPSocket] class.
  */
-internal class UDPSocketTest {
+class UDPSocketTest {
 
     /**
      * This class is used to stub the receive method of a mocked [MulticastSocket].
