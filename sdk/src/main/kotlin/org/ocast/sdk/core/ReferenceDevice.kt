@@ -543,11 +543,11 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
      */
     protected fun sendToWebSocket(id: Long, message: String, startApplicationIfNeeded: Boolean, onError: Consumer<OCastError>) {
         val send = {
-            if (webSocketsById[REFERENCE_WEB_SOCKET_ID]?.send(message) == false) {
+            if (webSocketsById[REFERENCE_WEB_SOCKET_ID]?.send(message) == true) {
+                OCastLog.info { "Sent command with ID $id to $friendlyName:\n${message.trim().prependIndent()}" }
+            } else {
                 replyCallbacksBySequenceID.remove(id)
                 onError.wrapRun(OCastError("Failed to send command with ID $id to $friendlyName:\n${message.trim().prependIndent()}").log())
-            } else {
-                OCastLog.info { "Sent command with ID $id to $friendlyName:\n${message.trim().prependIndent()}" }
             }
         }
 
