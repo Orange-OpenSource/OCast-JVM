@@ -263,7 +263,7 @@ device.send(message, OCastDomain.BROWSER, CustomReplyParams.class, customReplyPa
 :small_blue_diamond: Kotlin
 ```kotlin
 class CustomCommandParams(val myParameter: String) : OCastCommandParams("customCommand")
-class CustomReplyParams(myValue: String)
+class CustomReplyParams(val myValue: String)
 
 val data = CustomCommandParams("paramValue").build()
 val message = OCastApplicationLayer("CustomService", data)

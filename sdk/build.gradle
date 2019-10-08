@@ -89,11 +89,15 @@ compileJava {
     options.compilerArgs << "-Xlint:all" << "-Werror"
 }
 
+task testReport(type: TestReport) {
+}
+
 test {
     testLogging {
         events "passed", "skipped", "failed"
         exceptionFormat "full"
     }
+    finalizedBy testReport
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {

@@ -79,9 +79,17 @@ import org.ocast.sdk.discovery.models.UpnpDevice
 /**
  * The reference OCast device.
  *
- * @constructor Creates an instance of [ReferenceDevice].
+ * @param upnpDevice The UPnP device to create the reference device from.
+ * @param dialClient The DIAL client.
+ * @constructor Creates an instance of [ReferenceDevice] from an [UpnpDevice] with additional parameters.
  */
-open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSocket.Listener {
+open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClient: DialClient?, private val webAppConnectedStatusEventTimeout: Long) : Device(upnpDevice), WebSocket.Listener {
+
+    /**
+     * @param upnpDevice The UPnP device to create the reference device from.
+     * @constructor Creates an instance of [ReferenceDevice] from an [UpnpDevice].
+     */
+    constructor(upnpDevice: UpnpDevice) : this(upnpDevice, null, 60)
 
     /**
      * The companion object.
@@ -145,7 +153,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
     protected val replyCallbacksBySequenceID: MutableMap<Long, ReplyCallback<*>> = Collections.synchronizedMap(mutableMapOf())
 
     /** The DIAL client. */
-    private val dialClient = DialClient(dialURL)
+    private val dialClient = dialClient ?: DialClient(dialURL)
 
     /** A boolean which indicates if the web application specified by `applicationName` is currently running or not. */
     protected var isApplicationRunning = AtomicBoolean(false)
@@ -194,7 +202,7 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
                             applicationSemaphore = Semaphore(0)
                             // Semaphore is released when state or application name changes
                             // In these cases onError must be called
-                            if (applicationSemaphore?.tryAcquire(60, TimeUnit.SECONDS) == true && applicationName == name && state == State.CONNECTED) {
+                            if (applicationSemaphore?.tryAcquire(webAppConnectedStatusEventTimeout, TimeUnit.SECONDS) == true && applicationName == name && state == State.CONNECTED) {
                                 OCastLog.info { "Started application $name on $friendlyName" }
                                 onSuccess.wrapRun()
                             } else {
@@ -522,9 +530,9 @@ open class ReferenceDevice(upnpDevice: UpnpDevice) : Device(upnpDevice), WebSock
         try {
             replyCallbacksBySequenceID[id] = ReplyCallback(replyClass, onSuccess, onError)
             val deviceLayer = OCastCommandDeviceLayer(clientUuid, domain.value, id, message)
-            val deviveLayerString = JsonTools.encode(deviceLayer)
+            val deviceLayerString = JsonTools.encode(deviceLayer)
             // Do not start application when sending settings commands
-            sendToWebSocket(id, deviveLayerString, domain == OCastDomain.BROWSER, onError)
+            sendToWebSocket(id, deviceLayerString, domain == OCastDomain.BROWSER, onError)
         } catch (exception: Exception) {
             replyCallbacksBySequenceID.remove(id)
             onError.wrapRun(OCastError("Failed to send command with params ${message.data.params} to $friendlyName, unable to encode device layer", exception).log())

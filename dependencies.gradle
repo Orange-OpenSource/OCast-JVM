@@ -4,7 +4,7 @@ ext {
     target_sdk_version = 29
     build_tools_version = '29.0.2'
 
-    android_gradle_plugin_version = '3.5.0'
+    android_gradle_plugin_version = '3.5.1'
     annotations_version = '12.0'
     bintray_plugin_version = '1.8.4'
     checkstyle_version = '8.23'

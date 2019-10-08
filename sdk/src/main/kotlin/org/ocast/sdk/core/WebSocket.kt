@@ -81,17 +81,7 @@ open class WebSocket(val webSocketURL: String, private val sslConfiguration: SSL
             OCastLog.debug { "Web socket with URL $webSocketURL is connecting" }
             webSocket = null
             try {
-                val builder = OkHttpClient.Builder().apply {
-                    if (sslConfiguration != null) {
-                        sslSocketFactory(sslConfiguration.socketFactory, sslConfiguration.trustManager)
-                        hostnameVerifier(sslConfiguration.hostnameVerifier)
-                    }
-                    pingInterval(PING_INTERVAL, TimeUnit.SECONDS)
-                    connectTimeout(5, TimeUnit.SECONDS)
-                }
-                val client = builder.build()
-                val request = Request.Builder().url(webSocketURL).build()
-                webSocket = client.newWebSocket(request, this)
+                webSocket = createWebSocket()
                 true
             } catch (exception: Exception) {
                 state = State.DISCONNECTED
@@ -148,6 +138,26 @@ open class WebSocket(val webSocketURL: String, private val sslConfiguration: SSL
                 OCastLog.error { "Failed to send message on web socket with URL $webSocketURL:\n${message.trim().prependIndent()}" }
             }
         }
+    }
+
+    /**
+     * Creates and returns a web socket.
+     *
+     * @return The web socket.
+     */
+    protected open fun createWebSocket(): okhttp3.WebSocket {
+        val builder = OkHttpClient.Builder().apply {
+            if (sslConfiguration != null) {
+                sslSocketFactory(sslConfiguration.socketFactory, sslConfiguration.trustManager)
+                hostnameVerifier(sslConfiguration.hostnameVerifier)
+            }
+            pingInterval(PING_INTERVAL, TimeUnit.SECONDS)
+            connectTimeout(5, TimeUnit.SECONDS)
+        }
+        val client = builder.build()
+        val request = Request.Builder().url(webSocketURL).build()
+
+        return client.newWebSocket(request, this)
     }
 
     override fun onOpen(webSocket: okhttp3.WebSocket, response: Response) {
