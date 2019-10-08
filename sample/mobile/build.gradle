@@ -50,12 +50,9 @@ android {
 }
 
 dependencies {
-    implementation project(':sdk')
     implementation project(':mediaroute')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation "androidx.mediarouter:mediarouter:$media_router_version"
-    implementation "androidx.legacy:legacy-support-v4:$legacy_support_version"
-    implementation "androidx.appcompat:appcompat:$app_compat_version"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation "com.google.android.material:material:$material_version"
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
@@ -65,4 +62,10 @@ dependencies {
 
     androidTestImplementation "androidx.test:runner:$runner_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
+}
+
+configurations {
+    all {
+        exclude group: 'org.json', module: 'json'
+    }
 }
