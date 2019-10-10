@@ -26,6 +26,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
 import androidx.mediarouter.app.MediaRouteActionProvider
 import androidx.mediarouter.media.MediaRouter
+import java.util.logging.LogManager
 import org.ocast.mediaroute.OCastMediaRouteHelper
 import org.ocast.sample.mobile.R
 import org.ocast.sample.mobile.databinding.ActivityMainBinding
@@ -37,30 +38,35 @@ import org.ocast.sdk.core.models.Media
 import org.ocast.sdk.core.models.MediaMetadata
 import org.ocast.sdk.core.models.MediaPlaybackStatus
 import org.ocast.sdk.core.models.PrepareMediaCommandParams
+import org.ocast.sdk.core.utils.OCastLog
 
 class MainActivity : AppCompatActivity(), EventListener {
 
     companion object {
+
         private const val TAG = "MainActivity"
     }
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var mainViewModel: MainViewModel
-
     private var mediaRouterCallback = MediaRouterCallback()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         mainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-
         binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main).apply {
             lifecycleOwner = this@MainActivity
             viewModel = mainViewModel
         }
-
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
-
+        try {
+            val inputStream = resources.openRawResource(R.raw.logging)
+            LogManager.getLogManager().readConfiguration(inputStream)
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+        }
+        OCastLog.level = OCastLog.Level.ALL
         OCastMediaRouteHelper.initialize(this, listOf(ReferenceDevice::class.java))
     }
 
@@ -81,13 +87,9 @@ class MainActivity : AppCompatActivity(), EventListener {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         super.onCreateOptionsMenu(menu)
 
-        // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
-
         val mediaRouteMenuItem = menu.findItem(R.id.item_all_media_route)
         val actionProvider = MenuItemCompat.getActionProvider(mediaRouteMenuItem) as MediaRouteActionProvider
-
-        // Set the MediaRouteActionProvider selector for device discovery.
         actionProvider.routeSelector = OCastMediaRouteHelper.mediaRouteSelector
 
         return true
@@ -98,7 +100,7 @@ class MainActivity : AppCompatActivity(), EventListener {
         device.connect(
             null,
             { prepareMedia(device) },
-            { Log.e(TAG, "connect error ${it.message}") }
+            { Log.w(TAG, "connect error ${it.message}") }
         )
     }
 
@@ -116,14 +118,14 @@ class MainActivity : AppCompatActivity(), EventListener {
         device.prepareMedia(
             params,
             null,
-            { Log.d(TAG, "prepareMedia OK") },
-            { Log.e(TAG, "prepareMedia error ${it.status}") }
+            { Log.i(TAG, "prepareMedia OK") },
+            { Log.w(TAG, "prepareMedia error ${it.status}") }
         )
     }
 
     override fun onMediaPlaybackStatus(device: Device, mediaPlaybackStatus: MediaPlaybackStatus) {
         if (mainViewModel.selectedDevice.value == device) {
-            Log.d(TAG, "onMediaPlaybackStatus status=${mediaPlaybackStatus.state} position=${mediaPlaybackStatus.position}")
+            Log.i(TAG, "onMediaPlaybackStatus status=${mediaPlaybackStatus.state} position=${mediaPlaybackStatus.position}")
             mainViewModel.playbackStatus.updateValue(mediaPlaybackStatus)
         }
     }
@@ -138,7 +140,7 @@ class MainActivity : AppCompatActivity(), EventListener {
 
         override fun onRouteSelected(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
             OCastMediaRouteHelper.getDeviceFromRoute(route)?.apply {
-                Log.d(TAG, "OCast device selected: $friendlyName")
+                Log.i(TAG, "OCast device selected: $friendlyName")
                 mainViewModel.selectedDevice.updateValue(this)
                 connect(this)
             }
@@ -146,26 +148,26 @@ class MainActivity : AppCompatActivity(), EventListener {
 
         override fun onRouteUnselected(mediaRouter: MediaRouter?, route: MediaRouter.RouteInfo?) {
             OCastMediaRouteHelper.getDeviceFromRoute(route)?.apply {
-                Log.d(TAG, "OCast device unselected")
+                Log.i(TAG, "OCast device unselected")
                 stopApplication({}, {})
             }
         }
 
         override fun onRouteRemoved(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
             if (OCastMediaRouteHelper.isOCastRouteInfo(route)) {
-                Log.d(TAG, "OCast device removed")
+                Log.i(TAG, "OCast device removed")
             }
         }
 
         override fun onRouteAdded(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
             if (OCastMediaRouteHelper.isOCastRouteInfo(route)) {
-                Log.d(TAG, "OCast device added")
+                Log.i(TAG, "OCast device added")
             }
         }
 
         override fun onRouteChanged(router: MediaRouter?, route: MediaRouter.RouteInfo?) {
             if (OCastMediaRouteHelper.isOCastRouteInfo(route)) {
-                Log.d(TAG, "OCast device changed")
+                Log.i(TAG, "OCast device changed")
             }
         }
     }

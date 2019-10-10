@@ -33,7 +33,7 @@ import org.ocast.sdk.core.utils.OCastLog
  * @property listener The listener of the web socket events.
  * @constructor Creates an instance of [WebSocket].
  */
-open class WebSocket(private val webSocketURL: String, private val sslConfiguration: SSLConfiguration?, private val listener: Listener) : WebSocketListener() {
+open class WebSocket(val webSocketURL: String, private val sslConfiguration: SSLConfiguration?, private val listener: Listener) : WebSocketListener() {
 
     /**
      * The companion object.
@@ -77,25 +77,15 @@ open class WebSocket(private val webSocketURL: String, private val sslConfigurat
      */
     fun connect(): Boolean {
         return if (state == State.DISCONNECTED || state == State.DISCONNECTING) {
-            OCastLog.debug { "Connecting web socket" }
             state = State.CONNECTING
+            OCastLog.debug { "Web socket with URL $webSocketURL is connecting" }
             webSocket = null
             try {
-                val builder = OkHttpClient.Builder().apply {
-                    if (sslConfiguration != null) {
-                        sslSocketFactory(sslConfiguration.socketFactory, sslConfiguration.trustManager)
-                        hostnameVerifier(sslConfiguration.hostnameVerifier)
-                    }
-                    pingInterval(PING_INTERVAL, TimeUnit.SECONDS)
-                    connectTimeout(5, TimeUnit.SECONDS)
-                }
-                val client = builder.build()
-                val request = Request.Builder().url(webSocketURL).build()
-                webSocket = client.newWebSocket(request, this)
+                webSocket = createWebSocket()
                 true
             } catch (exception: Exception) {
-                OCastLog.error(exception) { "Could not create web socket" }
                 state = State.DISCONNECTED
+                OCastLog.error(exception) { "Failed to create web socket with URL $webSocketURL" }
                 listener.onDisconnected(this, exception)
                 false
             }
@@ -111,12 +101,13 @@ open class WebSocket(private val webSocketURL: String, private val sslConfigurat
      */
     fun disconnect(): Boolean {
         return if (state == State.CONNECTED || state == State.CONNECTING) {
-            OCastLog.debug { "Disconnecting web socket" }
             state = State.DISCONNECTING
+            OCastLog.debug { "Web socket with URL $webSocketURL is disconnecting" }
             if (webSocket?.close(1000, "Normal closure") == true) {
                 true
             } else {
                 state = State.DISCONNECTED
+                OCastLog.error { "Failed to disconnect web socket with URL $webSocketURL" }
                 listener.onDisconnected(this, null)
                 false
             }
@@ -133,7 +124,6 @@ open class WebSocket(private val webSocketURL: String, private val sslConfigurat
      */
     fun send(message: String): Boolean {
         return if (state == State.CONNECTED) {
-            OCastLog.debug { "Send message on web socket: $message" }
             if (message.length <= MAX_PAYLOAD_SIZE) {
                 webSocket?.send(message).orFalse()
             } else {
@@ -141,35 +131,62 @@ open class WebSocket(private val webSocketURL: String, private val sslConfigurat
             }
         } else {
             false
+        }.also { success ->
+            if (success) {
+                OCastLog.debug { "Sent message on web socket with URL $webSocketURL:\n${message.trim().prependIndent()}" }
+            } else {
+                OCastLog.error { "Failed to send message on web socket with URL $webSocketURL:\n${message.trim().prependIndent()}" }
+            }
         }
+    }
+
+    /**
+     * Creates and returns a web socket.
+     *
+     * @return The web socket.
+     */
+    protected open fun createWebSocket(): okhttp3.WebSocket {
+        val builder = OkHttpClient.Builder().apply {
+            if (sslConfiguration != null) {
+                sslSocketFactory(sslConfiguration.socketFactory, sslConfiguration.trustManager)
+                hostnameVerifier(sslConfiguration.hostnameVerifier)
+            }
+            pingInterval(PING_INTERVAL, TimeUnit.SECONDS)
+            connectTimeout(5, TimeUnit.SECONDS)
+        }
+        val client = builder.build()
+        val request = Request.Builder().url(webSocketURL).build()
+
+        return client.newWebSocket(request, this)
     }
 
     override fun onOpen(webSocket: okhttp3.WebSocket, response: Response) {
         if (this.webSocket == webSocket) {
-            OCastLog.debug { "Web socket connected" }
             state = State.CONNECTED
+            OCastLog.debug { "Web socket with URL $webSocketURL did connect" }
             listener.onConnected(this)
         }
     }
 
     override fun onMessage(webSocket: okhttp3.WebSocket, text: String) {
         if (this.webSocket == webSocket) {
+            OCastLog.debug { "Received message on web socket with URL $webSocketURL:\n${text.trim().prependIndent()}" }
             listener.onDataReceived(this, text)
         }
     }
 
     override fun onClosed(webSocket: okhttp3.WebSocket, code: Int, reason: String) {
         if (this.webSocket == webSocket) {
-            OCastLog.debug { "Web socket closed with reason: $reason" }
             state = State.DISCONNECTED
+            OCastLog.debug { "Web socket with URL $webSocketURL did disconnect successfully with reason: $reason" }
             listener.onDisconnected(this, null)
         }
     }
 
     override fun onFailure(webSocket: okhttp3.WebSocket, throwable: Throwable, response: Response?) {
         if (this.webSocket == webSocket) {
-            OCastLog.error(throwable) { "Web socket closed with error" }
             state = State.DISCONNECTED
+            OCastLog.error(throwable) { "Web socket with URL $webSocketURL did disconnect" }
             listener.onDisconnected(this, throwable)
         }
     }

@@ -1,4 +1,3 @@
-// ktlint-disable filename
 /*
  * Copyright 2019 Orange
  *
@@ -17,26 +16,28 @@
 
 package org.ocast.sdk.core.models
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import org.junit.Assert.assertEquals
+import org.junit.Test
+import org.ocast.sdk.core.utils.JsonTools
 
 /**
- * Represents the connected status event of a web app.
- *
- * @property status The status of the web app.
- * @constructor Creates an instance of [WebAppConnectedStatusEvent].
+ * Unit tests for model classes related to web app service.
  */
-class WebAppConnectedStatusEvent(
-    @JsonProperty("status") val status: WebAppStatus
-)
+class WebAppTest {
 
-/**
- * Represents the status of a web app.
- */
-enum class WebAppStatus {
+    @Test
+    fun decodeWebAppConnectedStatusEventSucceeds() {
+        // Given
+        val json = """
+            {
+              "status": "connected"
+            }
+        """.trimIndent()
 
-    /** The web app is connected to the web socket server. */
-    @JsonProperty("connected") CONNECTED,
+        // When
+        val webAppConnectedStatusEvent = JsonTools.decode<WebAppConnectedStatusEvent>(json)
 
-    /** The web app is disconnected from the web socket server. */
-    @JsonProperty("disconnected") DISCONNECTED
+        // Then
+        assertEquals(WebAppStatus.CONNECTED, webAppConnectedStatusEvent.status)
+    }
 }

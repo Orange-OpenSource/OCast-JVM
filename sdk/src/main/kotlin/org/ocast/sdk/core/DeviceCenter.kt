@@ -18,9 +18,11 @@ package org.ocast.sdk.core
 
 import java.util.Collections
 import org.ocast.sdk.common.extensions.ifNotNull
+import org.ocast.sdk.common.extensions.orElse
 import org.ocast.sdk.core.models.MediaMetadata
 import org.ocast.sdk.core.models.MediaPlaybackStatus
 import org.ocast.sdk.core.models.UpdateStatus
+import org.ocast.sdk.core.utils.OCastLog
 import org.ocast.sdk.core.wrapper.CallbackWrapper
 import org.ocast.sdk.core.wrapper.CallbackWrapperOwner
 import org.ocast.sdk.core.wrapper.SimpleCallbackWrapper
@@ -34,9 +36,15 @@ import org.ocast.sdk.discovery.models.UpnpDevice
  * `registerDevice(@NotNull Class deviceClass)` method. Then add a [DeviceListener] with
  * `addDeviceListener(@NotNull DeviceListener listener)` and start the discovery with `resumeDiscovery()`.
  *
- * @constructor Creates an instance of [DeviceCenter].
+ * @property deviceDiscovery The object which manages the discovery of OCast devices.
+ * @constructor Creates an instance of [DeviceCenter] with a device discovery.
  */
-open class DeviceCenter : CallbackWrapperOwner {
+open class DeviceCenter internal constructor(private val deviceDiscovery: DeviceDiscovery) : CallbackWrapperOwner {
+
+    /**
+     * @constructor Creates an instance of [DeviceCenter].
+     */
+    constructor() : this(DeviceDiscovery())
 
     /**
      * The companion object.
@@ -55,9 +63,6 @@ open class DeviceCenter : CallbackWrapperOwner {
             field = value
             devices.forEach { it.callbackWrapper = value }
         }
-
-    /** The object which manages the discovery of OCast devices. */
-    private val deviceDiscovery = DeviceDiscovery()
 
     /** The list of registered OCast event listeners. */
     private val eventListeners = mutableSetOf<EventListener>()
@@ -103,6 +108,9 @@ open class DeviceCenter : CallbackWrapperOwner {
                 // Custom actions on custom device
                 onAddDevice(this)
                 detectedDevices.add(this)
+            }.orElse {
+                OCastLog.error { "Failed to create device ${device.friendlyName} from UPnP device. Please verify that you registered a device class for manufacturer ${device.manufacturer}" }
+                null
             }
     }
 
@@ -150,6 +158,7 @@ open class DeviceCenter : CallbackWrapperOwner {
         val device = deviceClass.getConstructor(UpnpDevice::class.java).newInstance(UpnpDevice())
         registeredDevicesByManufacturer[device.manufacturer] = deviceClass
         deviceDiscovery.searchTargets += device.searchTarget
+        OCastLog.info { "Registered device class for manufacturer ${device.manufacturer} and search target ${device.searchTarget}" }
     }
 
     /**

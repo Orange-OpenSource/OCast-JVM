@@ -16,11 +16,10 @@
 
 package org.ocast.sdk.core.models
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Test
+import org.ocast.sdk.common.Assert.assertJsonEquals
 import org.ocast.sdk.core.utils.JsonTools
 
 /**
@@ -28,258 +27,157 @@ import org.ocast.sdk.core.utils.JsonTools
  */
 class OCastTest {
 
+    //region Device layer
+
     @Test
-    fun decodeWebAppConnectedStatusEventSucceeds() {
+    fun encodeOCastCommandDeviceLayerSucceeds() {
         // Given
-        val data = """
+        val dataLayer = OCastDataLayer(
+            "nameValue",
+            mapOf("paramName" to "paramValue"),
+            JSONObject(mapOf("optionName" to "optionValue"))
+        )
+        val deviceLayer = OCastCommandDeviceLayer(
+            "source",
+            "destination",
+            1L,
+            OCastApplicationLayer("org.ocast.service", dataLayer)
+        )
+
+        // When
+        val json = JsonTools.encode(deviceLayer)
+
+        // Then
+        val expectedJson = """
             {
-              "dst": "89cf41b8-ef40-48d9-99c3-2a1951abcde5",
-              "src": "browser",
-              "type": "event",
-              "status": "ok",
-              "id": 666,
+              "src": "source",
+              "dst": "destination",
+              "type": "command",
+              "id": 1,
               "message": {
-                "service": "org.ocast.webapp",
+                "service": "org.ocast.service",
                 "data": {
-                  "name": "connectedStatus",
+                  "name": "nameValue",
                   "params": {
-                    "status": "connected"
+                    "paramName": "paramValue"
+                  },
+                  "options": {
+                    "optionName": "optionValue"
                   }
                 }
               }
             }
-        """
+        """.trimIndent()
 
-        // When
-        val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
-        val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-        val webAppConnectedStatusEvent = JsonTools.decode<WebAppConnectedStatusEvent>(oCastData.params)
-
-        // Then
-        assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
-        assertEquals("89cf41b8-ef40-48d9-99c3-2a1951abcde5", deviceLayer.destination)
-        assertEquals(OCastDomain.BROWSER.value, deviceLayer.source)
-        assertEquals(OCastRawDeviceLayer.Type.EVENT, deviceLayer.type)
-        assertEquals(666L, deviceLayer.identifier)
-        assertEquals(Service.APPLICATION, deviceLayer.message.service)
-
-        assertEquals("connectedStatus", oCastData.name)
-
-        assertEquals(WebAppStatus.CONNECTED, webAppConnectedStatusEvent.status)
+        assertJsonEquals(expectedJson, json)
     }
 
     @Test
-    fun decodeMetadataChangedEventSucceeds() {
-
+    fun decodeOCastRawDeviceLayerSucceeds() {
         // Given
-        val data = """
+        val dataJson = """
             {
-              "dst": "89cf41b8-ef40-48d9-99c3-2a1951abcde5",
-              "src": "browser",
+              "name": "nameValue",
+              "params": {
+                "paramName": "paramValue"
+              }
+            }
+        """.trimIndent()
+
+        val json = """
+            {
+              "dst": "destination",
+              "src": "source",
               "type": "event",
               "status": "OK",
               "id": 666,
               "message": {
-                "service": "org.ocast.media",
-                "data": {
-                  "name": "metadataChanged",
-                  "params": {
-                    "title": "La_cité_de_la_peur",
-                    "subtitle": "Un_film_de_les_nuls",
-                    "mediaType": "video",
-                    "textTracks": [],
-                    "audioTracks": [
-                        {
-                            "type": "audio",
-                            "language": "de",
-                            "label": "Audio DE",
-                            "enable": true,
-                            "trackId": "id123"
-                        }
-                    ]
-                  }
-                }
+                "service": "org.ocast.service",
+                "data": $dataJson
               }
             }
-        """
+        """.trimIndent()
 
         // When
-        val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
-        val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-        val metadataChanged = JsonTools.decode<MediaMetadata>(oCastData.params)
+        val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(json)
 
         // Then
-        assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
-        assertEquals("89cf41b8-ef40-48d9-99c3-2a1951abcde5", deviceLayer.destination)
-        assertEquals(OCastDomain.BROWSER.value, deviceLayer.source)
+        assertEquals("destination", deviceLayer.destination)
+        assertEquals("source", deviceLayer.source)
         assertEquals(OCastRawDeviceLayer.Type.EVENT, deviceLayer.type)
-        assertEquals(666L, deviceLayer.identifier)
-        assertEquals(Service.MEDIA, deviceLayer.message.service)
-
-        assertEquals("metadataChanged", oCastData.name)
-
-        assertNull(metadataChanged.logo)
-        assertEquals("La_cité_de_la_peur", metadataChanged.title)
-        assertEquals("Un_film_de_les_nuls", metadataChanged.subtitle)
-        assertEquals(Media.Type.VIDEO, metadataChanged.mediaType)
-
-        assertEquals(1, metadataChanged.audioTracks?.size)
-        val audioTrack = metadataChanged.audioTracks?.elementAtOrNull(0)
-        assertEquals("id123", audioTrack?.id)
-        assertEquals("de", audioTrack?.language)
-        assertEquals("Audio DE", audioTrack?.label)
-        assertEquals(true, audioTrack?.isEnabled)
-
-        assertEquals(0, metadataChanged.subtitleTracks?.size)
-
-        assertNull(metadataChanged.videoTracks)
-    }
-
-    @Test
-    fun decodePlaybackStatusReplySucceeds() {
-
-        // Given
-        val data = """
-            {
-              "dst": "89cf41b8-ef40-48d9-99c3-2a1951abcde5",
-              "src": "browser",
-              "type": "reply",
-              "status": "OK",
-              "id": 666,
-              "message": {
-                "service": "org.ocast.media",
-                "data": {
-                  "name": "playbackStatus",
-                  "params": {
-                    "code": 0,
-                    "position": 1234.56,
-                    "duration": 5678.9,
-                    "state": 2,
-                    "volume": 0.45,
-                    "mute": true
-                  }
-                }
-              }
-            }
-        """
-
-        // When
-        val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
-        val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-        val replyData = JsonTools.decode<OCastDataLayer<OCastReplyEventParams>>(deviceLayer.message.data)
-        val playbackStatus = JsonTools.decode<MediaPlaybackStatus>(oCastData.params)
-
-        // Then
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
-        assertEquals("89cf41b8-ef40-48d9-99c3-2a1951abcde5", deviceLayer.destination)
-        assertEquals(OCastDomain.BROWSER.value, deviceLayer.source)
-        assertEquals(OCastRawDeviceLayer.Type.REPLY, deviceLayer.type)
         assertEquals(666L, deviceLayer.identifier)
-        assertEquals(Service.MEDIA, deviceLayer.message.service)
+        assertEquals("org.ocast.service", deviceLayer.message.service)
+        assertJsonEquals(dataJson, deviceLayer.message.data)
+    }
 
-        assertEquals("playbackStatus", oCastData.name)
+    //endregion
 
-        assertEquals(OCastMediaError.Status.SUCCESS.code, replyData.params.code)
+    //region Data layer
 
-        assertEquals(MediaPlaybackStatus.State.PLAYING, playbackStatus.state)
-        assertEquals(0.45, playbackStatus.volume, 0.00)
-        assertEquals(1234.56, playbackStatus.position, 0.00)
-        assertEquals(5678.9, playbackStatus.duration)
-        assertEquals(true, playbackStatus.isMuted)
+    class TestCommandParams(val paramName: String) : OCastCommandParams("commandName")
+    class TestReplyParams(val replyName: String)
+
+    @Test
+    fun decodeOCastDataLayerSucceeds() {
+        // Given
+        val json = """
+            {
+              "name": "nameValue",
+              "params": {
+                "replyName": "replyValue"
+              }
+            }
+        """.trimIndent()
+
+        // When
+        val dataLayer = JsonTools.decode<OCastDataLayer<TestReplyParams>>(json)
+
+        // Then
+        assertEquals("nameValue", dataLayer.name)
+        assertEquals("replyValue", dataLayer.params.replyName)
     }
 
     @Test
-    fun encodePrepareCommandWithoutLogoSucceeds() {
-
+    fun decodeOCastRawDataLayerSucceeds() {
         // Given
-        val options = JSONObject(hashMapOf("auth_cookie" to "azertyuiop1234"))
-        val prepareMessage = MediaMessage(PrepareMediaCommandParams(
-            "http://localhost",
-            4,
-            "La cité de la peur",
-            "Un film de les nuls",
-            null,
-            Media.Type.VIDEO,
-            Media.TransferMode.STREAMED,
-            true
-        ).options(options).build())
-        val uuid = "89cf41b8-ef40-48d9-99c3-2a1951abcde5"
-        val identifier = 666L
-        val deviceLayer = OCastCommandDeviceLayer(uuid, OCastDomain.BROWSER.value, identifier, prepareMessage)
+        val paramsJson = """
+            {
+              "replyName": "replyValue"
+            }
+        """.trimIndent()
+
+        val json = """
+            {
+              "name": "dataValue",
+              "params": $paramsJson 
+            }
+        """.trimIndent()
 
         // When
-        val layerMessage = JsonTools.encode(deviceLayer)
+        val dataLayer = JsonTools.decode<OCastRawDataLayer>(json)
 
         // Then
-        val oCastMessage = """
-            {
-              "src": "89cf41b8-ef40-48d9-99c3-2a1951abcde5",
-              "dst": "browser",
-              "id": 666,
-              "type": "command",
-              "message": {
-                "data": {
-                  "name": "prepare",
-                  "params": {
-                    "url": "http://localhost",
-                    "frequency": 4,
-                    "title": "La cité de la peur",
-                    "subtitle": "Un film de les nuls",
-                    "mediaType": "video",
-                    "transferMode": "streamed",
-                    "autoplay": true
-                  },
-                  "options": {
-                    "auth_cookie": "azertyuiop1234"
-                  }
-                },
-                "service": "org.ocast.media"
-              }
-            }
-        """
-
-        assertEquals(JsonTools.objectMapper.readTree(oCastMessage), JsonTools.objectMapper.readTree(layerMessage))
+        assertEquals("dataValue", dataLayer.name)
+        assertJsonEquals(paramsJson, dataLayer.params)
     }
-
-    class CustomCommandParams(@JsonProperty("my param") val myParam: String) : OCastCommandParams("my command")
 
     @Test
-    fun encodeCustomCommandSucceeds() {
-
+    fun buildOCastDataLayerFromOCastCommandParamsSucceeds() {
         // Given
-        val options = JSONObject(hashMapOf("my option" to "azertyuiop1234"))
-
-        val customMessage = OCastApplicationLayer("my service", CustomCommandParams("1234azertyuiop").options(options).build())
-
-        val uuid = "89cf41b8-ef40-48d9-99c3-2a1951abcde5"
-        val identifier = 666L
-        val deviceLayer = OCastCommandDeviceLayer(uuid, "my destination", identifier, customMessage)
+        val options = JSONObject(mapOf("optionName" to "optionValue"))
 
         // When
-        val layerMessage = JsonTools.encode(deviceLayer)
+        @Suppress("UNCHECKED_CAST")
+        val dataLayer = TestCommandParams("paramValue")
+            .options(options)
+            .build() as OCastDataLayer<TestCommandParams>
 
         // Then
-        val oCastMessage = """
-            {
-              "src": "89cf41b8-ef40-48d9-99c3-2a1951abcde5",
-              "dst": "my destination",
-              "id": 666,
-              "type": "command",
-              "message": {
-                "service": "my service",
-                "data": {
-                  "name": "my command",
-                  "params": {
-                    "my param": "1234azertyuiop"
-                  },
-                  "options": {
-                    "my option": "azertyuiop1234"
-                  }
-                }
-              }
-            }
-        """
-
-        assertEquals(JsonTools.objectMapper.readTree(oCastMessage), JsonTools.objectMapper.readTree(layerMessage))
+        assertEquals("commandName", dataLayer.name)
+        assertEquals("paramValue", dataLayer.params.paramName)
+        assertEquals(options, dataLayer.options)
     }
+
+    //endregion
 }

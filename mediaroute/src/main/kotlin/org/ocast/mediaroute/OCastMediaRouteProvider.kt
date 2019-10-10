@@ -21,7 +21,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
-import android.net.NetworkInfo
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.os.Handler
@@ -88,6 +87,7 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
             .addControlFilter(controlFilter)
             .setExtras(bundledDevice)
             .build()
+            .also { Log.d(TAG, "Created media route descriptor for ${device.friendlyName}") }
     }
 
     /**
@@ -100,6 +100,7 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
                     .apply { addRoutes(routeDescriptorsByUpnpID.values) }
                     .build()
             }
+            Log.d(TAG, "OCast media route provider descriptor changed")
         }
     }
 
@@ -120,9 +121,10 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
         }
     }
 
+    @Suppress("DEPRECATION")
     override fun onDiscoveryRequestChanged(request: MediaRouteDiscoveryRequest?) {
+        Log.d(TAG, "Media route discovery request changed: $request")
         if (request != null) {
-            Log.d(TAG, "Discovery request changed: $request")
             deviceCenter.discoveryInterval = if (request.isActiveScan) DeviceCenter.MINIMUM_DISCOVERY_INTERVAL else DeviceCenter.DEFAULT_DISCOVERY_INTERVAL
             if (!isWifiMonitorReceiverRegistered) {
                 isWifiMonitorReceiverRegistered = true
@@ -130,7 +132,6 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
                 context.registerReceiver(wifiMonitorReceiver, wifiMonitorIntentFilter)
             }
             val activeNetwork = (context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).activeNetworkInfo
-            @Suppress("DEPRECATION")
             val isWifiConnected = activeNetwork?.isConnectedOrConnecting == true && activeNetwork.type == ConnectivityManager.TYPE_WIFI
             if (isWifiConnected) {
                 deviceCenter.resumeDiscovery()
@@ -162,7 +163,10 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
                     routeDescriptorsByUpnpID
                         .keys
                         .firstOrNull { it == device.upnpID }
-                        ?.run { routeDescriptorsByUpnpID.remove(this) }
+                        ?.run {
+                            routeDescriptorsByUpnpID.remove(this)
+                            Log.d(TAG, "Removed media route descriptor for ${device.friendlyName}")
+                        }
                 }
             }
             publishRoutes()
@@ -175,19 +179,20 @@ internal class OCastMediaRouteProvider(context: Context, private val deviceCente
         /** Indicates if the Android device is connected to any WiFi network. */
         private var isConnected = false
 
+        @Suppress("DEPRECATION")
         override fun onReceive(context: Context?, intent: Intent?) {
             if (!isInitialStickyBroadcast && intent?.action == WifiManager.NETWORK_STATE_CHANGED_ACTION) {
-                val networkInfo = intent.getParcelableExtra<NetworkInfo>(WifiManager.EXTRA_NETWORK_INFO)
+                val networkInfo = intent.getParcelableExtra<android.net.NetworkInfo>(WifiManager.EXTRA_NETWORK_INFO)
                 if (networkInfo?.isConnected == true) {
                     if (!isConnected) {
-                        Log.d(TAG, "Wifi is connected: $networkInfo")
-                        onConnectionStateChanged(true)
                         isConnected = true
+                        Log.d(TAG, "Connected to WiFi network: $networkInfo")
+                        onConnectionStateChanged(true)
                     }
                 } else {
                     if (isConnected) {
-                        Log.d(TAG, "Wifi is disconnected: $networkInfo")
                         isConnected = false
+                        Log.d(TAG, "Disconnected from WiFi network: $networkInfo")
                         onConnectionStateChanged(false)
                     }
                 }

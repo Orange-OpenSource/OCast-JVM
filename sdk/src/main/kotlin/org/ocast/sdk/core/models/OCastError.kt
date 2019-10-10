@@ -17,6 +17,7 @@
 package org.ocast.sdk.core.models
 
 import org.ocast.sdk.common.extensions.orElse
+import org.ocast.sdk.core.utils.LoggableError
 
 /**
  * This interface is implemented by all enums which represent OCast error statuses.
@@ -41,7 +42,7 @@ interface ErrorStatus {
          * @return An enum value corresponding to the given error code.
          */
         inline fun <reified T> fromCode(code: Int): T where T : Enum<T>, T : ErrorStatus {
-            return enumValues<T>().firstOrNull { it.code == code }.orElse { enumValueOf<T>("UNKNOWN_ERROR") }
+            return enumValues<T>().firstOrNull { it.code == code }.orElse { enumValueOf("UNKNOWN_ERROR") }
         }
     }
 }
@@ -51,17 +52,17 @@ interface ErrorStatus {
  *
  * @property code The error code.
  * @property message The error message.
- * @property throwable The throwable associated with the error, if any.
+ * @property cause The cause of the error, if any.
  * @constructor Creates an [OCastError].
  */
-data class OCastError(val code: Int, val message: String, val throwable: Throwable? = null) {
+data class OCastError(val code: Int, override val message: String, override val cause: Throwable? = null) : LoggableError {
 
     /**
      * @property message The error message.
-     * @property throwable The throwable associated with the error, if any.
+     * @property cause The cause of the error, if any.
      * @constructor Creates an [OCastError] with a `CLIENT_ERROR` status.
      */
-    constructor(message: String, throwable: Throwable? = null) : this(OCastError.Status.CLIENT_ERROR.code, message, throwable)
+    constructor(message: String, cause: Throwable? = null) : this(Status.CLIENT_ERROR.code, message, cause)
 
     /**
      * Represents the status of an [OCastError].
@@ -90,16 +91,16 @@ data class OCastError(val code: Int, val message: String, val throwable: Throwab
  *
  * @property status The error status.
  * @property message The error message.
- * @property throwable The throwable associated with the error, if any.
+ * @property cause The cause of the error, if any.
  * @constructor Creates an instance of [OCastDeviceSettingsError].
  */
-data class OCastDeviceSettingsError(val status: Status, val message: String, val throwable: Throwable? = null) {
+data class OCastDeviceSettingsError(val status: Status, override val message: String, override val cause: Throwable? = null) : LoggableError {
 
     /**
      * @param error The generic OCast error.
      * @constructor Creates an instance of [OCastDeviceSettingsError] from a generic [OCastError].
      */
-    constructor(error: OCastError) : this(ErrorStatus.fromCode(error.code), error.message, error.throwable)
+    constructor(error: OCastError) : this(ErrorStatus.fromCode(error.code), error.message, error.cause)
 
     /**
      * Represents the status of an [OCastDeviceSettingsError].
@@ -128,16 +129,16 @@ data class OCastDeviceSettingsError(val status: Status, val message: String, val
  *
  * @property status The error status.
  * @property message The error message.
- * @property throwable The throwable associated with the error, if any.
+ * @property cause The cause of the error, if any.
  * @constructor Creates an [OCastInputSettingsError].
  */
-data class OCastInputSettingsError(val status: Status, val message: String, val throwable: Throwable? = null) {
+data class OCastInputSettingsError(val status: Status, override val message: String, override val cause: Throwable? = null) : LoggableError {
 
     /**
      * @param error The generic OCast error.
      * @constructor Creates an instance of [OCastInputSettingsError] from a generic [OCastError].
      */
-    constructor(error: OCastError) : this(ErrorStatus.fromCode(error.code), error.message, error.throwable)
+    constructor(error: OCastError) : this(ErrorStatus.fromCode(error.code), error.message, error.cause)
 
     /**
      * Represents the status of an [OCastInputSettingsError].
@@ -166,16 +167,16 @@ data class OCastInputSettingsError(val status: Status, val message: String, val 
  *
  * @property status The error status.
  * @property message The error message.
- * @property throwable The throwable associated with the error, if any.
+ * @property cause The cause of the error, if any.
  * @constructor Creates an [OCastMediaError].
  */
-data class OCastMediaError(val status: Status, val message: String, val throwable: Throwable? = null) {
+data class OCastMediaError(val status: Status, override val message: String, override val cause: Throwable? = null) : LoggableError {
 
     /**
      * @param error The generic OCast error.
      * @constructor Creates an instance of [OCastMediaError] from a generic [OCastError].
      */
-    constructor(error: OCastError) : this(ErrorStatus.fromCode(error.code), error.message, error.throwable)
+    constructor(error: OCastError) : this(ErrorStatus.fromCode(error.code), error.message, error.cause)
 
     /**
      * Represents the status of an [OCastMediaError].

@@ -11,4 +11,7 @@
     <dimen name="size_play_btn">64dp</dimen>
     <dimen name="size_stop_btn">36dp</dimen>
 
+    <!-- Text views -->
+    <dimen name="size_player_time_tv">48dp</dimen>
+
 </resources>

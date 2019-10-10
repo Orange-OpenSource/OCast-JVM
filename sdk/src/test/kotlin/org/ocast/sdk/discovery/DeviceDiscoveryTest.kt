@@ -37,9 +37,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
-import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Stubber
+import org.ocast.sdk.common.stubDeviceDescriptionResponses
+import org.ocast.sdk.common.stubMSearchResponses
 import org.ocast.sdk.discovery.models.UpnpDevice
 
 /**
@@ -74,7 +73,7 @@ class DeviceDiscoveryTest {
     //region Resume
 
     @Test
-    fun receiveMSearchResponseCallsListenerOnDeviceAdded() {
+    fun receiveMSearchResponseCallsListenerOnDevicesAdded() {
         // Given
         val firstMSearchResponseString = "HTTP/1.1 200 OK\r\n" +
             "LOCATION: http://10.0.0.28:56790/device-desc.xml\r\n" +
@@ -94,10 +93,10 @@ class DeviceDiscoveryTest {
             "ST: urn:cast-ocast-org:service:cast:1\r\n" +
             "USN: uuid:c1530a66-abf8-55b9-cb7d-111a854a4308\r\n" +
             "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
-        stubMSearchResponses(listOf(firstMSearchResponseString to 200L, secondMSearchResponseString to 100L))
+        socket.stubMSearchResponses(listOf(firstMSearchResponseString to 200L, secondMSearchResponseString to 100L))
         val firstDevice = UpnpDevice("UDN1", URL("http://foo1"), "Name1", "Manufacturer1", "Model1")
         val secondDevice = UpnpDevice("UDN2", URL("http://foo2"), "Name2", "Manufacturer2", "Model2")
-        stubDeviceDescriptionResponses(
+        upnpClient.stubDeviceDescriptionResponses(
             hashMapOf(
                 "http://10.0.0.28:56790/device-desc.xml" to firstDevice,
                 "http://10.0.0.29:56790/device-desc.xml" to secondDevice
@@ -120,7 +119,7 @@ class DeviceDiscoveryTest {
     }
 
     @Test
-    fun mSearchResponseTimeoutCallsListenerOnDeviceRemoved() {
+    fun mSearchResponseTimeoutCallsListenerOnDevicesRemoved() {
         // Given
         val firstMSearchResponseString = "HTTP/1.1 200 OK\r\n" +
             "LOCATION: http://10.0.0.28:56790/device-desc.xml\r\n" +
@@ -140,14 +139,14 @@ class DeviceDiscoveryTest {
             "ST: urn:cast-ocast-org:service:cast:1\r\n" +
             "USN: uuid:c1530a66-abf8-55b9-cb7d-111a854a4308\r\n" +
             "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
-        stubMSearchResponses(
+        socket.stubMSearchResponses(
             listOf(firstMSearchResponseString to 100L, secondMSearchResponseString to 200L),
             // First device does not respond to second M-SEARCH request
             listOf(secondMSearchResponseString to 300L)
         )
         val firstDevice = UpnpDevice("UDN1", URL("http://foo1"), "Name1", "Manufacturer1", "Model1")
         val secondDevice = UpnpDevice("UDN2", URL("http://foo2"), "Name2", "Manufacturer2", "Model2")
-        stubDeviceDescriptionResponses(
+        upnpClient.stubDeviceDescriptionResponses(
             hashMapOf(
                 "http://10.0.0.28:56790/device-desc.xml" to firstDevice,
                 "http://10.0.0.29:56790/device-desc.xml" to secondDevice
@@ -174,7 +173,7 @@ class DeviceDiscoveryTest {
     }
 
     @Test
-    fun receiveChangedDeviceDescriptionCallsListenerOnDeviceChanged() {
+    fun receiveChangedDeviceDescriptionCallsListenerOnDevicesChanged() {
         // Given
         val oldMSearchResponseString = "HTTP/1.1 200 OK\r\n" +
                 "LOCATION: http://10.0.0.28:56790/old-device-desc.xml\r\n" +
@@ -196,11 +195,11 @@ class DeviceDiscoveryTest {
                 "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7\r\n" +
                 "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
 
-        stubMSearchResponses(listOf(oldMSearchResponseString to 200L, newMSearchResponseString to 400L))
+        socket.stubMSearchResponses(listOf(oldMSearchResponseString to 200L, newMSearchResponseString to 400L))
         val oldDevice = UpnpDevice("UDN", URL("http://foo"), "OldName", "Manufacturer", "Model")
-        stubDeviceDescriptionResponses(hashMapOf("http://10.0.0.28:56790/old-device-desc.xml" to oldDevice))
+        upnpClient.stubDeviceDescriptionResponses(hashMapOf("http://10.0.0.28:56790/old-device-desc.xml" to oldDevice))
         val newDevice = UpnpDevice("UDN", URL("http://foo"), "NewName", "Manufacturer", "Model")
-        stubDeviceDescriptionResponses(hashMapOf("http://10.0.0.28:56790/new-device-desc.xml" to newDevice))
+        upnpClient.stubDeviceDescriptionResponses(hashMapOf("http://10.0.0.28:56790/new-device-desc.xml" to newDevice))
 
         // When
         discovery.resume()
@@ -260,14 +259,14 @@ class DeviceDiscoveryTest {
             "ST: urn:cast-ocast-org:service:cast:1\r\n" +
             "USN: uuid:c1530a66-abf8-55b9-cb7d-111a854a4308\r\n" +
             "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
-        stubMSearchResponses(
+        socket.stubMSearchResponses(
             listOf(firstMSearchResponseString to 100L, secondMSearchResponseString to 200L),
             // This line is for the second call to resume()
             listOf(firstMSearchResponseString to 100L, secondMSearchResponseString to 200L)
         )
         val firstDevice = UpnpDevice("UDN1", URL("http://foo1"), "Name1", "Manufacturer1", "Model1")
         val secondDevice = UpnpDevice("UDN2", URL("http://foo2"), "Name2", "Manufacturer2", "Model2")
-        stubDeviceDescriptionResponses(
+        upnpClient.stubDeviceDescriptionResponses(
             hashMapOf(
                 "http://10.0.0.28:56790/device-desc.xml" to firstDevice,
                 "http://10.0.0.29:56790/device-desc.xml" to secondDevice
@@ -304,9 +303,9 @@ class DeviceDiscoveryTest {
             "ST: urn:cast-ocast-org:service:cast:1\r\n" +
             "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7\r\n" +
             "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
-        stubMSearchResponses(listOf(mSearchResponseString to 100L))
+        socket.stubMSearchResponses(listOf(mSearchResponseString to 100L))
         val device = UpnpDevice("UDN", URL("http://foo"), "Name", "Manufacturer", "Model")
-        stubDeviceDescriptionResponses(hashMapOf("http://10.0.0.28:56790/device-desc.xml" to device))
+        upnpClient.stubDeviceDescriptionResponses(hashMapOf("http://10.0.0.28:56790/device-desc.xml" to device))
 
         // When
         discovery.resume()
@@ -363,10 +362,10 @@ class DeviceDiscoveryTest {
             "ST: urn:cast-ocast-org:service:cast:1\r\n" +
             "USN: uuid:c1530a66-abf8-55b9-cb7d-111a854a4308\r\n" +
             "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
-        stubMSearchResponses(listOf(firstMSearchResponseString to 100L, secondMSearchResponseString to 200L))
+        socket.stubMSearchResponses(listOf(firstMSearchResponseString to 100L, secondMSearchResponseString to 200L))
         val firstDevice = UpnpDevice("UDN1", URL("http://foo1"), "Name1", "Manufacturer1", "Model1")
         val secondDevice = UpnpDevice("UDN2", URL("http://foo2"), "Name2", "Manufacturer2", "Model2")
-        stubDeviceDescriptionResponses(
+        upnpClient.stubDeviceDescriptionResponses(
             hashMapOf(
                 "http://10.0.0.28:56790/device-desc.xml" to firstDevice,
                 "http://10.0.0.29:56790/device-desc.xml" to secondDevice
@@ -413,10 +412,10 @@ class DeviceDiscoveryTest {
             "ST: urn:cast-ocast-org:service:cast:1\r\n" +
             "USN: uuid:c1530a66-abf8-55b9-cb7d-111a854a4308\r\n" +
             "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
-        stubMSearchResponses(listOf(firstMSearchResponseString to 100L, secondMSearchResponseString to 200L))
+        socket.stubMSearchResponses(listOf(firstMSearchResponseString to 100L, secondMSearchResponseString to 200L))
         val firstDevice = UpnpDevice("UDN1", URL("http://foo1"), "Name1", "Manufacturer1", "Model1")
         val secondDevice = UpnpDevice("UDN2", URL("http://foo2"), "Name2", "Manufacturer2", "Model2")
-        stubDeviceDescriptionResponses(
+        upnpClient.stubDeviceDescriptionResponses(
             hashMapOf(
                 "http://10.0.0.28:56790/device-desc.xml" to firstDevice,
                 "http://10.0.0.29:56790/device-desc.xml" to secondDevice
@@ -455,9 +454,9 @@ class DeviceDiscoveryTest {
             "ST: urn:cast-ocast-org:service:cast:1\r\n" +
             "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7\r\n" +
             "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
-        stubMSearchResponses(listOf(mSearchResponseString to 100L))
+        socket.stubMSearchResponses(listOf(mSearchResponseString to 100L))
         val device = UpnpDevice("UDN", URL("http://foo"), "Name", "Manufacturer", "Model")
-        stubDeviceDescriptionResponses(hashMapOf("http://10.0.0.28:56790/device-desc.xml" to device))
+        upnpClient.stubDeviceDescriptionResponses(hashMapOf("http://10.0.0.28:56790/device-desc.xml" to device))
 
         // When
         discovery.resume()
@@ -489,44 +488,27 @@ class DeviceDiscoveryTest {
         verify(listener, times(2)).onDiscoveryStopped(isNull())
     }
 
+    @Test
+    fun stopDiscoveryAfterUnexpectedStopFails() {
+        // Given
+        val throwable = Throwable()
+        doAnswer {
+            Timer().schedule(100L) {
+                socket.listener?.onSocketClosed(socket, throwable)
+            }
+        }.doAnswer {
+            // Following calls do nothing
+        }.whenever(socket).send(any(), any(), any())
+
+        // When
+        discovery.resume()
+        Thread.sleep(200)
+        val success = discovery.stop()
+
+        // Then
+        assert(!success)
+        verify(listener, times(1)).onDiscoveryStopped(eq(throwable))
+    }
+
     //endregion
-
-    /**
-     * Stubs the M-SEARCH responses received by the socket.
-     * Each argument represents the M-SEARCH responses and their associated delay after an M-SEARCH request is sent by the socket.
-     *
-     * @param responses The M-SEARCH responses and their associated delay.
-     */
-    private fun stubMSearchResponses(vararg responses: List<Pair<String, Long>>) {
-        var stubbing: Stubber? = null
-        responses.forEach { response ->
-            val answer: (InvocationOnMock) -> Unit = {
-                response.forEach {
-                    Timer().schedule(it.second) {
-                        socket.listener?.onDataReceived(socket, it.first.toByteArray(), "127.0.0.1")
-                    }
-                }
-            }
-            // Stub the same answer twice because UDP packets are sent twice
-            repeat(2) {
-                stubbing = if (stubbing == null) Mockito.doAnswer(answer) else stubbing?.doAnswer(answer)
-            }
-        }
-        stubbing?.whenever(socket)?.send(any(), any(), any())
-    }
-
-    /**
-     * Stubs the responses to the device description requests received by the UPnP client.
-     *
-     * @param devicesByLocation A hash map where the key is the location used to perform the device description request and the value is the associated device.
-     */
-    private fun stubDeviceDescriptionResponses(devicesByLocation: HashMap<String, UpnpDevice>) {
-        devicesByLocation.forEach { (location, device) ->
-            whenever(upnpClient.getDevice(eq(location), any())).doAnswer {
-                // Directly invoke the callback with the desired device
-                val callback = it.getArgument<(Result<UpnpDevice>) -> Unit>(1)
-                callback.invoke(Result.success(device))
-            }
-        }
-    }
 }

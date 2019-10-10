@@ -7,13 +7,16 @@ description = "Sample Java desktop application for the OCast SDK"
 
 dependencies {
     implementation project(':sdk')
-    implementation "org.json:json:$json_version"
-    implementation "com.intellij:annotations:$annotations_version"
 }
 
 checkstyle {
     toolVersion checkstyle_version
     maxWarnings = 0
+}
+
+compileJava {
+    // -classfile disables unexplained warnings which seems to be related to Kotlin and Java interoperability
+    options.compilerArgs << "-Xlint:all,-classfile" << "-Werror"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8

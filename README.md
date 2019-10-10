@@ -20,7 +20,7 @@
 </tr>
 <tr>
 <td>Documentation</td>
-<td><a href="https://orange-opensource.github.io/OCast-JVM/"><img src="https://img.shields.io/badge/javadoc-2.0.1-brightgreen"></a></td>
+<td><a href="https://orange-opensource.github.io/OCast-JVM/"><img src="https://img.shields.io/badge/javadoc-2.0.2-brightgreen"></a></td>
 </tr>
 </tbody>
 </table>
@@ -42,10 +42,10 @@ repositories {
 }
 
 dependencies {
-    implementation "org.ocast:sdk:2.0.1"
+    implementation "org.ocast:sdk:2.0.2"
     // The following line is only needed if you are using OCast on Android
     // and want to take advantage of the MediaRouter framework
-    implementation "org.ocast:mediaroute:2.0.1"
+    implementation "org.ocast:mediaroute:2.0.2"
 }
 ```
 
@@ -114,7 +114,7 @@ By default, the list of devices is refreshed every 30 seconds. You can decrease 
 
 ### 3. Connect to the device
 
-To connect to the device and use OCast media commands on your own application, you must set the device `applicationName` property. When you connect to the device, the application is started automatically if needed. You can also manage the application state manually. See [Manage application state](#8-manage-application-state).
+To connect to the device and use OCast media commands on your own application, you must set the device `applicationName` property. Once you are connected to the device, the application is started automatically when you send a media command. You can also manage the application state manually. See [Manage application state](#8-manage-application-state).
 
 :small_orange_diamond: Java
 ```java
@@ -263,7 +263,7 @@ device.send(message, OCastDomain.BROWSER, CustomReplyParams.class, customReplyPa
 :small_blue_diamond: Kotlin
 ```kotlin
 class CustomCommandParams(val myParameter: String) : OCastCommandParams("customCommand")
-class CustomReplyParams(myValue: String)
+class CustomReplyParams(val myValue: String)
 
 val data = CustomCommandParams("paramValue").build()
 val message = OCastApplicationLayer("CustomService", data)
@@ -445,6 +445,22 @@ The Android media route module automatically sets the `discoverInterval` propert
 ## Sample applications
 
 Both Java and Kotlin desktop sample applications as well as a Kotlin Android application are available.
+
+## Logs
+
+The Orange OCast SDK includes specific log messages which can be enabled by changing the `DEBUG` constant of the `OCastLog.Companion` class to `true` and by recompiling the SDK.
+
+The `level` property of the `OCastLog.Companion` class controls the logging output. The default value is `OFF`.
+
+The logs rely on the native Java logging framework, thus you will need to configure the log level of your handlers. If you are working on Android, you will also need to type the following command in a terminal to enable logs with level lower than `INFO`:
+
+```
+adb shell setprop log.tag.WebSocket VERBOSE
+```
+
+Where `WebSocket` should be replaced by the name of the class which contains the logs to display.
+
+Please note that logs are not enabled on [JFrog Bintray](https://bintray.com/orange-opensource/maven) releases.
 
 ## Author
 

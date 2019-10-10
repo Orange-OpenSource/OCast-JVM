@@ -24,7 +24,7 @@ import org.junit.Before
 /**
  * An abstract class for unit tests of HTTP clients.
  */
-internal abstract class HttpClientTest {
+abstract class HttpClientTest {
 
     /** The mocked HTTP server. */
     protected val server = MockWebServer()
