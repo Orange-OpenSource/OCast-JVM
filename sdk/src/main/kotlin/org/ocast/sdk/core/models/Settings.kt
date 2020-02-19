@@ -19,6 +19,7 @@ package org.ocast.sdk.core.models
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import java.io.Serializable
 import java.util.EnumSet
 import org.ocast.sdk.core.utils.BitflagsSerializer
 
@@ -292,7 +293,7 @@ class UpdateStatus(
     @JsonProperty("state") val state: State,
     @JsonProperty("version") val version: String,
     @JsonProperty("progress") val progress: Int
-) {
+) : Serializable {
 
     /**
      * Represents the state of a firmware update.
