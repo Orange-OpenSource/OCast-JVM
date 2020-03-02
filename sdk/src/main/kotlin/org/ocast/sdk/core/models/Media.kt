@@ -19,6 +19,7 @@ package org.ocast.sdk.core.models
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
+import java.io.Serializable
 
 //region Messages
 
@@ -184,7 +185,7 @@ class MediaPlaybackStatus(
     @JsonProperty("state") val state: State,
     @JsonProperty("volume") val volume: Double,
     @get:JsonIgnore @field:JsonProperty("mute") val isMuted: Boolean
-) {
+) : Serializable {
 
     /**
      * Represents the playback states of a media.
@@ -236,7 +237,7 @@ class MediaMetadata(
     @JsonProperty("textTracks") val subtitleTracks: List<Track>?,
     @JsonProperty("audioTracks") val audioTracks: List<Track>?,
     @JsonProperty("videoTracks") val videoTracks: List<Track>?
-) {
+) : Serializable {
 
     /**
      * Represents a media track.
