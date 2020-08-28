@@ -26,49 +26,7 @@ import java.util.concurrent.atomic.AtomicLong
 import org.json.JSONObject
 import org.ocast.sdk.common.extensions.ifNotNull
 import org.ocast.sdk.common.extensions.orElse
-import org.ocast.sdk.core.models.Consumer
-import org.ocast.sdk.core.models.DeviceID
-import org.ocast.sdk.core.models.DeviceMessage
-import org.ocast.sdk.core.models.Event
-import org.ocast.sdk.core.models.GetDeviceIDCommandParams
-import org.ocast.sdk.core.models.GetMediaMetadataCommandParams
-import org.ocast.sdk.core.models.GetMediaPlaybackStatusCommandParams
-import org.ocast.sdk.core.models.GetUpdateStatusCommandParams
-import org.ocast.sdk.core.models.InputMessage
-import org.ocast.sdk.core.models.MediaMessage
-import org.ocast.sdk.core.models.MediaMetadata
-import org.ocast.sdk.core.models.MediaPlaybackStatus
-import org.ocast.sdk.core.models.MuteMediaCommandParams
-import org.ocast.sdk.core.models.OCastApplicationLayer
-import org.ocast.sdk.core.models.OCastCommandDeviceLayer
-import org.ocast.sdk.core.models.OCastDataLayer
-import org.ocast.sdk.core.models.OCastDeviceSettingsError
-import org.ocast.sdk.core.models.OCastDomain
-import org.ocast.sdk.core.models.OCastError
-import org.ocast.sdk.core.models.OCastInputSettingsError
-import org.ocast.sdk.core.models.OCastMediaError
-import org.ocast.sdk.core.models.OCastRawDataLayer
-import org.ocast.sdk.core.models.OCastRawDeviceLayer
-import org.ocast.sdk.core.models.OCastReplyEventParams
-import org.ocast.sdk.core.models.PauseMediaCommandParams
-import org.ocast.sdk.core.models.PlayMediaCommandParams
-import org.ocast.sdk.core.models.PrepareMediaCommandParams
-import org.ocast.sdk.core.models.ReplyCallback
-import org.ocast.sdk.core.models.ResumeMediaCommandParams
-import org.ocast.sdk.core.models.RunnableCallback
-import org.ocast.sdk.core.models.SSLConfiguration
-import org.ocast.sdk.core.models.SeekMediaCommandParams
-import org.ocast.sdk.core.models.SendGamepadEventCommandParams
-import org.ocast.sdk.core.models.SendKeyEventCommandParams
-import org.ocast.sdk.core.models.SendMouseEventCommandParams
-import org.ocast.sdk.core.models.Service
-import org.ocast.sdk.core.models.SetMediaTrackCommandParams
-import org.ocast.sdk.core.models.SetMediaVolumeCommandParams
-import org.ocast.sdk.core.models.SettingsService
-import org.ocast.sdk.core.models.StopMediaCommandParams
-import org.ocast.sdk.core.models.UpdateStatus
-import org.ocast.sdk.core.models.WebAppConnectedStatusEvent
-import org.ocast.sdk.core.models.WebAppStatus
+import org.ocast.sdk.core.models.*
 import org.ocast.sdk.core.utils.JsonTools
 import org.ocast.sdk.core.utils.OCastLog
 import org.ocast.sdk.core.utils.log
@@ -431,6 +389,11 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
                         val updateStatus = JsonTools.decode<UpdateStatus>(oCastData.params)
                         eventListener?.onUpdateStatus(this, updateStatus)
                     }
+                    Event.Device.VOLUME_CHANGED -> {
+                        OCastLog.info { "Received volume changed event from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
+                        val volumeChanged = JsonTools.decode<Volume>(oCastData.params)
+                        eventListener?.onVolumeChanged(this, volumeChanged)
+                    }
                 }
             }
             else -> {
@@ -499,6 +462,14 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
 
     override fun getDeviceID(onSuccess: Consumer<String>, onError: Consumer<OCastDeviceSettingsError>) {
         send(DeviceMessage(GetDeviceIDCommandParams().build()), OCastDomain.SETTINGS, DeviceID::class.java, { onSuccess.run(it.id) }, { onError.run(OCastDeviceSettingsError(it)) })
+    }
+
+    override fun setVolume(level: Int, mute: Boolean, onSuccess: Runnable, onError: Consumer<OCastDeviceSettingsError>) {
+        send(DeviceMessage(SetVolumeCommandParams(level, mute).build()), OCastDomain.SETTINGS, onSuccess, Consumer { onError.run(OCastDeviceSettingsError(it)) })
+    }
+
+    override fun getVolume(onSuccess: Consumer<Volume>, onError: Consumer<OCastDeviceSettingsError>) {
+        send(DeviceMessage(GetVolumeCommandParams().build()), OCastDomain.SETTINGS, Volume::class.java, { onSuccess.run(it) }, { onError.run(OCastDeviceSettingsError(it)) })
     }
 
     //endregion

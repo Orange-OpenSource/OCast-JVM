@@ -62,6 +62,25 @@ class GetUpdateStatusCommandParams : OCastCommandParams("getUpdateStatus")
 class GetDeviceIDCommandParams : OCastCommandParams("getDeviceID")
 
 /**
+ * Represents the parameters of a `setVolume` command.
+ *
+ * @property level The system sound level.
+ * @property mute The system sound mute status.
+ * @constructor Creates an instance of [SetVolumeCommandParams].
+ */
+class SetVolumeCommandParams(
+    @JsonProperty("level") val level: Int,
+    @JsonProperty("mute") val mute: Boolean
+) : OCastCommandParams("setVolume")
+
+/**
+ * Represents the parameters of a `getVolume` command.
+ *
+ * @constructor Creates an instance of [GetVolumeCommandParams].
+ */
+class GetVolumeCommandParams : OCastCommandParams("getVolume")
+
+/**
  * Represents the parameters of a `keyPressed` command.
  *
  * @property key The key attribute value corresponding to the key pressed. Possible supported keys are defined by the [W3C UI events KeyboardEvent interface](https://www.w3.org/TR/uievents-code/).
@@ -339,6 +358,18 @@ class UpdateStatus(
  */
 class DeviceID(
     @JsonProperty("id") val id: String
+)
+
+/**
+ * Represents the volume.
+ *
+ * @property level The system volume level.
+ * @property mute The system mute state.
+ * @constructor Creates an instance of [Volume].
+ */
+class Volume(
+        @JsonProperty("level") val level: Int,
+        @JsonProperty("mute") val mute: Boolean
 )
 
 //endregion
