@@ -2,7 +2,11 @@
 .gradle
 local.properties
 .idea/caches
+.idea/compiler.xml
+.idea/jarRepositories.xml
 .idea/libraries
+.idea/markdown-navigator-enh.xml
+.idea/markdown-navigator.xml
 .idea/modules.xml
 .idea/workspace.xml
 .idea/navEditor.xml
@@ -11,3 +15,4 @@ local.properties
 build
 captures
 .externalNativeBuild
+
