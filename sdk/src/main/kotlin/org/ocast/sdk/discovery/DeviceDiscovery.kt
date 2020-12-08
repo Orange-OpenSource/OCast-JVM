@@ -269,9 +269,15 @@ internal class DeviceDiscovery constructor(
         }
 
         val date = Date()
-        // Add a 1 second delay to take into account the network round-trip time
-        removeDevicesTimer?.schedule(TimeUnit.SECONDS.toMillis(MSEARCH_MX_VALUE.toLong() + 1)) {
-            removeDevices(date)
+        // Fixes a crash where the timer has already been cancelled
+        try {
+            // Add a 1 second delay to take into account the network round-trip time
+            removeDevicesTimer?.schedule(TimeUnit.SECONDS.toMillis(MSEARCH_MX_VALUE.toLong() + 1)) {
+                removeDevices(date)
+            }
+        } catch (_: IllegalStateException) {
+            // Reset the property because the timer is unusable if it has been cancelled
+            removeDevicesTimer = null
         }
     }
 
