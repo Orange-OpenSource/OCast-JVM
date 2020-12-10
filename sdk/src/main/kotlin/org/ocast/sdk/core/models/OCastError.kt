@@ -75,14 +75,35 @@ data class OCastError(val code: Int, override val message: String, override val 
         /** The error is unknown. */
         UNKNOWN_ERROR(-1),
 
-        /** There was an error in the OCast SDK. */
+        /** There is an error in the OCast SDK. */
         CLIENT_ERROR(-2),
 
-        /** There was an error in the received OCast device layer. */
-        DEVICE_LAYER_ERROR(-3),
+        /** There is a badly formatted JSON in the received OCast device layer. */
+        DEVICE_LAYER_JSON_FORMAT_ERROR(-3),
 
-        /** There was an error during decoding message. */
-        DECODE_ERROR(-4)
+        /** There is a malformed value in the received OCast device layer. */
+        DEVICE_LAYER_VALUE_FORMAT_ERROR(-4),
+
+        /** There is a missing mandatory field in the received OCast device layer. */
+        DEVICE_LAYER_MISSING_MANDATORY_FIELD(-5),
+
+        /** The client has no right to access the required destination or service. */
+        DEVICE_LAYER_FORBIDDEN_UNSECURE_MODE(-6),
+
+        /** The WiFi password is too short. **/
+        DEVICE_LAYER_WIFI_PASSWORD_TOO_SHORT(-7),
+
+        /** There is an internal OCast device layer error. **/
+        DEVICE_LAYER_INTERNAL_ERROR(-8),
+
+        /** The status is missing in the received OCast device layer. **/
+        DEVICE_LAYER_MISSING_STATUS_ERROR(-9),
+
+        /** The reply data is missing in the received OCast device layer. **/
+        DEVICE_LAYER_MISSING_REPLY_DATA_ERROR(-10),
+
+        /** There was an error while decoding the message. */
+        DECODE_ERROR(-11)
     }
 }
 
@@ -113,14 +134,35 @@ data class OCastDeviceSettingsError(val status: Status, override val message: St
         /** The error is unknown. */
         UNKNOWN_ERROR(-1),
 
-        /** There was an error in the OCast SDK. */
+        /** There is an error in the OCast SDK. */
         CLIENT_ERROR(-2),
 
-        /** There was an error in the received OCast device layer. */
-        DEVICE_LAYER_ERROR(-3),
+        /** There is a badly formatted JSON in the received OCast device layer. */
+        DEVICE_LAYER_JSON_FORMAT_ERROR(-3),
 
-        /** There was an error during decoding message. */
-        DECODE_ERROR(-4)
+        /** There is a malformed value in the received OCast device layer. */
+        DEVICE_LAYER_VALUE_FORMAT_ERROR(-4),
+
+        /** There is a missing mandatory field in the received OCast device layer. */
+        DEVICE_LAYER_MISSING_MANDATORY_FIELD(-5),
+
+        /** The client has no right to access the required destination or service. */
+        DEVICE_LAYER_FORBIDDEN_UNSECURE_MODE(-6),
+
+        /** The WiFi password is too short. **/
+        DEVICE_LAYER_WIFI_PASSWORD_TOO_SHORT(-7),
+
+        /** There is an internal OCast device layer error. **/
+        DEVICE_LAYER_INTERNAL_ERROR(-8),
+
+        /** The status is missing in the received OCast device layer. **/
+        DEVICE_LAYER_MISSING_STATUS_ERROR(-9),
+
+        /** The reply data is missing in the received OCast device layer. **/
+        DEVICE_LAYER_MISSING_REPLY_DATA_ERROR(-10),
+
+        /** There was an error while decoding the message. */
+        DECODE_ERROR(-11)
     }
 }
 
@@ -151,14 +193,35 @@ data class OCastInputSettingsError(val status: Status, override val message: Str
         /** The error is unknown. */
         UNKNOWN_ERROR(-1),
 
-        /** There was an error in the OCast SDK. */
+        /** There is an error in the OCast SDK. */
         CLIENT_ERROR(-2),
 
-        /** There was an error in the received OCast device layer. */
-        DEVICE_LAYER_ERROR(-3),
+        /** There is a badly formatted JSON in the received OCast device layer. */
+        DEVICE_LAYER_JSON_FORMAT_ERROR(-3),
 
-        /** There was an error during decoding message. */
-        DECODE_ERROR(-4)
+        /** There is a malformed value in the received OCast device layer. */
+        DEVICE_LAYER_VALUE_FORMAT_ERROR(-4),
+
+        /** There is a missing mandatory field in the received OCast device layer. */
+        DEVICE_LAYER_MISSING_MANDATORY_FIELD(-5),
+
+        /** The client has no right to access the required destination or service. */
+        DEVICE_LAYER_FORBIDDEN_UNSECURE_MODE(-6),
+
+        /** The WiFi password is too short. **/
+        DEVICE_LAYER_WIFI_PASSWORD_TOO_SHORT(-7),
+
+        /** There is an internal OCast device layer error. **/
+        DEVICE_LAYER_INTERNAL_ERROR(-8),
+
+        /** The status is missing in the received OCast device layer. **/
+        DEVICE_LAYER_MISSING_STATUS_ERROR(-9),
+
+        /** The reply data is missing in the received OCast device layer. **/
+        DEVICE_LAYER_MISSING_REPLY_DATA_ERROR(-10),
+
+        /** There was an error while decoding the message. */
+        DECODE_ERROR(-11)
     }
 }
 
@@ -216,13 +279,34 @@ data class OCastMediaError(val status: Status, override val message: String, ove
         /** The error is unknown. */
         UNKNOWN_ERROR(-1),
 
-        /** There was an error in the OCast SDK. */
+        /** There is an error in the OCast SDK. */
         CLIENT_ERROR(-2),
 
-        /** There was an error in the received OCast device layer. */
-        DEVICE_LAYER_ERROR(-3),
+        /** There is a badly formatted JSON in the received OCast device layer. */
+        DEVICE_LAYER_JSON_FORMAT_ERROR(-3),
 
-        /** There was an error during decoding message. */
-        DECODE_ERROR(-4)
+        /** There is a malformed value in the received OCast device layer. */
+        DEVICE_LAYER_VALUE_FORMAT_ERROR(-4),
+
+        /** There is a missing mandatory field in the received OCast device layer. */
+        DEVICE_LAYER_MISSING_MANDATORY_FIELD(-5),
+
+        /** The client has no right to access the required destination or service. */
+        DEVICE_LAYER_FORBIDDEN_UNSECURE_MODE(-6),
+
+        /** The WiFi password is too short. **/
+        DEVICE_LAYER_WIFI_PASSWORD_TOO_SHORT(-7),
+
+        /** There is an internal OCast device layer error. **/
+        DEVICE_LAYER_INTERNAL_ERROR(-8),
+
+        /** The status is missing in the received OCast device layer. **/
+        DEVICE_LAYER_MISSING_STATUS_ERROR(-9),
+
+        /** The reply data is missing in the received OCast device layer. **/
+        DEVICE_LAYER_MISSING_REPLY_DATA_ERROR(-10),
+
+        /** There was an error while decoding the message. */
+        DECODE_ERROR(-11)
     }
 }

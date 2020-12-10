@@ -18,6 +18,7 @@ package org.ocast.sdk.core.models
 
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.ocast.sdk.common.Assert.assertJsonEquals
 import org.ocast.sdk.core.utils.JsonTools
@@ -108,7 +109,8 @@ class OCastTest {
         assertEquals(OCastRawDeviceLayer.Status.OK, deviceLayer.status)
         assertEquals(666L, deviceLayer.identifier)
         assertEquals("org.ocast.service", deviceLayer.message.service)
-        assertJsonEquals(dataJson, deviceLayer.message.data)
+        assertNotNull(deviceLayer.message.data)
+        deviceLayer.message.data?.let { assertJsonEquals(dataJson, it) }
     }
 
     //endregion
