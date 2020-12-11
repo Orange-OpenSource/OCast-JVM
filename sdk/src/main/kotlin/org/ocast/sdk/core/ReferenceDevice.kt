@@ -410,7 +410,7 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
                 }
             } else {
                 val errorMessage = "Received message with missing reply data from $friendlyName:\n${data.trim().prependIndent() }"
-                replyCallback.onError.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_MISSING_REPLY_DATA_ERROR.code, errorMessage).log())
+                replyCallback.onError.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_MISSING_REPLY_DATA.code, errorMessage).log())
             }
         } else {
             val errorMessage = "Received reply message with device layer error status ${deviceLayer.status} from $friendlyName:\n${data.trim().prependIndent()}"

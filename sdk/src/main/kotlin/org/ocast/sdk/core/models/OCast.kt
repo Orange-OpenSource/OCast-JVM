@@ -16,6 +16,7 @@
 
 package org.ocast.sdk.core.models
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
@@ -166,11 +167,11 @@ class OCastRawDeviceLayer(
         /** The packet has no right to access the required destination or service. */
         @JsonProperty("forbidden_unsecure_mode") FORBIDDEN_UNSECURE_MODE,
 
-        /** The WiFi password is too short. */
-        @JsonProperty("password_too_short") WIFI_PASSWORD_TOO_SHORT,
-
         /** There is an internal error. */
-        @JsonProperty("internal_error") INTERNAL_ERROR
+        @JsonProperty("internal_error") INTERNAL_ERROR,
+
+        /** There is an unknown error. */
+        @JsonEnumDefaultValue UNKNOWN_ERROR
     }
 
     /**
