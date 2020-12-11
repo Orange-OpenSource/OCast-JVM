@@ -364,7 +364,7 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
                                 }
                                 OCastLog.info { "Received reply of type ${it.replyClass.name} from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
                                 @Suppress("UNCHECKED_CAST")
-                                (it as ReplyCallback<Any?>).onSuccess.wrapRun(reply)
+                                (it as ReplyCallback<Any>).onSuccess.wrapRun(reply)
                             } else {
                                 it.onError.wrapRun(OCastError(replyData.params.code, "Received reply with params error code ${replyData.params.code} from $friendlyName").log())
                             }
@@ -521,11 +521,11 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
 
     //region Custom commands
 
-    override fun <T : Any?> send(message: OCastApplicationLayer<T>, domain: OCastDomain, onSuccess: Runnable, onError: Consumer<OCastError>) {
+    override fun <T : Any> send(message: OCastApplicationLayer<T>, domain: OCastDomain, onSuccess: Runnable, onError: Consumer<OCastError>) {
         send(message, domain, Unit::class.java, Consumer { onSuccess.run() }, onError)
     }
 
-    override fun <T : Any?, S : Any?> send(message: OCastApplicationLayer<T>, domain: OCastDomain, replyClass: Class<S>, onSuccess: Consumer<S>, onError: Consumer<OCastError>) {
+    override fun <T : Any, S : Any> send(message: OCastApplicationLayer<T>, domain: OCastDomain, replyClass: Class<S>, onSuccess: Consumer<S>, onError: Consumer<OCastError>) {
         val id = generateSequenceID()
         try {
             replyCallbacksBySequenceID[id] = ReplyCallback(replyClass, onSuccess, onError)

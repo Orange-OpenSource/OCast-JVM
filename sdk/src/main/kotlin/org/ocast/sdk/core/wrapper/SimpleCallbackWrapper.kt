@@ -25,7 +25,7 @@ import org.ocast.sdk.core.models.Consumer
  */
 class SimpleCallbackWrapper : CallbackWrapper {
 
-    override fun <T> wrap(consumer: Consumer<T>): Consumer<T> {
+    override fun <T : Any> wrap(consumer: Consumer<T>): Consumer<T> {
         return consumer
     }
 

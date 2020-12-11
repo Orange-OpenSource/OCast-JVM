@@ -31,7 +31,7 @@ internal class AndroidUIThreadCallbackWrapper : CallbackWrapper {
     /** A handler on the main thread. */
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    override fun <T> wrap(consumer: Consumer<T>): Consumer<T> {
+    override fun <T : Any> wrap(consumer: Consumer<T>): Consumer<T> {
         return Consumer { mainHandler.post { consumer.run(it) } }
     }
 
