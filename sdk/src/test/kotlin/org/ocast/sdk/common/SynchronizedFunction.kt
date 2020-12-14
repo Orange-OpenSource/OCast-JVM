@@ -118,7 +118,7 @@ internal class SynchronizedRunnable(runnable: Runnable, count: Int = 1) : Synchr
  * @param count The number of times countDown() must be called before threads can pass through await()
  * @constructor Creates an instance of [SynchronizedConsumer].
  */
-internal class SynchronizedConsumer<T>(consumer: Consumer<T>, count: Int = 1) : SynchronizedFunction1<T, Unit>({ t: T -> consumer.run(t) }, count), Consumer<T> {
+internal class SynchronizedConsumer<T : Any>(consumer: Consumer<T>, count: Int = 1) : SynchronizedFunction1<T, Unit>({ t: T -> consumer.run(t) }, count), Consumer<T> {
 
     override fun run(t: T) {
         invoke(t)

@@ -36,7 +36,7 @@ import okhttp3.Response
 import okhttp3.internal.ws.RealWebSocket
 import okhttp3.mockwebserver.MockResponse
 import org.hamcrest.CoreMatchers.instanceOf
-import org.junit.Assert.assertThat
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
