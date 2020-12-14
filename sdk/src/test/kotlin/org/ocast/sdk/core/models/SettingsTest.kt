@@ -16,11 +16,11 @@
 
 package org.ocast.sdk.core.models
 
-import java.util.EnumSet
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.ocast.sdk.common.Assert.assertJsonEquals
 import org.ocast.sdk.core.utils.JsonTools
+import java.util.EnumSet
 
 /**
  * Unit tests for model classes related to settings services.

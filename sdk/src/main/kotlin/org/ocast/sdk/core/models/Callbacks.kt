@@ -33,7 +33,7 @@ open class RunnableCallback(val onSuccess: Runnable, val onError: Consumer<OCast
  * @property onError The operation executed if the task failed.
  * @constructor Creates an instance of [ConsumerCallback].
  */
-open class ConsumerCallback<T>(val onSuccess: Consumer<T>, val onError: Consumer<OCastError>)
+open class ConsumerCallback<T : Any>(val onSuccess: Consumer<T>, val onError: Consumer<OCastError>)
 
 /**
  * Represents a callback for an OCast reply.
@@ -44,4 +44,4 @@ open class ConsumerCallback<T>(val onSuccess: Consumer<T>, val onError: Consumer
  * @property onError The operation executed if the task failed.
  * @constructor Creates an instance of [ReplyCallback].
  */
-class ReplyCallback<T>(val replyClass: Class<T>, onSuccess: Consumer<T>, onError: Consumer<OCastError>) : ConsumerCallback<T>(onSuccess, onError)
+class ReplyCallback<T : Any>(val replyClass: Class<T>, onSuccess: Consumer<T>, onError: Consumer<OCastError>) : ConsumerCallback<T>(onSuccess, onError)

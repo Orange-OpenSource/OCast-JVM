@@ -16,13 +16,6 @@
 
 package org.ocast.sdk.core
 
-import java.net.URI
-import java.util.Collections
-import java.util.UUID
-import java.util.concurrent.Semaphore
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 import org.json.JSONObject
 import org.ocast.sdk.common.extensions.ifNotNull
 import org.ocast.sdk.common.extensions.orElse
@@ -75,6 +68,13 @@ import org.ocast.sdk.core.utils.log
 import org.ocast.sdk.dial.DialClient
 import org.ocast.sdk.dial.models.DialApplication
 import org.ocast.sdk.discovery.models.UpnpDevice
+import java.net.URI
+import java.util.Collections
+import java.util.UUID
+import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * The reference OCast device.
@@ -243,14 +243,14 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
             State.DISCONNECTING -> onError.wrapRun(OCastError("Failed to connect to $friendlyName, device is disconnecting").log())
             State.DISCONNECTED -> {
                 state = State.CONNECTING
-                onCreateWebSockets(sslConfiguration, Consumer { webSocketsById ->
+                onCreateWebSockets(sslConfiguration) { webSocketsById ->
                     this.webSocketsById = webSocketsById
                     connectCallback = RunnableCallback(onSuccess, onError)
                     webSocketsById.values.forEach { webSocket ->
                         OCastLog.debug { "Created web socket with ID ${webSocket.id} and url ${webSocket.webSocketURL} for $friendlyName" }
                         webSocket.connect()
                     }
-                })
+                }
             }
         }
     }
@@ -364,7 +364,7 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
                                 }
                                 OCastLog.info { "Received reply of type ${it.replyClass.name} from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
                                 @Suppress("UNCHECKED_CAST")
-                                (it as ReplyCallback<Any?>).onSuccess.wrapRun(reply)
+                                (it as ReplyCallback<Any>).onSuccess.wrapRun(reply)
                             } else {
                                 it.onError.wrapRun(OCastError(replyData.params.code, "Received reply with params error code ${replyData.params.code} from $friendlyName").log())
                             }
@@ -446,47 +446,47 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
     //region Media commands
 
     override fun playMedia(position: Double, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(PlayMediaCommandParams(position).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(PlayMediaCommandParams(position).build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun stopMedia(onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(StopMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(StopMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun pauseMedia(onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(PauseMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(PauseMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun resumeMedia(onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(ResumeMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(ResumeMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun prepareMedia(params: PrepareMediaCommandParams, options: JSONObject?, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(params.options(options).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(params.options(options).build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun setMediaVolume(volume: Double, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(SetMediaVolumeCommandParams(volume).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(SetMediaVolumeCommandParams(volume).build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun setMediaTrack(params: SetMediaTrackCommandParams, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(params.build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(params.build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun seekMedia(position: Double, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(SeekMediaCommandParams(position).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(SeekMediaCommandParams(position).build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun muteMedia(mute: Boolean, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(MuteMediaCommandParams(mute).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(MuteMediaCommandParams(mute).build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun getMediaPlaybackStatus(onSuccess: Consumer<MediaPlaybackStatus>, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(GetMediaPlaybackStatusCommandParams().build()), OCastDomain.BROWSER, MediaPlaybackStatus::class.java, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(GetMediaPlaybackStatusCommandParams().build()), OCastDomain.BROWSER, MediaPlaybackStatus::class.java, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun getMediaMetadata(onSuccess: Consumer<MediaMetadata>, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(GetMediaMetadataCommandParams().build()), OCastDomain.BROWSER, MediaMetadata::class.java, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(GetMediaMetadataCommandParams().build()), OCastDomain.BROWSER, MediaMetadata::class.java, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     //endregion
@@ -494,7 +494,7 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
     //region Settings device commands
 
     override fun getUpdateStatus(onSuccess: Consumer<UpdateStatus>, onError: Consumer<OCastDeviceSettingsError>) {
-        send(DeviceMessage(GetUpdateStatusCommandParams().build()), OCastDomain.SETTINGS, UpdateStatus::class.java, onSuccess, Consumer { onError.run(OCastDeviceSettingsError(it)) })
+        send(DeviceMessage(GetUpdateStatusCommandParams().build()), OCastDomain.SETTINGS, UpdateStatus::class.java, onSuccess, { onError.run(OCastDeviceSettingsError(it)) })
     }
 
     override fun getDeviceID(onSuccess: Consumer<String>, onError: Consumer<OCastDeviceSettingsError>) {
@@ -506,26 +506,26 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
     //region Settings input commands
 
     override fun sendKeyEvent(params: SendKeyEventCommandParams, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
-        send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
+        send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, { onError.run(OCastInputSettingsError(it)) })
     }
 
     override fun sendMouseEvent(params: SendMouseEventCommandParams, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
-        send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
+        send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, { onError.run(OCastInputSettingsError(it)) })
     }
 
     override fun sendGamepadEvent(params: SendGamepadEventCommandParams, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
-        send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
+        send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, { onError.run(OCastInputSettingsError(it)) })
     }
 
     //endregion
 
     //region Custom commands
 
-    override fun <T : Any?> send(message: OCastApplicationLayer<T>, domain: OCastDomain, onSuccess: Runnable, onError: Consumer<OCastError>) {
-        send(message, domain, Unit::class.java, Consumer { onSuccess.run() }, onError)
+    override fun <T : Any> send(message: OCastApplicationLayer<T>, domain: OCastDomain, onSuccess: Runnable, onError: Consumer<OCastError>) {
+        send(message, domain, Unit::class.java, { onSuccess.run() }, onError)
     }
 
-    override fun <T : Any?, S : Any?> send(message: OCastApplicationLayer<T>, domain: OCastDomain, replyClass: Class<S>, onSuccess: Consumer<S>, onError: Consumer<OCastError>) {
+    override fun <T : Any, S : Any> send(message: OCastApplicationLayer<T>, domain: OCastDomain, replyClass: Class<S>, onSuccess: Consumer<S>, onError: Consumer<OCastError>) {
         val id = generateSequenceID()
         try {
             replyCallbacksBySequenceID[id] = ReplyCallback(replyClass, onSuccess, onError)
@@ -562,11 +562,7 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
         if (!startApplicationIfNeeded || isApplicationRunning.get()) {
             send()
         } else {
-            startApplication({
-                send()
-            }, { error ->
-                onError.wrapRun(error.log())
-            })
+            startApplication({ send() }, { onError.wrapRun(it.log()) })
         }
     }
 

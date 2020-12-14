@@ -26,11 +26,10 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
-import java.net.URL
 import org.hamcrest.CoreMatchers.instanceOf
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.ocast.sdk.common.stubDeviceDescriptionResponses
@@ -43,6 +42,7 @@ import org.ocast.sdk.discovery.DeviceDiscovery
 import org.ocast.sdk.discovery.UDPSocket
 import org.ocast.sdk.discovery.UpnpClient
 import org.ocast.sdk.discovery.models.UpnpDevice
+import java.net.URL
 
 /**
  * Unit tests for the [DeviceCenter] class.

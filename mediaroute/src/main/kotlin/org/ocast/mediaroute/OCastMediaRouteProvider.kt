@@ -29,10 +29,10 @@ import androidx.mediarouter.media.MediaRouteDescriptor
 import androidx.mediarouter.media.MediaRouteDiscoveryRequest
 import androidx.mediarouter.media.MediaRouteProvider
 import androidx.mediarouter.media.MediaRouteProviderDescriptor
-import java.util.Collections
 import org.ocast.sdk.core.Device
 import org.ocast.sdk.core.DeviceCenter
 import org.ocast.sdk.core.DeviceListener
+import java.util.Collections
 
 /**
  * This class is a concrete implementation of [MediaRouteProvider] to discover OCast devices with the Android media route framework.

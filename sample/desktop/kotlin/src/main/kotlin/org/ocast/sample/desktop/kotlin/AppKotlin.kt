@@ -16,12 +16,6 @@
 
 package org.ocast.sample.desktop.kotlin
 
-import java.io.FileInputStream
-import java.util.concurrent.CountDownLatch
-import java.util.logging.Level
-import java.util.logging.LogManager
-import java.util.logging.Logger
-import kotlin.system.exitProcess
 import org.ocast.sdk.core.Device
 import org.ocast.sdk.core.DeviceCenter
 import org.ocast.sdk.core.DeviceListener
@@ -31,6 +25,12 @@ import org.ocast.sdk.core.models.Media
 import org.ocast.sdk.core.models.MediaPlaybackStatus
 import org.ocast.sdk.core.models.PrepareMediaCommandParams
 import org.ocast.sdk.core.utils.OCastLog
+import java.io.FileInputStream
+import java.util.concurrent.CountDownLatch
+import java.util.logging.Level
+import java.util.logging.LogManager
+import java.util.logging.Logger
+import kotlin.system.exitProcess
 
 class AppKotlin : EventListener, DeviceListener {
 
@@ -77,14 +77,14 @@ class AppKotlin : EventListener, DeviceListener {
     private fun startApplication(device: Device) {
         device.applicationName = "Orange-DefaultReceiver-DEV"
         device.connect(
-            null, {
+            null,
+            {
                 device.startApplication(
                     { prepareMedia(device) },
                     { logger.log(Level.WARNING, "startApplication error: ${it.message}") }
                 )
-            }, { error ->
-                logger.log(Level.WARNING, "connect error: ${error.message}")
-            }
+            },
+            { logger.log(Level.WARNING, "connect error: ${it.message}") }
         )
     }
 

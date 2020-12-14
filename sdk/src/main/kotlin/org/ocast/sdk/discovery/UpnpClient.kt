@@ -16,16 +16,16 @@
 
 package org.ocast.sdk.discovery
 
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.ocast.sdk.common.extensions.enqueue
 import org.ocast.sdk.common.extensions.toMap
 import org.ocast.sdk.core.utils.OCastLog
 import org.ocast.sdk.discovery.models.UpnpDevice
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 /**
  * This class handles the retrieval of information about devices through the UPnP protocol.

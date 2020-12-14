@@ -31,9 +31,9 @@ import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.util.EnumSet
 import org.ocast.sdk.common.extensions.orElse
 import org.ocast.sdk.core.models.Bitflag
+import java.util.EnumSet
 
 /**
  * A singleton object that decodes and encodes JSON.

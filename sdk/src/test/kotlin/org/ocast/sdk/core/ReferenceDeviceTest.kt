@@ -28,18 +28,15 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import java.util.Timer
-import java.util.concurrent.TimeUnit
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
-import kotlin.concurrent.schedule
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.internal.ws.RealWebSocket
 import okhttp3.mockwebserver.MockResponse
 import org.hamcrest.CoreMatchers.instanceOf
-import org.junit.Assert.assertThat
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,6 +63,9 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PowerMockIgnore
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
+import java.util.Timer
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.schedule
 
 /**
  * Unit tests for the [ReferenceDevice] class.
@@ -1458,7 +1458,7 @@ class ReferenceDeviceTest : HttpClientTest() {
               </additionalData>
               <link rel="run" href="run"/>
             </service>
-            """.trimIndent()
+        """.trimIndent()
     }
 
     //endregion
