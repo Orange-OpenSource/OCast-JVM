@@ -16,9 +16,9 @@
 
 package org.ocast.sdk.common
 
+import org.ocast.sdk.core.models.Consumer
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import org.ocast.sdk.core.models.Consumer
 
 /**
  * This class represents a function with synchronization capabilities.

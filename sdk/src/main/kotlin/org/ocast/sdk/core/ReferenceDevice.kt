@@ -16,13 +16,6 @@
 
 package org.ocast.sdk.core
 
-import java.net.URI
-import java.util.Collections
-import java.util.UUID
-import java.util.concurrent.Semaphore
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 import org.json.JSONObject
 import org.ocast.sdk.common.extensions.ifNotNull
 import org.ocast.sdk.common.extensions.orElse
@@ -75,6 +68,13 @@ import org.ocast.sdk.core.utils.log
 import org.ocast.sdk.dial.DialClient
 import org.ocast.sdk.dial.models.DialApplication
 import org.ocast.sdk.discovery.models.UpnpDevice
+import java.net.URI
+import java.util.Collections
+import java.util.UUID
+import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * The reference OCast device.
@@ -243,14 +243,14 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
             State.DISCONNECTING -> onError.wrapRun(OCastError("Failed to connect to $friendlyName, device is disconnecting").log())
             State.DISCONNECTED -> {
                 state = State.CONNECTING
-                onCreateWebSockets(sslConfiguration, Consumer { webSocketsById ->
+                onCreateWebSockets(sslConfiguration) { webSocketsById ->
                     this.webSocketsById = webSocketsById
                     connectCallback = RunnableCallback(onSuccess, onError)
                     webSocketsById.values.forEach { webSocket ->
                         OCastLog.debug { "Created web socket with ID ${webSocket.id} and url ${webSocket.webSocketURL} for $friendlyName" }
                         webSocket.connect()
                     }
-                })
+                }
             }
         }
     }
@@ -562,11 +562,7 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
         if (!startApplicationIfNeeded || isApplicationRunning.get()) {
             send()
         } else {
-            startApplication({
-                send()
-            }, { error ->
-                onError.wrapRun(error.log())
-            })
+            startApplication({ send() }, { onError.wrapRun(it.log()) })
         }
     }
 

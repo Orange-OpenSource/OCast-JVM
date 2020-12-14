@@ -26,7 +26,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.mediarouter.app.MediaRouteActionProvider
 import androidx.mediarouter.media.MediaRouter
-import java.util.logging.LogManager
 import org.ocast.mediaroute.OCastMediaRouteHelper
 import org.ocast.sample.mobile.R
 import org.ocast.sample.mobile.databinding.ActivityMainBinding
@@ -39,6 +38,7 @@ import org.ocast.sdk.core.models.MediaMetadata
 import org.ocast.sdk.core.models.MediaPlaybackStatus
 import org.ocast.sdk.core.models.PrepareMediaCommandParams
 import org.ocast.sdk.core.utils.OCastLog
+import java.util.logging.LogManager
 
 class MainActivity : AppCompatActivity(), EventListener {
 

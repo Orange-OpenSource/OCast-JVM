@@ -21,11 +21,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
-import java.util.EnumSet
 import junit.framework.TestCase.assertNull
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.ocast.sdk.core.models.Bitflag
+import java.util.EnumSet
 
 /**
  * Unit tests for the JsonTools object.

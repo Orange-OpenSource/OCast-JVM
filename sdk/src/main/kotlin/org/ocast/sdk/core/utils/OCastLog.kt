@@ -51,9 +51,9 @@ class OCastLog {
         @PublishedApi
         internal val tag: String
             get() = callingStackFrame
-                    ?.className
-                    ?.substringBefore("$")
-                    .orEmpty()
+                ?.className
+                ?.substringBefore("$")
+                .orEmpty()
 
         /** The calling stack frame. */
         private val callingStackFrame: StackTraceElement?
