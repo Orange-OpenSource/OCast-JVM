@@ -8,7 +8,7 @@
 </tr>
 <tr>
 <td>Build status</td>
-<td><a href="https://travis-ci.org/Orange-OpenSource/OCast-JVM"><img src="https://travis-ci.org/Orange-OpenSource/OCast-JVM.svg?branch=master"></a></td>
+<td><a href="https://github.com/Orange-OpenSource/OCast-JVM/actions?query=workflow%3Abuild"><img src="https://github.com/Orange-OpenSource/OCast-JVM/workflows/build/badge.svg"></a></td>
 </tr>
 <tr>
 <td>OCast SDK</td>
