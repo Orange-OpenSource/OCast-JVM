@@ -16,6 +16,7 @@
 
 package org.ocast.sdk.core.utils
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
@@ -38,8 +39,16 @@ class JsonToolsTest {
         @JsonProperty("foo") val foo: String,
         @JsonProperty("bar") val bar: Int,
         @JsonProperty("baz") val baz: String?,
-        @JsonProperty("qux") val qux: Int?
-    )
+        @JsonProperty("qux") val qux: Int?,
+        @JsonProperty("quux") val quux: TestEnum?
+    ) {
+
+        enum class TestEnum {
+            @JsonProperty("ONE") ONE,
+            @JsonProperty("TWO") TWO,
+            @JsonEnumDefaultValue UNKNOWN
+        }
+    }
 
     @Test
     fun deserializeJsonWithUnknownValueSucceeds() {
@@ -50,6 +59,7 @@ class JsonToolsTest {
               "bar": 0,
               "baz": null,
               "qux": null,
+              "quux": "ONE",
               "unknownName": "unknownValue"
             }
         """.trimIndent()
@@ -62,6 +72,7 @@ class JsonToolsTest {
         assertEquals(0, entity.bar)
         assertNull(entity.baz)
         assertNull(entity.qux)
+        assertEquals(TestEntity.TestEnum.ONE, entity.quux)
     }
 
     @Test(expected = MissingKotlinParameterException::class)
@@ -71,7 +82,8 @@ class JsonToolsTest {
             {
               "bar": 0,
               "baz": null,
-              "qux": null
+              "qux": null,
+              "quux": "ONE"
             }
         """.trimIndent()
 
@@ -89,7 +101,8 @@ class JsonToolsTest {
             {
               "foo": "string",
               "baz": null,
-              "qux": null
+              "qux": null,
+              "quux": "ONE"
             }
         """.trimIndent()
 
@@ -108,7 +121,8 @@ class JsonToolsTest {
               "foo": null,
               "bar": 0,
               "baz": null,
-              "qux": null
+              "qux": null,
+              "quux": "ONE"
             }
         """.trimIndent()
 
@@ -127,7 +141,8 @@ class JsonToolsTest {
               "foo": "string",
               "bar": null,
               "baz": null,
-              "qux": null
+              "qux": null,
+              "quux": "ONE"
             }
         """.trimIndent()
 
@@ -136,6 +151,30 @@ class JsonToolsTest {
 
         // Then
         // An exception is thrown
+    }
+
+    @Test
+    fun deserializeJsonWithUnknownEnumValueSucceeds() {
+        // Given
+        val json = """
+            {
+              "foo": "string",
+              "bar": 0,
+              "baz": null,
+              "qux": null,
+              "quux": "THREE"
+            }
+        """.trimIndent()
+
+        // When
+        val entity = JsonTools.decode(json, TestEntity::class.java)
+
+        // Then
+        assertEquals("string", entity.foo)
+        assertEquals(0, entity.bar)
+        assertNull(entity.baz)
+        assertNull(entity.qux)
+        assertEquals(TestEntity.TestEnum.UNKNOWN, entity.quux)
     }
 
     //endregion

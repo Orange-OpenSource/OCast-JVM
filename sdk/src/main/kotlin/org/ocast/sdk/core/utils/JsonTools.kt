@@ -49,6 +49,7 @@ object JsonTools {
         objectMapper.registerModule(JsonOrgModule())
         objectMapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        objectMapper.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE, true)
         objectMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
         objectMapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
