@@ -16,6 +16,11 @@
 
 package org.ocast.sdk.discovery
 
+import org.ocast.sdk.core.utils.OCastLog
+import org.ocast.sdk.discovery.models.SsdpMSearchRequest
+import org.ocast.sdk.discovery.models.SsdpMSearchResponse
+import org.ocast.sdk.discovery.models.SsdpMessage
+import org.ocast.sdk.discovery.models.UpnpDevice
 import java.io.IOException
 import java.util.Collections.synchronizedMap
 import java.util.Date
@@ -24,11 +29,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.fixedRateTimer
 import kotlin.concurrent.schedule
 import kotlin.math.max
-import org.ocast.sdk.core.utils.OCastLog
-import org.ocast.sdk.discovery.models.SsdpMSearchRequest
-import org.ocast.sdk.discovery.models.SsdpMSearchResponse
-import org.ocast.sdk.discovery.models.SsdpMessage
-import org.ocast.sdk.discovery.models.UpnpDevice
 
 /**
  * This class is the entry point for the discovery of OCast devices.
@@ -269,9 +269,15 @@ internal class DeviceDiscovery constructor(
         }
 
         val date = Date()
-        // Add a 1 second delay to take into account the network round-trip time
-        removeDevicesTimer?.schedule(TimeUnit.SECONDS.toMillis(MSEARCH_MX_VALUE.toLong() + 1)) {
-            removeDevices(date)
+        // Fixes a crash where the timer has already been cancelled
+        try {
+            // Add a 1 second delay to take into account the network round-trip time
+            removeDevicesTimer?.schedule(TimeUnit.SECONDS.toMillis(MSEARCH_MX_VALUE.toLong() + 1)) {
+                removeDevices(date)
+            }
+        } catch (_: IllegalStateException) {
+            // Reset the property because the timer is unusable if it has been cancelled
+            removeDevicesTimer = null
         }
     }
 

@@ -16,17 +16,168 @@
 
 package org.ocast.sdk.core.utils
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import java.util.EnumSet
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
+import com.fasterxml.jackson.module.kotlin.MissingKotlinParameterException
+import junit.framework.TestCase.assertNull
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.ocast.sdk.core.models.Bitflag
+import java.util.EnumSet
 
 /**
  * Unit tests for the JsonTools object.
  */
 class JsonToolsTest {
+
+    //region Deserialization
+
+    class TestEntity(
+        @JsonProperty("foo") val foo: String,
+        @JsonProperty("bar") val bar: Int,
+        @JsonProperty("baz") val baz: String?,
+        @JsonProperty("qux") val qux: Int?,
+        @JsonProperty("quux") val quux: TestEnum?
+    ) {
+
+        enum class TestEnum {
+            @JsonProperty("ONE") ONE,
+            @JsonProperty("TWO") TWO,
+            @JsonEnumDefaultValue UNKNOWN
+        }
+    }
+
+    @Test
+    fun deserializeJsonWithUnknownValueSucceeds() {
+        // Given
+        val json = """
+            {
+              "foo": "string",
+              "bar": 0,
+              "baz": null,
+              "qux": null,
+              "quux": "ONE",
+              "unknownName": "unknownValue"
+            }
+        """.trimIndent()
+
+        // When
+        val entity = JsonTools.decode(json, TestEntity::class.java)
+
+        // Then
+        assertEquals("string", entity.foo)
+        assertEquals(0, entity.bar)
+        assertNull(entity.baz)
+        assertNull(entity.qux)
+        assertEquals(TestEntity.TestEnum.ONE, entity.quux)
+    }
+
+    @Test(expected = MissingKotlinParameterException::class)
+    fun deserializeJsonWithMissingValueFails() {
+        // Given
+        val json = """
+            {
+              "bar": 0,
+              "baz": null,
+              "qux": null,
+              "quux": "ONE"
+            }
+        """.trimIndent()
+
+        // When
+        JsonTools.decode(json, TestEntity::class.java)
+
+        // Then
+        // An exception is thrown
+    }
+
+    @Test(expected = MismatchedInputException::class)
+    fun deserializeJsonWithMissingPrimitiveValueFails() {
+        // Given
+        val json = """
+            {
+              "foo": "string",
+              "baz": null,
+              "qux": null,
+              "quux": "ONE"
+            }
+        """.trimIndent()
+
+        // When
+        JsonTools.decode(json, TestEntity::class.java)
+
+        // Then
+        // An exception is thrown
+    }
+
+    @Test(expected = MissingKotlinParameterException::class)
+    fun deserializeJsonWithNullValueFails() {
+        // Given
+        val json = """
+            {
+              "foo": null,
+              "bar": 0,
+              "baz": null,
+              "qux": null,
+              "quux": "ONE"
+            }
+        """.trimIndent()
+
+        // When
+        JsonTools.decode(json, TestEntity::class.java)
+
+        // Then
+        // An exception is thrown
+    }
+
+    @Test(expected = MismatchedInputException::class)
+    fun deserializeJsonWithNullPrimitiveValueFails() {
+        // Given
+        val json = """
+            {
+              "foo": "string",
+              "bar": null,
+              "baz": null,
+              "qux": null,
+              "quux": "ONE"
+            }
+        """.trimIndent()
+
+        // When
+        JsonTools.decode(json, TestEntity::class.java)
+
+        // Then
+        // An exception is thrown
+    }
+
+    @Test
+    fun deserializeJsonWithUnknownEnumValueSucceeds() {
+        // Given
+        val json = """
+            {
+              "foo": "string",
+              "bar": 0,
+              "baz": null,
+              "qux": null,
+              "quux": "THREE"
+            }
+        """.trimIndent()
+
+        // When
+        val entity = JsonTools.decode(json, TestEntity::class.java)
+
+        // Then
+        assertEquals("string", entity.foo)
+        assertEquals(0, entity.bar)
+        assertNull(entity.baz)
+        assertNull(entity.qux)
+        assertEquals(TestEntity.TestEnum.UNKNOWN, entity.quux)
+    }
+
+    //endregion
 
     //region RawJsonDeserializer
 

@@ -28,18 +28,18 @@ import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import java.net.URL
-import java.util.Timer
-import kotlin.concurrent.schedule
+import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.ocast.sdk.common.stubDeviceDescriptionResponses
 import org.ocast.sdk.common.stubMSearchResponses
 import org.ocast.sdk.discovery.models.UpnpDevice
+import java.net.URL
+import java.util.Timer
+import kotlin.concurrent.schedule
 
 /**
  * Unit tests for the [DeviceDiscovery] class.
@@ -176,24 +176,24 @@ class DeviceDiscoveryTest {
     fun receiveChangedDeviceDescriptionCallsListenerOnDevicesChanged() {
         // Given
         val oldMSearchResponseString = "HTTP/1.1 200 OK\r\n" +
-                "LOCATION: http://10.0.0.28:56790/old-device-desc.xml\r\n" +
-                "CACHE-CONTROL: max-age=1800\r\n" +
-                "EXT:\r\n" +
-                "BOOTID.UPNP.ORG: 1\r\n" +
-                "SERVER: Linux/4.9 UPnP/1.1 quick_ssdp/1.1\r\n" +
-                "ST: urn:cast-ocast-org:service:cast:1\r\n" +
-                "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7\r\n" +
-                "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
+            "LOCATION: http://10.0.0.28:56790/old-device-desc.xml\r\n" +
+            "CACHE-CONTROL: max-age=1800\r\n" +
+            "EXT:\r\n" +
+            "BOOTID.UPNP.ORG: 1\r\n" +
+            "SERVER: Linux/4.9 UPnP/1.1 quick_ssdp/1.1\r\n" +
+            "ST: urn:cast-ocast-org:service:cast:1\r\n" +
+            "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7\r\n" +
+            "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
 
         val newMSearchResponseString = "HTTP/1.1 200 OK\r\n" +
-                "LOCATION: http://10.0.0.28:56790/new-device-desc.xml\r\n" +
-                "CACHE-CONTROL: max-age=1800\r\n" +
-                "EXT:\r\n" +
-                "BOOTID.UPNP.ORG: 1\r\n" +
-                "SERVER: Linux/4.9 UPnP/1.1 quick_ssdp/1.1\r\n" +
-                "ST: urn:cast-ocast-org:service:cast:1\r\n" +
-                "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7\r\n" +
-                "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
+            "LOCATION: http://10.0.0.28:56790/new-device-desc.xml\r\n" +
+            "CACHE-CONTROL: max-age=1800\r\n" +
+            "EXT:\r\n" +
+            "BOOTID.UPNP.ORG: 1\r\n" +
+            "SERVER: Linux/4.9 UPnP/1.1 quick_ssdp/1.1\r\n" +
+            "ST: urn:cast-ocast-org:service:cast:1\r\n" +
+            "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7\r\n" +
+            "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
 
         socket.stubMSearchResponses(listOf(oldMSearchResponseString to 200L, newMSearchResponseString to 400L))
         val oldDevice = UpnpDevice("UDN", URL("http://foo"), "OldName", "Manufacturer", "Model")

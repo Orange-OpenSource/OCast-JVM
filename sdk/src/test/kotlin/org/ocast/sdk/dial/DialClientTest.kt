@@ -20,9 +20,6 @@ import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
-import java.net.URI
-import java.net.URL
-import java.util.concurrent.TimeUnit
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.SocketPolicy
 import org.junit.Assert.assertEquals
@@ -37,6 +34,9 @@ import org.ocast.sdk.common.SynchronizedFunction1
 import org.ocast.sdk.common.models.HttpException
 import org.ocast.sdk.common.removeXMLElement
 import org.ocast.sdk.dial.models.DialApplication
+import java.net.URI
+import java.net.URL
+import java.util.concurrent.TimeUnit
 
 /**
  * Unit tests for the [DialClient] class.

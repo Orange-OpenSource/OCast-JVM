@@ -28,18 +28,15 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import java.util.Timer
-import java.util.concurrent.TimeUnit
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
-import kotlin.concurrent.schedule
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.internal.ws.RealWebSocket
 import okhttp3.mockwebserver.MockResponse
 import org.hamcrest.CoreMatchers.instanceOf
-import org.junit.Assert.assertThat
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,6 +63,9 @@ import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PowerMockIgnore
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
+import java.util.Timer
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.schedule
 
 /**
  * Unit tests for the [ReferenceDevice] class.
@@ -950,7 +950,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         verify(onSuccess, never()).run(any())
         val errorCaptor = argumentCaptor<OCastError>()
         verify(onError, times(1)).run(errorCaptor.capture())
-        assertEquals(OCastError.Status.DEVICE_LAYER_ERROR.code, errorCaptor.firstValue.code)
+        assertEquals(OCastError.Status.DEVICE_LAYER_INTERNAL_ERROR.code, errorCaptor.firstValue.code)
     }
 
     @Test
@@ -1071,6 +1071,141 @@ class ReferenceDeviceTest : HttpClientTest() {
         val errorCaptor = argumentCaptor<OCastError>()
         verify(onError, times(1)).run(errorCaptor.capture())
         assertEquals(OCastError.Status.DECODE_ERROR.code, errorCaptor.firstValue.code)
+    }
+
+    @Test
+    fun sendMessageWithReceivedForbiddenUnsecureModeStatusFails() {
+        // Given
+        awaitDeviceConnected()
+        val message = OCastApplicationLayer("org.ocast.service", OCastCommandParams("commandName").build())
+        val onSuccess = mock<Consumer<TestReplyParams>>()
+        val onError = mock<Consumer<OCastError>>()
+        val synchronizedOnError = SynchronizedConsumer(onError)
+        val receivedMessage = """
+            {
+              "dst": null,
+              "src": null,
+              "type": "reply",
+              "status": "forbidden_unsecure_mode",
+              "id": -1,
+              "message": {
+              }
+            }
+        """.trimIndent()
+        stubReceivedMessages(receivedMessage to 100)
+
+        // When
+        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+
+        // Then
+        synchronizedOnError.await(5, TimeUnit.SECONDS)
+        verify(onSuccess, never()).run(any())
+        val errorCaptor = argumentCaptor<OCastError>()
+        verify(onError, times(1)).run(errorCaptor.capture())
+        assertEquals(OCastError.Status.DEVICE_LAYER_FORBIDDEN_UNSECURE_MODE.code, errorCaptor.firstValue.code)
+    }
+
+    @Test
+    fun sendMessageWithMissingReceivedStatusFails() {
+        // Given
+        awaitDeviceConnected()
+        val message = OCastApplicationLayer("org.ocast.service", OCastCommandParams("commandName").build())
+        val onSuccess = mock<Consumer<TestReplyParams>>()
+        val onError = mock<Consumer<OCastError>>()
+        val synchronizedOnError = SynchronizedConsumer(onError)
+        val receivedMessage = """
+            {
+              "dst": null,
+              "src": null,
+              "type": "reply",
+              "status": null,
+              "id": -1,
+              "message": {
+              }
+            }
+        """.trimIndent()
+        stubReceivedMessages(receivedMessage to 100)
+
+        // When
+        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+
+        // Then
+        synchronizedOnError.await(5, TimeUnit.SECONDS)
+        verify(onSuccess, never()).run(any())
+        val errorCaptor = argumentCaptor<OCastError>()
+        verify(onError, times(1)).run(errorCaptor.capture())
+        assertEquals(OCastError.Status.DEVICE_LAYER_MISSING_STATUS.code, errorCaptor.firstValue.code)
+    }
+
+    @Test
+    fun sendMessageWithMissingReceivedReplyDataFails() {
+        // Given
+        awaitDeviceConnected()
+        val message = OCastApplicationLayer("org.ocast.service", OCastCommandParams("commandName").build())
+        val onSuccess = mock<Consumer<TestReplyParams>>()
+        val onError = mock<Consumer<OCastError>>()
+        val synchronizedOnError = SynchronizedConsumer(onError)
+        val receivedMessage = """
+            {
+              "dst": null,
+              "src": null,
+              "type": "reply",
+              "status": "ok",
+              "id": -1,
+              "message": {
+              }
+            }
+        """.trimIndent()
+        stubReceivedMessages(receivedMessage to 100)
+
+        // When
+        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+
+        // Then
+        synchronizedOnError.await(5, TimeUnit.SECONDS)
+        verify(onSuccess, never()).run(any())
+        val errorCaptor = argumentCaptor<OCastError>()
+        verify(onError, times(1)).run(errorCaptor.capture())
+        assertEquals(OCastError.Status.DEVICE_LAYER_MISSING_REPLY_DATA.code, errorCaptor.firstValue.code)
+    }
+
+    @Test
+    fun sendMessageWithUnknownReceivedStatusFails() {
+        // Given
+        awaitDeviceConnected()
+        val message = OCastApplicationLayer("org.ocast.service", OCastCommandParams("commandName").build())
+        val onSuccess = mock<Consumer<TestReplyParams>>()
+        val onError = mock<Consumer<OCastError>>()
+        val synchronizedOnError = SynchronizedConsumer(onError)
+        val receivedMessage = """
+            {
+              "dst": "*",
+              "src": "browser",
+              "type": "reply",
+              "status": "OCAST_UNKNOWN_STATUS",
+              "id": 1,
+              "message": {
+                "service": "org.ocast.service",
+                "data": {
+                  "name": "commandName",
+                  "params": {
+                    "replyName": "replyValue"
+                  }
+                }
+              }
+            }
+        """.trimIndent()
+        stubReceivedMessages(receivedMessage to 100)
+
+        // When
+        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+
+        // Then
+        synchronizedOnError.await(5, TimeUnit.SECONDS)
+        verify(onSuccess, never()).run(any())
+        val errorCaptor = argumentCaptor<OCastError>()
+        verify(onError, times(1)).run(errorCaptor.capture())
+        assertEquals(OCastError.Status.DEVICE_LAYER_UNKNOWN_ERROR.code, errorCaptor.firstValue.code)
     }
 
     @Test
@@ -1458,7 +1593,7 @@ class ReferenceDeviceTest : HttpClientTest() {
               </additionalData>
               <link rel="run" href="run"/>
             </service>
-            """.trimIndent()
+        """.trimIndent()
     }
 
     //endregion

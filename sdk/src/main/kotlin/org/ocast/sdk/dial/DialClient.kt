@@ -16,7 +16,6 @@
 
 package org.ocast.sdk.dial
 
-import java.net.URL
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -25,6 +24,7 @@ import org.ocast.sdk.core.utils.OCastLog
 import org.ocast.sdk.core.utils.log
 import org.ocast.sdk.dial.models.DialApplication
 import org.ocast.sdk.dial.models.DialError
+import java.net.URL
 
 /**
  * Instances of this class handle DIAL requests.

@@ -31,9 +31,9 @@ import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import java.util.EnumSet
 import org.ocast.sdk.common.extensions.orElse
 import org.ocast.sdk.core.models.Bitflag
+import java.util.EnumSet
 
 /**
  * A singleton object that decodes and encodes JSON.
@@ -47,7 +47,9 @@ object JsonTools {
     init {
         objectMapper.registerModule(KotlinModule())
         objectMapper.registerModule(JsonOrgModule())
+        objectMapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        objectMapper.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE, true)
         objectMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
         objectMapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
