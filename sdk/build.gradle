@@ -105,6 +105,15 @@ task sourcesJar(type: Jar, dependsOn: classes) {
     from sourceSets.main.allSource
 }
 
+task testJar(type: Jar) {
+    classifier = 'test'
+    from sourceSets.test.output
+}
+
+artifacts {
+    testRuntime testJar
+}
+
 dokka {
     outputFormat = 'javadoc'
     outputDirectory = "$buildDir/javadoc"
