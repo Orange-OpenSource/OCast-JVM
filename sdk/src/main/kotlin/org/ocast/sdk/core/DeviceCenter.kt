@@ -136,7 +136,7 @@ open class DeviceCenter internal constructor(private val deviceDiscovery: Device
      *
      * @param device The device to add.
      */
-    protected open fun onAddDevice(device: Device) {
+    open fun onAddDevice(device: Device) {
     }
 
     /**
@@ -146,7 +146,7 @@ open class DeviceCenter internal constructor(private val deviceDiscovery: Device
      *
      * @param device The device to remove.
      */
-    protected open fun onRemoveDevice(device: Device) {
+    open fun onRemoveDevice(device: Device) {
     }
 
     /**

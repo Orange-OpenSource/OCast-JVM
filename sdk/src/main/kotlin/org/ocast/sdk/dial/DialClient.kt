@@ -32,7 +32,7 @@ import java.net.URL
  * @property baseURL The base URL of the DIAL service.
  * @constructor Creates an instance of [DialClient].
  */
-internal class DialClient(private val baseURL: URL) {
+class DialClient(private val baseURL: URL) {
 
     /** The OkHttp client which will send DIAL requests. */
     private val client = OkHttpClient()

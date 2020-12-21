@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit
  * @property count The number of times countDown() must be called before threads can pass through await().
  * @constructor Creates an instance of [SynchronizedFunction].
  */
-internal abstract class SynchronizedFunction<R>(protected open val function: Function<R>, private val count: Int) {
+abstract class SynchronizedFunction<R>(protected open val function: Function<R>, private val count: Int) {
 
     /** The latch. */
     private val latch = CountDownLatch(count)
@@ -67,7 +67,7 @@ internal abstract class SynchronizedFunction<R>(protected open val function: Fun
  * @param count The number of times countDown() must be called before threads can pass through await().
  * @constructor Creates an instance of [SynchronizedFunction0].
  */
-internal open class SynchronizedFunction0<R>(override val function: Function0<R>, count: Int = 1) : SynchronizedFunction<R>(function, count), Function0<R> {
+open class SynchronizedFunction0<R>(override val function: Function0<R>, count: Int = 1) : SynchronizedFunction<R>(function, count), Function0<R> {
 
     override fun invoke(): R {
         val returnValue = function.invoke()
@@ -86,7 +86,7 @@ internal open class SynchronizedFunction0<R>(override val function: Function0<R>
  * @param count The number of times countDown() must be called before threads can pass through await().
  * @constructor Creates an instance of [SynchronizedFunction1].
  */
-internal open class SynchronizedFunction1<T, R>(override val function: Function1<T, R>, count: Int = 1) : SynchronizedFunction<R>(function, count), Function1<T, R> {
+open class SynchronizedFunction1<T, R>(override val function: Function1<T, R>, count: Int = 1) : SynchronizedFunction<R>(function, count), Function1<T, R> {
 
     override fun invoke(p1: T): R {
         val returnValue = function.invoke(p1)
@@ -103,7 +103,7 @@ internal open class SynchronizedFunction1<T, R>(override val function: Function1
  * @param count The number of times countDown() must be called before threads can pass through await().
  * @constructor Creates an instance of [SynchronizedRunnable].
  */
-internal class SynchronizedRunnable(runnable: Runnable, count: Int = 1) : SynchronizedFunction0<Unit>({ runnable.run() }, count), Runnable {
+class SynchronizedRunnable(runnable: Runnable, count: Int = 1) : SynchronizedFunction0<Unit>({ runnable.run() }, count), Runnable {
 
     override fun run() {
         invoke()
@@ -118,7 +118,7 @@ internal class SynchronizedRunnable(runnable: Runnable, count: Int = 1) : Synchr
  * @param count The number of times countDown() must be called before threads can pass through await()
  * @constructor Creates an instance of [SynchronizedConsumer].
  */
-internal class SynchronizedConsumer<T : Any>(consumer: Consumer<T>, count: Int = 1) : SynchronizedFunction1<T, Unit>({ t: T -> consumer.run(t) }, count), Consumer<T> {
+class SynchronizedConsumer<T : Any>(consumer: Consumer<T>, count: Int = 1) : SynchronizedFunction1<T, Unit>({ t: T -> consumer.run(t) }, count), Consumer<T> {
 
     override fun run(t: T) {
         invoke(t)
