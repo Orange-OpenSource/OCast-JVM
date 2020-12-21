@@ -28,22 +28,12 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertNull
-import okhttp3.Protocol
-import okhttp3.Request
-import okhttp3.Response
-import okhttp3.internal.ws.RealWebSocket
 import okhttp3.mockwebserver.MockResponse
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.Before
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mockito
-import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Stubber
-import org.ocast.sdk.common.HttpClientTest
 import org.ocast.sdk.common.SynchronizedConsumer
 import org.ocast.sdk.common.SynchronizedRunnable
 import org.ocast.sdk.common.models.HttpException
@@ -57,12 +47,6 @@ import org.ocast.sdk.core.models.OCastDataLayer
 import org.ocast.sdk.core.models.OCastDomain
 import org.ocast.sdk.core.models.OCastError
 import org.ocast.sdk.core.models.UpdateStatus
-import org.ocast.sdk.dial.DialClient
-import org.ocast.sdk.discovery.models.UpnpDevice
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PowerMockIgnore
-import org.powermock.core.classloader.annotations.PrepareForTest
-import org.powermock.modules.junit4.PowerMockRunner
 import java.util.Timer
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
@@ -70,35 +54,7 @@ import kotlin.concurrent.schedule
 /**
  * Unit tests for the [ReferenceDevice] class.
  */
-@RunWith(PowerMockRunner::class)
-@PowerMockIgnore("javax.net.ssl.*") // This fixes a java.lang.AssertionError with OkHttp and PowerMock
-@PrepareForTest(fullyQualifiedNames = ["okhttp3.internal.ws.RealWebSocket", "org.ocast.sdk.core.*"])
-class ReferenceDeviceTest : HttpClientTest() {
-
-    /** The reference device. */
-    private val referenceDevice = ReferenceDevice(UpnpDevice(), DialClient(baseURL), 5)
-
-    /** The OCast web socket. */
-    private var webSocket: WebSocket? = null
-
-    /** The underlying OkHttp web socket. */
-    private val realWebSocket = mock<RealWebSocket>()
-
-    /** The device listener. */
-    private val deviceListener = mock<DeviceListener>()
-
-    /** The event listener. */
-    private val eventListener = mock<EventListener>()
-
-    @Before
-    override fun setUp() {
-        super.setUp()
-
-        referenceDevice.deviceListener = deviceListener
-        referenceDevice.eventListener = eventListener
-        referenceDevice.applicationName = "OrangeTVReceiverProd"
-        stubWebSocket()
-    }
+class ReferenceDeviceTest : DeviceTest<ReferenceDevice>(ReferenceDevice::class.java) {
 
     //region Connect
 
@@ -111,31 +67,31 @@ class ReferenceDeviceTest : HttpClientTest() {
         val onError = mock<Consumer<OCastError>>()
 
         // When
-        referenceDevice.connect(null, synchronizedOnSuccess, onError)
+        device.connect(null, synchronizedOnSuccess, onError)
 
         // Then
         synchronizedOnSuccess.await(5, TimeUnit.SECONDS)
         verify(onSuccess, times(1)).run()
         verify(onError, never()).run(any())
-        assertEquals(Device.State.CONNECTED, referenceDevice.state)
+        assertEquals(Device.State.CONNECTED, device.state)
     }
 
     @Test
     fun connectWithoutApplicationNameSucceeds() {
         // Given
-        referenceDevice.applicationName = null
+        device.applicationName = null
         val onSuccess = mock<Runnable>()
         val synchronizedOnSuccess = SynchronizedRunnable(onSuccess)
         val onError = mock<Consumer<OCastError>>()
 
         // When
-        referenceDevice.connect(null, synchronizedOnSuccess, onError)
+        device.connect(null, synchronizedOnSuccess, onError)
 
         // Then
         synchronizedOnSuccess.await(5, TimeUnit.SECONDS)
         verify(onSuccess, times(1)).run()
         verify(onError, never()).run(any())
-        assertEquals(Device.State.CONNECTED, referenceDevice.state)
+        assertEquals(Device.State.CONNECTED, device.state)
     }
 
     @Test
@@ -147,13 +103,13 @@ class ReferenceDeviceTest : HttpClientTest() {
         val onError = mock<Consumer<OCastError>>()
 
         // When
-        referenceDevice.connect(null, synchronizedOnSuccess, onError)
+        device.connect(null, synchronizedOnSuccess, onError)
 
         // Then
         synchronizedOnSuccess.await(5, TimeUnit.SECONDS)
         verify(onSuccess, times(1)).run()
         verify(onError, never()).run(any())
-        assertEquals(Device.State.CONNECTED, referenceDevice.state)
+        assertEquals(Device.State.CONNECTED, device.state)
     }
 
     @Test
@@ -162,14 +118,14 @@ class ReferenceDeviceTest : HttpClientTest() {
         repeat(2) {
             server.enqueue(MockResponse().setBody(createGetApplicationResponseBody()))
         }
-        referenceDevice.connect(null, {}, {})
+        device.connect(null, {}, {})
         val onSuccess = mock<Runnable>()
         val onError = mock<Consumer<OCastError>>()
         val synchronizedOnError = SynchronizedConsumer(onError)
-        assertEquals(Device.State.CONNECTING, referenceDevice.state)
+        assertEquals(Device.State.CONNECTING, device.state)
 
         // When
-        referenceDevice.connect(null, onSuccess, synchronizedOnError)
+        device.connect(null, onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -177,22 +133,22 @@ class ReferenceDeviceTest : HttpClientTest() {
         val errorCaptor = argumentCaptor<OCastError>()
         verify(onError, times(1)).run(errorCaptor.capture())
         assertEquals(OCastError.Status.CLIENT_ERROR.code, errorCaptor.firstValue.code)
-        assertEquals(Device.State.CONNECTING, referenceDevice.state)
+        assertEquals(Device.State.CONNECTING, device.state)
     }
 
     @Test
     fun connectWhenDisconnectingFails() {
         // Given
         awaitDeviceConnected()
-        referenceDevice.disconnect({}, {})
+        device.disconnect({}, {})
         server.enqueue(MockResponse().setBody(createGetApplicationResponseBody()))
         val onSuccess = mock<Runnable>()
         val onError = mock<Consumer<OCastError>>()
         val synchronizedOnError = SynchronizedConsumer(onError)
-        assertEquals(Device.State.DISCONNECTING, referenceDevice.state)
+        assertEquals(Device.State.DISCONNECTING, device.state)
 
         // When
-        referenceDevice.connect(null, onSuccess, synchronizedOnError)
+        device.connect(null, onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -200,7 +156,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         val errorCaptor = argumentCaptor<OCastError>()
         verify(onError, times(1)).run(errorCaptor.capture())
         assertEquals(OCastError.Status.CLIENT_ERROR.code, errorCaptor.firstValue.code)
-        assertEquals(Device.State.DISCONNECTING, referenceDevice.state)
+        assertEquals(Device.State.DISCONNECTING, device.state)
     }
 
     @Test
@@ -218,7 +174,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnError = SynchronizedConsumer(onError)
 
         // When
-        referenceDevice.connect(null, onSuccess, synchronizedOnError)
+        device.connect(null, onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -227,7 +183,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         verify(onError, times(1)).run(errorCaptor.capture())
         assertEquals(OCastError.Status.CLIENT_ERROR.code, errorCaptor.firstValue.code)
         assertEquals(throwable, errorCaptor.firstValue.cause)
-        assertEquals(Device.State.DISCONNECTED, referenceDevice.state)
+        assertEquals(Device.State.DISCONNECTED, device.state)
         verify(deviceListener, never()).onDeviceDisconnected(any(), anyOrNull())
     }
 
@@ -240,13 +196,13 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnSuccess = SynchronizedRunnable(onSuccess)
 
         // When
-        referenceDevice.connect(null, synchronizedOnSuccess, onError)
+        device.connect(null, synchronizedOnSuccess, onError)
 
         // Then
         synchronizedOnSuccess.await(5, TimeUnit.SECONDS)
         verify(onSuccess, times(1)).run()
         verify(onError, never()).run(any())
-        assertEquals(Device.State.CONNECTED, referenceDevice.state)
+        assertEquals(Device.State.CONNECTED, device.state)
     }
 
     @Test
@@ -258,13 +214,13 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnSuccess = SynchronizedRunnable(onSuccess)
 
         // When
-        referenceDevice.connect(null, synchronizedOnSuccess, onError)
+        device.connect(null, synchronizedOnSuccess, onError)
 
         // Then
         synchronizedOnSuccess.await(5, TimeUnit.SECONDS)
         verify(onSuccess, times(1)).run()
         verify(onError, never()).run(any())
-        assertEquals(Device.State.CONNECTED, referenceDevice.state)
+        assertEquals(Device.State.CONNECTED, device.state)
     }
 
     //endregion
@@ -280,13 +236,13 @@ class ReferenceDeviceTest : HttpClientTest() {
         val onError = mock<Consumer<OCastError>>()
 
         // When
-        referenceDevice.disconnect(synchronizedOnSuccess, onError)
+        device.disconnect(synchronizedOnSuccess, onError)
 
         // Then
         synchronizedOnSuccess.await(5, TimeUnit.SECONDS)
         verify(onSuccess, times(1)).run()
         verify(onError, never()).run(any())
-        assertEquals(Device.State.DISCONNECTED, referenceDevice.state)
+        assertEquals(Device.State.DISCONNECTED, device.state)
         verify(deviceListener, never()).onDeviceDisconnected(any(), anyOrNull())
     }
 
@@ -296,16 +252,16 @@ class ReferenceDeviceTest : HttpClientTest() {
         val onSuccess = mock<Runnable>()
         val synchronizedOnSuccess = SynchronizedRunnable(onSuccess)
         val onError = mock<Consumer<OCastError>>()
-        assertEquals(Device.State.DISCONNECTED, referenceDevice.state)
+        assertEquals(Device.State.DISCONNECTED, device.state)
 
         // When
-        referenceDevice.disconnect(synchronizedOnSuccess, onError)
+        device.disconnect(synchronizedOnSuccess, onError)
 
         // Then
         synchronizedOnSuccess.await(5, TimeUnit.SECONDS)
         verify(onSuccess, times(1)).run()
         verify(onError, never()).run(any())
-        assertEquals(Device.State.DISCONNECTED, referenceDevice.state)
+        assertEquals(Device.State.DISCONNECTED, device.state)
         verify(deviceListener, never()).onDeviceDisconnected(any(), anyOrNull())
     }
 
@@ -313,14 +269,14 @@ class ReferenceDeviceTest : HttpClientTest() {
     fun disconnectWhenConnectingFails() {
         // Given
         server.enqueue(MockResponse().setBody(createGetApplicationResponseBody()))
-        referenceDevice.connect(null, {}, {})
+        device.connect(null, {}, {})
         val onSuccess = mock<Runnable>()
         val onError = mock<Consumer<OCastError>>()
         val synchronizedOnError = SynchronizedConsumer(onError)
-        assertEquals(Device.State.CONNECTING, referenceDevice.state)
+        assertEquals(Device.State.CONNECTING, device.state)
 
         // When
-        referenceDevice.disconnect(onSuccess, synchronizedOnError)
+        device.disconnect(onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -328,21 +284,21 @@ class ReferenceDeviceTest : HttpClientTest() {
         val errorCaptor = argumentCaptor<OCastError>()
         verify(onError, times(1)).run(errorCaptor.capture())
         assertEquals(OCastError.Status.CLIENT_ERROR.code, errorCaptor.firstValue.code)
-        assertEquals(Device.State.CONNECTING, referenceDevice.state)
+        assertEquals(Device.State.CONNECTING, device.state)
     }
 
     @Test
     fun disconnectWhenDisconnectingFails() {
         // Given
         awaitDeviceConnected()
-        referenceDevice.disconnect({}, {})
+        device.disconnect({}, {})
         val onSuccess = mock<Runnable>()
         val onError = mock<Consumer<OCastError>>()
         val synchronizedOnError = SynchronizedConsumer(onError)
-        assertEquals(Device.State.DISCONNECTING, referenceDevice.state)
+        assertEquals(Device.State.DISCONNECTING, device.state)
 
         // When
-        referenceDevice.disconnect(onSuccess, synchronizedOnError)
+        device.disconnect(onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -350,7 +306,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         val errorCaptor = argumentCaptor<OCastError>()
         verify(onError, times(1)).run(errorCaptor.capture())
         assertEquals(OCastError.Status.CLIENT_ERROR.code, errorCaptor.firstValue.code)
-        assertEquals(Device.State.DISCONNECTING, referenceDevice.state)
+        assertEquals(Device.State.DISCONNECTING, device.state)
     }
 
     @Test
@@ -369,7 +325,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnError = SynchronizedConsumer(onError)
 
         // When
-        referenceDevice.disconnect(onSuccess, synchronizedOnError)
+        device.disconnect(onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -378,7 +334,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         verify(onError, times(1)).run(errorCaptor.capture())
         assertEquals(OCastError.Status.CLIENT_ERROR.code, errorCaptor.firstValue.code)
         assertEquals(throwable, errorCaptor.firstValue.cause)
-        assertEquals(Device.State.DISCONNECTED, referenceDevice.state)
+        assertEquals(Device.State.DISCONNECTED, device.state)
     }
 
     @Test
@@ -394,7 +350,7 @@ class ReferenceDeviceTest : HttpClientTest() {
 
         // Then
         Thread.sleep(500)
-        verify(deviceListener, times(1)).onDeviceDisconnected(eq(referenceDevice), eq(throwable))
+        verify(deviceListener, times(1)).onDeviceDisconnected(eq(device), eq(throwable))
     }
 
     //endregion
@@ -431,7 +387,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnSuccess = SynchronizedRunnable(onSuccess)
 
         // When
-        referenceDevice.startApplication(synchronizedOnSuccess, onError)
+        device.startApplication(synchronizedOnSuccess, onError)
 
         // Then
         synchronizedOnSuccess.await(5, TimeUnit.SECONDS)
@@ -449,7 +405,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnSuccess = SynchronizedRunnable(onSuccess)
 
         // When
-        referenceDevice.startApplication(synchronizedOnSuccess, onError)
+        device.startApplication(synchronizedOnSuccess, onError)
 
         // Then
         synchronizedOnSuccess.await(5, TimeUnit.SECONDS)
@@ -487,8 +443,8 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnError = SynchronizedConsumer(onError)
 
         // When
-        referenceDevice.startApplication(onSuccess, synchronizedOnError)
-        referenceDevice.applicationName = "OtherApp"
+        device.startApplication(onSuccess, synchronizedOnError)
+        device.applicationName = "OtherApp"
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -509,7 +465,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnError = SynchronizedConsumer(onError)
 
         // When
-        referenceDevice.startApplication(onSuccess, synchronizedOnError)
+        device.startApplication(onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(10, TimeUnit.SECONDS)
@@ -530,7 +486,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnError = SynchronizedConsumer(onError)
 
         // When
-        referenceDevice.startApplication(onSuccess, synchronizedOnError)
+        device.startApplication(onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -553,7 +509,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnError = SynchronizedConsumer(onError)
 
         // When
-        referenceDevice.startApplication(onSuccess, synchronizedOnError)
+        device.startApplication(onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -569,7 +525,7 @@ class ReferenceDeviceTest : HttpClientTest() {
     fun startApplicationWithoutApplicationNameFails() {
         // Given
         awaitDeviceConnected()
-        referenceDevice.applicationName = null
+        device.applicationName = null
         server.enqueue(MockResponse().setBody(createGetApplicationResponseBody()))
         server.enqueue(MockResponse().setResponseCode(201))
         val onSuccess = mock<Runnable>()
@@ -577,7 +533,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnError = SynchronizedConsumer(onError)
 
         // When
-        referenceDevice.startApplication(onSuccess, synchronizedOnError)
+        device.startApplication(onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -595,10 +551,10 @@ class ReferenceDeviceTest : HttpClientTest() {
         val onSuccess = mock<Runnable>()
         val onError = mock<Consumer<OCastError>>()
         val synchronizedOnError = SynchronizedConsumer(onError)
-        assertEquals(Device.State.DISCONNECTED, referenceDevice.state)
+        assertEquals(Device.State.DISCONNECTED, device.state)
 
         // When
-        referenceDevice.startApplication(onSuccess, synchronizedOnError)
+        device.startApplication(onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -612,16 +568,16 @@ class ReferenceDeviceTest : HttpClientTest() {
     fun startApplicationWhenConnectingFails() {
         // Given
         server.enqueue(MockResponse().setBody(createGetApplicationResponseBody()))
-        referenceDevice.connect(null, {}, {})
+        device.connect(null, {}, {})
         server.enqueue(MockResponse().setBody(createGetApplicationResponseBody()))
         server.enqueue(MockResponse().setResponseCode(201))
         val onSuccess = mock<Runnable>()
         val onError = mock<Consumer<OCastError>>()
         val synchronizedOnError = SynchronizedConsumer(onError)
-        assertEquals(Device.State.CONNECTING, referenceDevice.state)
+        assertEquals(Device.State.CONNECTING, device.state)
 
         // When
-        referenceDevice.startApplication(onSuccess, synchronizedOnError)
+        device.startApplication(onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -635,16 +591,16 @@ class ReferenceDeviceTest : HttpClientTest() {
     fun startApplicationWhenDisconnectingFails() {
         // Given
         awaitDeviceConnected()
-        referenceDevice.disconnect({}, {})
+        device.disconnect({}, {})
         server.enqueue(MockResponse().setBody(createGetApplicationResponseBody()))
         server.enqueue(MockResponse().setResponseCode(201))
         val onSuccess = mock<Runnable>()
         val onError = mock<Consumer<OCastError>>()
         val synchronizedOnError = SynchronizedConsumer(onError)
-        assertEquals(Device.State.DISCONNECTING, referenceDevice.state)
+        assertEquals(Device.State.DISCONNECTING, device.state)
 
         // When
-        referenceDevice.startApplication(onSuccess, synchronizedOnError)
+        device.startApplication(onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -669,7 +625,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnSuccess = SynchronizedRunnable(onSuccess)
 
         // When
-        referenceDevice.stopApplication(synchronizedOnSuccess, onError)
+        device.stopApplication(synchronizedOnSuccess, onError)
 
         // Then
         synchronizedOnSuccess.await(5, TimeUnit.SECONDS)
@@ -681,7 +637,7 @@ class ReferenceDeviceTest : HttpClientTest() {
     fun stopApplicationWithoutApplicationNameFails() {
         // Given
         awaitDeviceConnected()
-        referenceDevice.applicationName = null
+        device.applicationName = null
         server.enqueue(MockResponse().setBody(createGetApplicationResponseBody("running")))
         server.enqueue(MockResponse())
         val onSuccess = mock<Runnable>()
@@ -689,7 +645,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnError = SynchronizedConsumer(onError)
 
         // When
-        referenceDevice.stopApplication(onSuccess, synchronizedOnError)
+        device.stopApplication(onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -710,7 +666,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnError = SynchronizedConsumer(onError)
 
         // When
-        referenceDevice.stopApplication(onSuccess, synchronizedOnError)
+        device.stopApplication(onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -733,7 +689,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         val synchronizedOnError = SynchronizedConsumer(onError)
 
         // When
-        referenceDevice.stopApplication(onSuccess, synchronizedOnError)
+        device.stopApplication(onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -801,15 +757,13 @@ class ReferenceDeviceTest : HttpClientTest() {
         stubReceivedMessages(firstReceivedMessage to 200, secondReceivedMessage to 100)
 
         // When
-        referenceDevice.send(firstMessage, OCastDomain.BROWSER, TestReplyParams::class.java, firstSynchronizedOnSuccess, onError)
-        referenceDevice.send(secondMessage, OCastDomain.SETTINGS, secondSynchronizedOnSuccess, onError)
+        device.send(firstMessage, OCastDomain.BROWSER, TestReplyParams::class.java, firstSynchronizedOnSuccess, onError)
+        device.send(secondMessage, OCastDomain.SETTINGS, secondSynchronizedOnSuccess, onError)
 
         // Then
         firstSynchronizedOnSuccess.await(5, TimeUnit.SECONDS)
         secondSynchronizedOnSuccess.await(5, TimeUnit.SECONDS)
-        val firstReplyParamsCaptor = argumentCaptor<TestReplyParams>()
-        verify(firstOnSuccess, times(1)).run(firstReplyParamsCaptor.capture())
-        assertEquals(TestReplyParams("replyValue"), firstReplyParamsCaptor.firstValue)
+        verify(firstOnSuccess, times(1)).run(eq(TestReplyParams("replyValue")))
         verify(secondOnSuccess, times(1)).run()
         verify(onError, never()).run(any())
     }
@@ -843,8 +797,8 @@ class ReferenceDeviceTest : HttpClientTest() {
         stubReceivedMessages(receivedMessage to 10000)
 
         // When
-        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
-        referenceDevice.disconnect({}, {})
+        device.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+        device.disconnect({}, {})
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -880,10 +834,10 @@ class ReferenceDeviceTest : HttpClientTest() {
             }
         """.trimIndent()
         stubReceivedMessages(receivedMessage to 100)
-        assertEquals(Device.State.DISCONNECTED, referenceDevice.state)
+        assertEquals(Device.State.DISCONNECTED, device.state)
 
         // When
-        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+        device.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -904,7 +858,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         doReturn(false).whenever(realWebSocket).send(any<String>())
 
         // When
-        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+        device.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -943,7 +897,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         stubReceivedMessages(receivedMessage to 100)
 
         // When
-        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+        device.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -983,7 +937,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         stubReceivedMessages(receivedMessage to 100)
 
         // When
-        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+        device.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -1023,7 +977,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         stubReceivedMessages(receivedMessage to 100)
 
         // When
-        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+        device.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -1063,7 +1017,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         stubReceivedMessages(receivedMessage to 100)
 
         // When
-        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+        device.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -1095,7 +1049,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         stubReceivedMessages(receivedMessage to 100)
 
         // When
-        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+        device.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -1127,7 +1081,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         stubReceivedMessages(receivedMessage to 100)
 
         // When
-        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+        device.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -1159,7 +1113,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         stubReceivedMessages(receivedMessage to 100)
 
         // When
-        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+        device.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -1198,7 +1152,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         stubReceivedMessages(receivedMessage to 100)
 
         // When
-        referenceDevice.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+        device.send(message, OCastDomain.SETTINGS, TestReplyParams::class.java, onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -1258,13 +1212,11 @@ class ReferenceDeviceTest : HttpClientTest() {
         stubReceivedMessages(receivedMessage to 100)
 
         // When
-        referenceDevice.send(message, OCastDomain.BROWSER, TestReplyParams::class.java, synchronizedOnSuccess, onError)
+        device.send(message, OCastDomain.BROWSER, TestReplyParams::class.java, synchronizedOnSuccess, onError)
 
         // Then
         synchronizedOnSuccess.await(5, TimeUnit.SECONDS)
-        val replyParamsCaptor = argumentCaptor<TestReplyParams>()
-        verify(onSuccess, times(1)).run(replyParamsCaptor.capture())
-        assertEquals(TestReplyParams("replyValue"), replyParamsCaptor.firstValue)
+        verify(onSuccess, times(1)).run(eq(TestReplyParams("replyValue")))
         verify(onError, never()).run(any())
     }
 
@@ -1298,7 +1250,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         stubReceivedMessages(receivedMessage to 100)
 
         // When
-        referenceDevice.send(message, OCastDomain.BROWSER, TestReplyParams::class.java, onSuccess, synchronizedOnError)
+        device.send(message, OCastDomain.BROWSER, TestReplyParams::class.java, onSuccess, synchronizedOnError)
 
         // Then
         synchronizedOnError.await(5, TimeUnit.SECONDS)
@@ -1345,7 +1297,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         // Then
         Thread.sleep(3000) // Decoding JSON on a background thread for the first time takes a lot of time
         val playbackStatusCaptor = argumentCaptor<MediaPlaybackStatus>()
-        verify(eventListener, times(1)).onMediaPlaybackStatus(eq(referenceDevice), playbackStatusCaptor.capture())
+        verify(eventListener, times(1)).onMediaPlaybackStatus(eq(device), playbackStatusCaptor.capture())
         val playbackStatus = playbackStatusCaptor.firstValue
         assertEquals(0.3, playbackStatus.volume, 0.0)
         assertEquals(true, playbackStatus.isMuted)
@@ -1396,7 +1348,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         // Then
         Thread.sleep(3000) // Decoding JSON on a background thread for the first time takes a lot of time
         val metadataCaptor = argumentCaptor<MediaMetadata>()
-        verify(eventListener, times(1)).onMediaMetadataChanged(eq(referenceDevice), metadataCaptor.capture())
+        verify(eventListener, times(1)).onMediaMetadataChanged(eq(device), metadataCaptor.capture())
         val metadata = metadataCaptor.firstValue
         assertEquals("La cité de la peur", metadata.title)
         assertEquals("Un film de les nuls", metadata.subtitle)
@@ -1443,7 +1395,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         // Then
         Thread.sleep(3000) // Decoding JSON on a background thread for the first time takes a lot of time
         val updateStatusCaptor = argumentCaptor<UpdateStatus>()
-        verify(eventListener, times(1)).onUpdateStatus(eq(referenceDevice), updateStatusCaptor.capture())
+        verify(eventListener, times(1)).onUpdateStatus(eq(device), updateStatusCaptor.capture())
         val updateStatus = updateStatusCaptor.firstValue
         assertEquals(UpdateStatus.State.DOWNLOADING, updateStatus.state)
         assertEquals(50, updateStatus.progress)
@@ -1478,122 +1430,7 @@ class ReferenceDeviceTest : HttpClientTest() {
 
         // Then
         Thread.sleep(3000) // Decoding JSON on a background thread for the first time takes a lot of time
-        verify(eventListener, times(1)).onCustomEvent(eq(referenceDevice), eq("customEvent"), eq("{\"paramName\":\"paramValue\"}"))
-    }
-
-    //endregion
-
-    //region Private methods
-
-    /**
-     * Stubs the underlying OkHttp web socket.
-     */
-    private fun stubWebSocket() {
-        val webSocket = object : WebSocket("wss://192.168.1.65:4433/ocast", null, referenceDevice) {
-
-            override fun createWebSocket(): okhttp3.WebSocket {
-                // The connect method is called in the RealWebSocket constructor
-                return realWebSocket.apply { connect(mock()) }
-            }
-        }
-        this.webSocket = webSocket
-        PowerMockito.whenNew(WebSocket::class.java).withAnyArguments().thenReturn(webSocket)
-
-        doAnswer {
-            val response = Response.Builder()
-                .request(Request.Builder().url("http://locahost").build())
-                .protocol(Protocol.HTTP_1_1)
-                .code(101)
-                .message("")
-                .build()
-            Timer().schedule(100L) {
-                webSocket.onOpen(realWebSocket, response)
-            }
-        }.whenever(realWebSocket).connect(any())
-
-        doAnswer {
-            Timer().schedule(100L) {
-                webSocket.onClosed(realWebSocket, 1000, "Normal closure")
-            }
-            true
-        }.whenever(realWebSocket).close(any(), any())
-
-        doReturn(true).whenever(realWebSocket).send(any<String>())
-    }
-
-    /**
-     * Schedules a list of messages received on the web socket.
-     *
-     * @param messages The list of messages with their associated delay.
-     */
-    private fun scheduleReceivedMessages(vararg messages: Pair<String, Long>) {
-        messages.forEach { message ->
-            Timer().schedule(message.second) {
-                webSocket?.onMessage(realWebSocket, message.first)
-            }
-        }
-    }
-
-    /**
-     * Stubs a list of messages to be received on the web socket each time the send method is called.
-     *
-     * @param messages The list of messages with their associated delay.
-     */
-    private fun stubReceivedMessages(vararg messages: Pair<String, Long>) {
-        var stubbing: Stubber? = null
-        messages.forEach { message ->
-            val answer: (InvocationOnMock) -> Boolean = {
-                scheduleReceivedMessages(message)
-                true
-            }
-            stubbing = if (stubbing == null) Mockito.doAnswer(answer) else stubbing?.doAnswer(answer)
-        }
-        stubbing?.whenever(realWebSocket)?.send(any<String>())
-    }
-
-    /**
-     * Waits for the device to connect.
-     */
-    private fun awaitDeviceConnected() {
-        if (referenceDevice.state != Device.State.CONNECTED) {
-            server.enqueue(MockResponse().setBody(createGetApplicationResponseBody()))
-            val synchronizedOnSuccess = SynchronizedRunnable(Runnable {})
-            referenceDevice.connect(null, synchronizedOnSuccess, {})
-            synchronizedOnSuccess.await(5, TimeUnit.SECONDS)
-        }
-        assertEquals(Device.State.CONNECTED, referenceDevice.state)
-    }
-
-    /**
-     * Waits for the application to start.
-     */
-    private fun awaitApplicationStarted() {
-        awaitDeviceConnected()
-        server.enqueue(MockResponse().setBody(createGetApplicationResponseBody("running")))
-        val synchronizedOnSuccess = SynchronizedRunnable(Runnable {})
-        referenceDevice.startApplication(synchronizedOnSuccess, {})
-        synchronizedOnSuccess.await(5, TimeUnit.SECONDS)
-    }
-
-    /**
-     * Creates a response body for the DIAL get application request.
-     *
-     * @param state The state of the DIAL application.
-     * @return The response body.
-     */
-    private fun createGetApplicationResponseBody(state: String = "stopped"): String {
-        return """
-            <service xmlns="urn:dial-multiscreen-org:schemas:dial" xmlns:ocast="urn:cast-ocast-org:service:cast:1" dialVer="2.1">
-              <name>OrangeTVReceiverProd</name>
-              <options allowStop="true"/>
-              <state>$state</state>
-              <additionalData>
-                <ocast:X_OCAST_App2AppURL>wss://192.168.1.65:4433/ocast</ocast:X_OCAST_App2AppURL>
-                <ocast:X_OCAST_Version>1.0</ocast:X_OCAST_Version>
-              </additionalData>
-              <link rel="run" href="run"/>
-            </service>
-        """.trimIndent()
+        verify(eventListener, times(1)).onCustomEvent(eq(device), eq("customEvent"), eq("{\"paramName\":\"paramValue\"}"))
     }
 
     //endregion

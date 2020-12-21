@@ -31,7 +31,7 @@ import java.net.URL
  * @property additionalData The additional data for this application.
  * @constructor Creates an instance of [DialApplication].
  */
-internal data class DialApplication(
+data class DialApplication(
     val name: String,
     val isStopAllowed: Boolean,
     val state: State? = null,
@@ -225,7 +225,7 @@ internal data class DialApplication(
  * @property version The OCast version.
  * @constructor Creates an instance of [OCastAdditionalData].
  */
-internal data class OCastAdditionalData(
+data class OCastAdditionalData(
     val webSocketURL: URI? = null,
     val version: String? = null
 )

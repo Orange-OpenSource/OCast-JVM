@@ -84,7 +84,7 @@ import java.util.concurrent.atomic.AtomicLong
  * @param dialClient The DIAL client.
  * @constructor Creates an instance of [ReferenceDevice] from an [UpnpDevice] with additional parameters.
  */
-open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClient: DialClient?, private val webAppConnectedStatusEventTimeout: Long) : Device(upnpDevice), WebSocket.Listener {
+open class ReferenceDevice protected constructor(upnpDevice: UpnpDevice, dialClient: DialClient?, private val webAppConnectedStatusEventTimeout: Long) : Device(upnpDevice), WebSocket.Listener {
 
     /**
      * @param upnpDevice The UPnP device to create the reference device from.
