@@ -165,9 +165,7 @@ class DeviceDiscoveryTest {
         verify(listener, times(2)).onDevicesAdded(addedDevicesCaptor.capture())
         assertEquals(listOf(firstDevice), addedDevicesCaptor.firstValue)
         assertEquals(listOf(secondDevice), addedDevicesCaptor.secondValue)
-        val removedDevicesCaptor = argumentCaptor<List<UpnpDevice>>()
-        verify(listener, times(1)).onDevicesRemoved(removedDevicesCaptor.capture())
-        assertEquals(listOf(firstDevice), removedDevicesCaptor.firstValue)
+        verify(listener, times(1)).onDevicesRemoved(eq(listOf(firstDevice)))
         verify(listener, never()).onDevicesChanged(any())
         verify(listener, never()).onDiscoveryStopped(anyOrNull())
     }
@@ -212,9 +210,7 @@ class DeviceDiscoveryTest {
 
         verify(listener, times(1)).onDevicesAdded(any())
         verify(listener, never()).onDevicesRemoved(any())
-        val changedDevicesCaptor = argumentCaptor<List<UpnpDevice>>()
-        verify(listener, times(1)).onDevicesChanged(changedDevicesCaptor.capture())
-        assertEquals(listOf(newDevice), changedDevicesCaptor.firstValue)
+        verify(listener, times(1)).onDevicesChanged(eq(listOf(newDevice)))
         verify(listener, never()).onDiscoveryStopped(anyOrNull())
     }
 

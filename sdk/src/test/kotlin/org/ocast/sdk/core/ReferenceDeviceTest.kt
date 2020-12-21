@@ -807,9 +807,7 @@ class ReferenceDeviceTest : HttpClientTest() {
         // Then
         firstSynchronizedOnSuccess.await(5, TimeUnit.SECONDS)
         secondSynchronizedOnSuccess.await(5, TimeUnit.SECONDS)
-        val firstReplyParamsCaptor = argumentCaptor<TestReplyParams>()
-        verify(firstOnSuccess, times(1)).run(firstReplyParamsCaptor.capture())
-        assertEquals(TestReplyParams("replyValue"), firstReplyParamsCaptor.firstValue)
+        verify(firstOnSuccess, times(1)).run(eq(TestReplyParams("replyValue")))
         verify(secondOnSuccess, times(1)).run()
         verify(onError, never()).run(any())
     }
@@ -1262,9 +1260,7 @@ class ReferenceDeviceTest : HttpClientTest() {
 
         // Then
         synchronizedOnSuccess.await(5, TimeUnit.SECONDS)
-        val replyParamsCaptor = argumentCaptor<TestReplyParams>()
-        verify(onSuccess, times(1)).run(replyParamsCaptor.capture())
-        assertEquals(TestReplyParams("replyValue"), replyParamsCaptor.firstValue)
+        verify(onSuccess, times(1)).run(eq(TestReplyParams("replyValue")))
         verify(onError, never()).run(any())
     }
 
