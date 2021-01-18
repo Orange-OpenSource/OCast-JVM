@@ -16,14 +16,15 @@
 
 package org.ocast.sdk.core.models
 
+import com.fasterxml.jackson.annotation.JsonEnumDefaultValue
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import org.json.JSONObject
+import org.ocast.sdk.core.utils.RawJsonDeserializer
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.X509TrustManager
-import org.json.JSONObject
-import org.ocast.sdk.core.utils.RawJsonDeserializer
 
 /**
  * Represents an OCast settings service.
@@ -141,8 +142,8 @@ enum class OCastDomain(val value: String) {
  * @constructor Creates an instance of [OCastRawDeviceLayer].
  */
 class OCastRawDeviceLayer(
-    @JsonProperty("src") val source: String,
-    @JsonProperty("dst") val destination: String,
+    @JsonProperty("src") val source: String?,
+    @JsonProperty("dst") val destination: String?,
     @JsonProperty("type") val type: Type,
     @JsonProperty("status") val status: Status?,
     @JsonProperty("id") val identifier: Long,
@@ -164,16 +165,16 @@ class OCastRawDeviceLayer(
         @JsonProperty("value_format_error") VALUE_FORMAT_ERROR,
 
         /** There is an error in the packet, typically caused by a missing field. */
-        @JsonProperty("missing_mandatory_field ") MISSING_MANDATORY_FIELD,
+        @JsonProperty("missing_mandatory_field") MISSING_MANDATORY_FIELD,
 
         /** The packet has no right to access the required destination or service. */
-        @JsonProperty("forbidden_unsecure_mode ") FORBIDDEN_UNSECURE_MODE,
-
-        /** The WiFi password is too short. */
-        @JsonProperty("password_too_short") WIFI_PASSWORD_TOO_SHORT,
+        @JsonProperty("forbidden_unsecure_mode") FORBIDDEN_UNSECURE_MODE,
 
         /** There is an internal error. */
-        @JsonProperty("internal_error") INTERNAL_ERROR
+        @JsonProperty("internal_error") INTERNAL_ERROR,
+
+        /** There is an unknown error. */
+        @JsonEnumDefaultValue UNKNOWN_ERROR
     }
 
     /**
@@ -203,8 +204,8 @@ class OCastRawDeviceLayer(
  * @constructor Creates an instance of [OCastCommandDeviceLayer].
  */
 class OCastCommandDeviceLayer<T>(
-    @JsonProperty("src") val source: String,
-    @JsonProperty("dst") val destination: String,
+    @JsonProperty("src") val source: String?,
+    @JsonProperty("dst") val destination: String?,
     @JsonProperty("id") val identifier: Long,
     @JsonProperty("message") val message: OCastApplicationLayer<T>
 ) {
@@ -224,9 +225,9 @@ class OCastCommandDeviceLayer<T>(
  * @constructor Creates an instance of [OCastRawApplicationLayer].
  */
 open class OCastRawApplicationLayer(
-    @JsonProperty("service") val service: String,
+    @JsonProperty("service") val service: String?,
     @JsonDeserialize(using = RawJsonDeserializer::class)
-    @JsonProperty("data") val data: String
+    @JsonProperty("data") val data: String?
 )
 
 /**
@@ -238,8 +239,8 @@ open class OCastRawApplicationLayer(
  * @constructor Creates an instance of [OCastApplicationLayer].
  */
 open class OCastApplicationLayer<T>(
-    @JsonProperty("service") val service: String,
-    @JsonProperty("data") val data: OCastDataLayer<T>
+    @JsonProperty("service") val service: String?,
+    @JsonProperty("data") val data: OCastDataLayer<T>?
 )
 
 //endregion

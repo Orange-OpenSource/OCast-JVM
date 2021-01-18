@@ -1,15 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'org.jetbrains.dokka-android'
 apply plugin: 'maven-publish'
 apply from: project.file('../ktlint.gradle')
 apply from: project.file('../bintray.gradle')
-
-androidExtensions {
-    experimental = true
-}
 
 buildscript {
     apply from: project.file('../dependencies.gradle')

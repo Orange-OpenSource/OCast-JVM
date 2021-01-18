@@ -16,14 +16,14 @@
 
 package org.ocast.sdk.discovery
 
+import org.ocast.sdk.common.extensions.orTrue
+import org.ocast.sdk.core.utils.OCastLog
 import java.io.IOException
 import java.net.DatagramPacket
 import java.net.InetAddress
 import java.net.MulticastSocket
 import java.net.SocketException
 import kotlin.concurrent.thread
-import org.ocast.sdk.common.extensions.orTrue
-import org.ocast.sdk.core.utils.OCastLog
 
 /**
  * This class represents a UDP socket.

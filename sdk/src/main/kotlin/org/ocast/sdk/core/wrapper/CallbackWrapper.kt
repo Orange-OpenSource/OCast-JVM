@@ -32,7 +32,7 @@ interface CallbackWrapper {
      * @param consumer The consumer to wrap.
      * @return The wrapping consumer.
      */
-    fun <T> wrap(consumer: Consumer<T>): Consumer<T>
+    fun <T : Any> wrap(consumer: Consumer<T>): Consumer<T>
 
     /**
      * Wraps a [Runnable] into a new one.

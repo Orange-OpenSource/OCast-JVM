@@ -8,7 +8,7 @@
 </tr>
 <tr>
 <td>Build status</td>
-<td><a href="https://travis-ci.org/Orange-OpenSource/OCast-JVM"><img src="https://travis-ci.org/Orange-OpenSource/OCast-JVM.svg?branch=master"></a></td>
+<td><a href="https://github.com/Orange-OpenSource/OCast-JVM/actions?query=workflow%3Abuild"><img src="https://github.com/Orange-OpenSource/OCast-JVM/workflows/build/badge.svg"></a></td>
 </tr>
 <tr>
 <td>OCast SDK</td>
@@ -20,7 +20,7 @@
 </tr>
 <tr>
 <td>Documentation</td>
-<td><a href="https://orange-opensource.github.io/OCast-JVM/"><img src="https://img.shields.io/badge/javadoc-2.0.2-brightgreen"></a></td>
+<td><a href="https://orange-opensource.github.io/OCast-JVM/"><img src="https://img.shields.io/badge/javadoc-2.0.3-brightgreen"></a></td>
 </tr>
 </tbody>
 </table>
@@ -42,10 +42,10 @@ repositories {
 }
 
 dependencies {
-    implementation "org.ocast:sdk:2.0.2"
+    implementation "org.ocast:sdk:2.0.3"
     // The following line is only needed if you are using OCast on Android
     // and want to take advantage of the MediaRouter framework
-    implementation "org.ocast:mediaroute:2.0.2"
+    implementation "org.ocast:mediaroute:2.0.3"
 }
 ```
 

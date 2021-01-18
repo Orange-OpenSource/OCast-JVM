@@ -19,9 +19,9 @@ package org.ocast.sdk.core.models
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import org.ocast.sdk.core.utils.BitflagsSerializer
 import java.io.Serializable
 import java.util.EnumSet
-import org.ocast.sdk.core.utils.BitflagsSerializer
 
 //region Messages
 

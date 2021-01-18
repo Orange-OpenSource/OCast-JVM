@@ -22,7 +22,7 @@ import org.ocast.sdk.core.utils.JsonTools
 /**
  * A singleton object that provides custom assert methods for tests.
  */
-internal object Assert {
+object Assert {
 
     /**
      * Asserts that two JSON strings are equal.

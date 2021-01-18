@@ -197,14 +197,14 @@ class SsdpMessageTest {
         fun parseMSearchResponseWithParameterizedNewlineSucceeds() {
             // Given
             val mSearchResponseString = "HTTP/1.1 200 OK$newline" +
-                    "LOCATION: http://10.0.0.28:56790/device-desc.xml$newline" +
-                    "CACHE-CONTROL: max-age=1800$newline" +
-                    "EXT:$newline" +
-                    "BOOTID.UPNP.ORG: 1$newline" +
-                    "SERVER: Linux/4.9 UPnP/1.1 quick_ssdp/1.1$newline" +
-                    "ST: urn:cast-ocast-org:service:cast:1$newline" +
-                    "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7$newline" +
-                    "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
+                "LOCATION: http://10.0.0.28:56790/device-desc.xml$newline" +
+                "CACHE-CONTROL: max-age=1800$newline" +
+                "EXT:$newline" +
+                "BOOTID.UPNP.ORG: 1$newline" +
+                "SERVER: Linux/4.9 UPnP/1.1 quick_ssdp/1.1$newline" +
+                "ST: urn:cast-ocast-org:service:cast:1$newline" +
+                "USN: uuid:b042f955-9ae7-44a8-ba6c-0009743932f7$newline" +
+                "WAKEUP: MAC=00:09:74:39:32:f7;Timeout=10"
 
             // When
             val mSearchResponse = SsdpMessage.fromData(mSearchResponseString.toByteArray()) as? SsdpMSearchResponse

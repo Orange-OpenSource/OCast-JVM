@@ -16,7 +16,6 @@
 
 package org.ocast.sdk.dial
 
-import java.net.URL
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
@@ -25,6 +24,7 @@ import org.ocast.sdk.core.utils.OCastLog
 import org.ocast.sdk.core.utils.log
 import org.ocast.sdk.dial.models.DialApplication
 import org.ocast.sdk.dial.models.DialError
+import java.net.URL
 
 /**
  * Instances of this class handle DIAL requests.
@@ -32,7 +32,7 @@ import org.ocast.sdk.dial.models.DialError
  * @property baseURL The base URL of the DIAL service.
  * @constructor Creates an instance of [DialClient].
  */
-internal class DialClient(private val baseURL: URL) {
+class DialClient(private val baseURL: URL) {
 
     /** The OkHttp client which will send DIAL requests. */
     private val client = OkHttpClient()

@@ -26,11 +26,10 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
-import java.net.URL
 import org.hamcrest.CoreMatchers.instanceOf
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.ocast.sdk.common.stubDeviceDescriptionResponses
@@ -43,6 +42,7 @@ import org.ocast.sdk.discovery.DeviceDiscovery
 import org.ocast.sdk.discovery.UDPSocket
 import org.ocast.sdk.discovery.UpnpClient
 import org.ocast.sdk.discovery.models.UpnpDevice
+import java.net.URL
 
 /**
  * Unit tests for the [DeviceCenter] class.
@@ -133,12 +133,9 @@ class DeviceCenterTest {
         Thread.sleep(9000) // Wait at least next SSDP request (5 sec) + MX (3 sec) + network round-trip time (1 sec)
 
         // Then
-        val devicesCaptor = argumentCaptor<List<Device>>()
-        verify(deviceListeners[0], times(1)).onDevicesRemoved(devicesCaptor.capture())
-        verify(deviceListeners[1], times(1)).onDevicesRemoved(devicesCaptor.capture())
+        verify(deviceListeners[0], times(1)).onDevicesRemoved(eq(listOf(addedDevice)))
+        verify(deviceListeners[1], times(1)).onDevicesRemoved(eq(listOf(addedDevice)))
         verify(deviceListeners[2], never()).onDevicesRemoved(any())
-        assertEquals(listOf(addedDevice), devicesCaptor.firstValue)
-        assertEquals(listOf(addedDevice), devicesCaptor.secondValue)
         assertEquals(0, deviceCenter.devices.size)
     }
 
@@ -249,12 +246,9 @@ class DeviceCenterTest {
         device.eventListener?.onMediaPlaybackStatus(device, playbackStatus)
 
         // Then
-        val playbackStatusCaptor = argumentCaptor<MediaPlaybackStatus>()
-        verify(eventListeners[0], times(1)).onMediaPlaybackStatus(eq(device), playbackStatusCaptor.capture())
-        verify(eventListeners[1], times(1)).onMediaPlaybackStatus(eq(device), playbackStatusCaptor.capture())
+        verify(eventListeners[0], times(1)).onMediaPlaybackStatus(eq(device), eq(playbackStatus))
+        verify(eventListeners[1], times(1)).onMediaPlaybackStatus(eq(device), eq(playbackStatus))
         verify(eventListeners[2], never()).onMediaPlaybackStatus(any(), any())
-        assertEquals(playbackStatus, playbackStatusCaptor.firstValue)
-        assertEquals(playbackStatus, playbackStatusCaptor.secondValue)
     }
 
     @Test
@@ -276,12 +270,9 @@ class DeviceCenterTest {
         device.eventListener?.onMediaMetadataChanged(device, metadata)
 
         // Then
-        val metadataCaptor = argumentCaptor<MediaMetadata>()
-        verify(eventListeners[0], times(1)).onMediaMetadataChanged(eq(device), metadataCaptor.capture())
-        verify(eventListeners[1], times(1)).onMediaMetadataChanged(eq(device), metadataCaptor.capture())
+        verify(eventListeners[0], times(1)).onMediaMetadataChanged(eq(device), eq(metadata))
+        verify(eventListeners[1], times(1)).onMediaMetadataChanged(eq(device), eq(metadata))
         verify(eventListeners[2], never()).onMediaMetadataChanged(any(), any())
-        assertEquals(metadata, metadataCaptor.firstValue)
-        assertEquals(metadata, metadataCaptor.secondValue)
     }
 
     @Test
@@ -299,12 +290,9 @@ class DeviceCenterTest {
         device.eventListener?.onUpdateStatus(device, updateStatus)
 
         // Then
-        val updateStatusCaptor = argumentCaptor<UpdateStatus>()
-        verify(eventListeners[0], times(1)).onUpdateStatus(eq(device), updateStatusCaptor.capture())
-        verify(eventListeners[1], times(1)).onUpdateStatus(eq(device), updateStatusCaptor.capture())
+        verify(eventListeners[0], times(1)).onUpdateStatus(eq(device), eq(updateStatus))
+        verify(eventListeners[1], times(1)).onUpdateStatus(eq(device), eq(updateStatus))
         verify(eventListeners[2], never()).onUpdateStatus(any(), any())
-        assertEquals(updateStatus, updateStatusCaptor.firstValue)
-        assertEquals(updateStatus, updateStatusCaptor.secondValue)
     }
 
     @Test

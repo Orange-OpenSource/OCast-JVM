@@ -16,7 +16,6 @@
 
 package org.ocast.sdk.core
 
-import java.util.Collections
 import org.ocast.sdk.common.extensions.ifNotNull
 import org.ocast.sdk.common.extensions.orElse
 import org.ocast.sdk.core.models.MediaMetadata
@@ -28,6 +27,7 @@ import org.ocast.sdk.core.wrapper.CallbackWrapperOwner
 import org.ocast.sdk.core.wrapper.SimpleCallbackWrapper
 import org.ocast.sdk.discovery.DeviceDiscovery
 import org.ocast.sdk.discovery.models.UpnpDevice
+import java.util.Collections
 
 /**
  * This class is the entry point to discover and use OCast devices.
@@ -136,7 +136,7 @@ open class DeviceCenter internal constructor(private val deviceDiscovery: Device
      *
      * @param device The device to add.
      */
-    protected open fun onAddDevice(device: Device) {
+    open fun onAddDevice(device: Device) {
     }
 
     /**
@@ -146,7 +146,7 @@ open class DeviceCenter internal constructor(private val deviceDiscovery: Device
      *
      * @param device The device to remove.
      */
-    protected open fun onRemoveDevice(device: Device) {
+    open fun onRemoveDevice(device: Device) {
     }
 
     /**
@@ -258,8 +258,8 @@ open class DeviceCenter internal constructor(private val deviceDiscovery: Device
         override fun onDevicesChanged(devices: List<UpnpDevice>) {
             val devicesChanged = devices.mapNotNull { device ->
                 detectedDevices
-                        .firstOrNull { device.id == it.upnpID }
-                        .ifNotNull { it.upnpDevice = device }
+                    .firstOrNull { device.id == it.upnpID }
+                    .ifNotNull { it.upnpDevice = device }
             }
             if (devicesChanged.isNotEmpty()) {
                 deviceListener.onDevicesChanged(devicesChanged)

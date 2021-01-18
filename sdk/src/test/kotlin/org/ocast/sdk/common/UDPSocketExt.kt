@@ -18,12 +18,12 @@ package org.ocast.sdk.common
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
-import java.util.Timer
-import kotlin.concurrent.schedule
 import org.mockito.Mockito
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Stubber
 import org.ocast.sdk.discovery.UDPSocket
+import java.util.Timer
+import kotlin.concurrent.schedule
 
 /**
  * Stubs the M-SEARCH responses received by the socket.

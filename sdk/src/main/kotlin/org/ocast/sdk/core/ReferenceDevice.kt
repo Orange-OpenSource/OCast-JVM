@@ -16,6 +16,62 @@
 
 package org.ocast.sdk.core
 
+import org.json.JSONObject
+import org.ocast.sdk.common.extensions.ifNotNull
+import org.ocast.sdk.common.extensions.orElse
+import org.ocast.sdk.core.models.Consumer
+import org.ocast.sdk.core.models.DeviceID
+import org.ocast.sdk.core.models.DeviceMessage
+import org.ocast.sdk.core.models.Event
+import org.ocast.sdk.core.models.GetDeviceIDCommandParams
+import org.ocast.sdk.core.models.GetMediaMetadataCommandParams
+import org.ocast.sdk.core.models.GetMediaPlaybackStatusCommandParams
+import org.ocast.sdk.core.models.GetVolumeCommandParams
+import org.ocast.sdk.core.models.GetUpdateStatusCommandParams
+import org.ocast.sdk.core.models.InputMessage
+import org.ocast.sdk.core.models.MediaMessage
+import org.ocast.sdk.core.models.MediaMetadata
+import org.ocast.sdk.core.models.MediaPlaybackStatus
+import org.ocast.sdk.core.models.MuteMediaCommandParams
+import org.ocast.sdk.core.models.OCastApplicationLayer
+import org.ocast.sdk.core.models.OCastCommandDeviceLayer
+import org.ocast.sdk.core.models.OCastDataLayer
+import org.ocast.sdk.core.models.OCastDeviceSettingsError
+import org.ocast.sdk.core.models.OCastDomain
+import org.ocast.sdk.core.models.OCastError
+import org.ocast.sdk.core.models.OCastInputSettingsError
+import org.ocast.sdk.core.models.OCastMediaError
+import org.ocast.sdk.core.models.OCastRawDataLayer
+import org.ocast.sdk.core.models.OCastRawDeviceLayer
+import org.ocast.sdk.core.models.OCastReplyEventParams
+import org.ocast.sdk.core.models.PauseMediaCommandParams
+import org.ocast.sdk.core.models.PlayMediaCommandParams
+import org.ocast.sdk.core.models.PrepareMediaCommandParams
+import org.ocast.sdk.core.models.ReplyCallback
+import org.ocast.sdk.core.models.ResumeMediaCommandParams
+import org.ocast.sdk.core.models.RunnableCallback
+import org.ocast.sdk.core.models.SSLConfiguration
+import org.ocast.sdk.core.models.SeekMediaCommandParams
+import org.ocast.sdk.core.models.SendGamepadEventCommandParams
+import org.ocast.sdk.core.models.SendKeyEventCommandParams
+import org.ocast.sdk.core.models.SendMouseEventCommandParams
+import org.ocast.sdk.core.models.Service
+import org.ocast.sdk.core.models.SetMediaTrackCommandParams
+import org.ocast.sdk.core.models.SetMediaVolumeCommandParams
+import org.ocast.sdk.core.models.SetVolumeCommandParams
+import org.ocast.sdk.core.models.SettingsService
+import org.ocast.sdk.core.models.StopMediaCommandParams
+import org.ocast.sdk.core.models.UpdateStatus
+import org.ocast.sdk.core.models.Volume
+import org.ocast.sdk.core.models.WebAppConnectedStatusEvent
+import org.ocast.sdk.core.models.WebAppStatus
+import org.ocast.sdk.core.models.toOCastErrorStatus
+import org.ocast.sdk.core.utils.JsonTools
+import org.ocast.sdk.core.utils.OCastLog
+import org.ocast.sdk.core.utils.log
+import org.ocast.sdk.dial.DialClient
+import org.ocast.sdk.dial.models.DialApplication
+import org.ocast.sdk.discovery.models.UpnpDevice
 import java.net.URI
 import java.util.Collections
 import java.util.UUID
@@ -23,16 +79,6 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
-import org.json.JSONObject
-import org.ocast.sdk.common.extensions.ifNotNull
-import org.ocast.sdk.common.extensions.orElse
-import org.ocast.sdk.core.models.*
-import org.ocast.sdk.core.utils.JsonTools
-import org.ocast.sdk.core.utils.OCastLog
-import org.ocast.sdk.core.utils.log
-import org.ocast.sdk.dial.DialClient
-import org.ocast.sdk.dial.models.DialApplication
-import org.ocast.sdk.discovery.models.UpnpDevice
 
 /**
  * The reference OCast device.
@@ -41,7 +87,7 @@ import org.ocast.sdk.discovery.models.UpnpDevice
  * @param dialClient The DIAL client.
  * @constructor Creates an instance of [ReferenceDevice] from an [UpnpDevice] with additional parameters.
  */
-open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClient: DialClient?, private val webAppConnectedStatusEventTimeout: Long) : Device(upnpDevice), WebSocket.Listener {
+open class ReferenceDevice protected constructor(upnpDevice: UpnpDevice, dialClient: DialClient?, private val webAppConnectedStatusEventTimeout: Long) : Device(upnpDevice), WebSocket.Listener {
 
     /**
      * @param upnpDevice The UPnP device to create the reference device from.
@@ -201,14 +247,14 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
             State.DISCONNECTING -> onError.wrapRun(OCastError("Failed to connect to $friendlyName, device is disconnecting").log())
             State.DISCONNECTED -> {
                 state = State.CONNECTING
-                onCreateWebSockets(sslConfiguration, Consumer { webSocketsById ->
+                onCreateWebSockets(sslConfiguration) { webSocketsById ->
                     this.webSocketsById = webSocketsById
                     connectCallback = RunnableCallback(onSuccess, onError)
                     webSocketsById.values.forEach { webSocket ->
                         OCastLog.debug { "Created web socket with ID ${webSocket.id} and url ${webSocket.webSocketURL} for $friendlyName" }
                         webSocket.connect()
                     }
-                })
+                }
             }
         }
     }
@@ -302,44 +348,76 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
     }
 
     override fun onDataReceived(webSocket: WebSocket, data: String) {
-        var deviceLayer: OCastRawDeviceLayer? = null
+        var replyIdentifier: Long? = null
         var replyCallback: ReplyCallback<*>? = null
         try {
-            deviceLayer = JsonTools.decode(data)
+            val deviceLayer = JsonTools.decode<OCastRawDeviceLayer>(data)
             when (deviceLayer.type) {
-                OCastRawDeviceLayer.Type.EVENT -> analyzeEvent(deviceLayer)
+                OCastRawDeviceLayer.Type.EVENT -> analyzeEvent(deviceLayer, data)
                 OCastRawDeviceLayer.Type.REPLY -> {
-                    replyCallback = replyCallbacksBySequenceID[deviceLayer.identifier]
-                    replyCallback.ifNotNull {
-                        if (deviceLayer.status == OCastRawDeviceLayer.Status.OK) {
-                            val replyData = JsonTools.decode<OCastDataLayer<OCastReplyEventParams>>(deviceLayer.message.data)
-                            if (replyData.params.code == null || replyData.params.code == OCastError.Status.SUCCESS.code) {
-                                val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-                                val reply = if (it.replyClass != Unit::class.java) {
-                                    JsonTools.decode(oCastData.params, it.replyClass)
-                                } else {
-                                    Unit
-                                }
-                                OCastLog.info { "Received reply of type ${it.replyClass.name} from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
-                                @Suppress("UNCHECKED_CAST")
-                                (it as ReplyCallback<Any?>).onSuccess.wrapRun(reply)
-                            } else {
-                                it.onError.wrapRun(OCastError(replyData.params.code, "Received reply with params error code ${replyData.params.code} from $friendlyName").log())
-                            }
-                        } else {
-                            it.onError.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_ERROR.code, "Received reply with device layer error status ${deviceLayer.status} from $friendlyName").log())
-                        }
+                    replyIdentifier = deviceLayer.identifier
+                        .takeIf { replyCallbacksBySequenceID.keys.contains(it) }
+                        .orElse { replyCallbacksBySequenceID.keys.minOrNull() }
+                    if (replyIdentifier != null) {
+                        replyCallback = replyCallbacksBySequenceID[replyIdentifier]
+                    }
+                    if (replyCallback != null) {
+                        analyzeReply(deviceLayer, replyCallback, data)
                     }
                 }
                 OCastRawDeviceLayer.Type.COMMAND -> {}
             }
         } catch (e: Exception) {
-            replyCallback?.onError?.wrapRun(OCastError(OCastError.Status.DECODE_ERROR.code, "Received bad formatted message from $friendlyName:\n${data.trim().prependIndent()}").log())
+            val errorMessage = "Received bad formatted message from $friendlyName:\n${data.trim().prependIndent()}"
+            replyCallback?.onError?.wrapRun(OCastError(OCastError.Status.DECODE_ERROR.code, errorMessage).log())
         } finally {
-            deviceLayer.ifNotNull {
+            if (replyIdentifier != null) {
                 // Remove callback
-                replyCallbacksBySequenceID.remove(it.identifier)
+                replyCallbacksBySequenceID.remove(replyIdentifier)
             }
+        }
+    }
+
+    //endregion
+
+    //region Replies
+
+    /**
+     * Checks if the specified device layer embeds an OCast reply.
+     *
+     * @param deviceLayer The device layer to analyze.
+     * @param replyCallback The callback called when the analysis completes.
+     * @param data The raw device layer.
+     * @throws Exception If an error occurs while analyzing the device layer.
+     */
+    @Throws(Exception::class)
+    private fun analyzeReply(deviceLayer: OCastRawDeviceLayer, replyCallback: ReplyCallback<*>, data: String) {
+        val errorStatus = deviceLayer.status.toOCastErrorStatus()
+        if (errorStatus == null) {
+            val rawReplyData = deviceLayer.message.data
+            if (rawReplyData != null) {
+                val replyData = JsonTools.decode<OCastDataLayer<OCastReplyEventParams>>(rawReplyData)
+                if (replyData.params.code == null || replyData.params.code == OCastError.Status.SUCCESS.code) {
+                    val oCastData = JsonTools.decode<OCastRawDataLayer>(rawReplyData)
+                    val reply = if (replyCallback.replyClass != Unit::class.java) {
+                        JsonTools.decode(oCastData.params, replyCallback.replyClass)
+                    } else {
+                        Unit
+                    }
+                    OCastLog.info { "Received message with reply of type ${replyCallback.replyClass.name} from $friendlyName:\n${data.trim().prependIndent()}" }
+                    @Suppress("UNCHECKED_CAST")
+                    (replyCallback as ReplyCallback<Any>).onSuccess.wrapRun(reply)
+                } else {
+                    val errorMessage = "Received message with reply params error code ${replyData.params.code} from $friendlyName:\n${data.trim().prependIndent()}"
+                    replyCallback.onError.wrapRun(OCastError(replyData.params.code, errorMessage).log())
+                }
+            } else {
+                val errorMessage = "Received message with missing reply data from $friendlyName:\n${data.trim().prependIndent() }"
+                replyCallback.onError.wrapRun(OCastError(OCastError.Status.DEVICE_LAYER_MISSING_REPLY_DATA.code, errorMessage).log())
+            }
+        } else {
+            val errorMessage = "Received reply message with device layer error status ${deviceLayer.status} from $friendlyName:\n${data.trim().prependIndent()}"
+            replyCallback.onError.wrapRun(OCastError(errorStatus.code, errorMessage).log())
         }
     }
 
@@ -351,56 +429,61 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
      * Checks if the specified device layer embeds an OCast event.
      *
      * @param deviceLayer The device layer to analyze.
+     * @param data The raw device layer.
      * @throws Exception If an error occurs while analyzing the device layer.
      */
     @Throws(Exception::class)
-    private fun analyzeEvent(deviceLayer: OCastRawDeviceLayer) {
-        val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
-        when (deviceLayer.message.service) {
-            Service.APPLICATION -> {
-                val webAppConnectedStatus = JsonTools.decode<WebAppConnectedStatusEvent>(oCastData.params).status
-                OCastLog.info { "Received web app connected status event from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
-                when (webAppConnectedStatus) {
-                    WebAppStatus.CONNECTED -> {
-                        isApplicationRunning.set(true)
-                        applicationSemaphore?.release()
-                    }
-                    WebAppStatus.DISCONNECTED -> isApplicationRunning.set(false)
-                }
-            }
-            Service.MEDIA -> {
-                when (oCastData.name) {
-                    Event.Media.PLAYBACK_STATUS -> {
-                        OCastLog.info { "Received media playback status event from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
-                        val playbackStatus = JsonTools.decode<MediaPlaybackStatus>(oCastData.params)
-                        eventListener?.onMediaPlaybackStatus(this, playbackStatus)
-                    }
-                    Event.Media.METADATA_CHANGED -> {
-                        OCastLog.info { "Received media metadata changed event from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
-                        val metadataChanged = JsonTools.decode<MediaMetadata>(oCastData.params)
-                        eventListener?.onMediaMetadataChanged(this, metadataChanged)
+    private fun analyzeEvent(deviceLayer: OCastRawDeviceLayer, data: String) {
+        if (deviceLayer.message.data != null) {
+            val oCastData = JsonTools.decode<OCastRawDataLayer>(deviceLayer.message.data)
+            when (deviceLayer.message.service) {
+                Service.APPLICATION -> {
+                    val webAppConnectedStatus = JsonTools.decode<WebAppConnectedStatusEvent>(oCastData.params).status
+                    OCastLog.info { "Received web app connected status event from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
+                    when (webAppConnectedStatus) {
+                        WebAppStatus.CONNECTED -> {
+                            isApplicationRunning.set(true)
+                            applicationSemaphore?.release()
+                        }
+                        WebAppStatus.DISCONNECTED -> isApplicationRunning.set(false)
                     }
                 }
-            }
-            SettingsService.DEVICE -> {
-                when (oCastData.name) {
-                    Event.Device.UPDATE_STATUS -> {
-                        OCastLog.info { "Received update status event from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
-                        val updateStatus = JsonTools.decode<UpdateStatus>(oCastData.params)
-                        eventListener?.onUpdateStatus(this, updateStatus)
-                    }
-                    Event.Device.VOLUME_CHANGED -> {
-                        OCastLog.info { "Received volume changed event from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
-                        val volumeChanged = JsonTools.decode<Volume>(oCastData.params)
-                        eventListener?.onVolumeChanged(this, volumeChanged)
+                Service.MEDIA -> {
+                    when (oCastData.name) {
+                        Event.Media.PLAYBACK_STATUS -> {
+                            OCastLog.info { "Received media playback status event from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
+                            val playbackStatus = JsonTools.decode<MediaPlaybackStatus>(oCastData.params)
+                            eventListener?.onMediaPlaybackStatus(this, playbackStatus)
+                        }
+                        Event.Media.METADATA_CHANGED -> {
+                            OCastLog.info { "Received media metadata changed event from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
+                            val metadataChanged = JsonTools.decode<MediaMetadata>(oCastData.params)
+                            eventListener?.onMediaMetadataChanged(this, metadataChanged)
+                        }
                     }
                 }
+                SettingsService.DEVICE -> {
+                    when (oCastData.name) {
+                        Event.Device.UPDATE_STATUS -> {
+                            OCastLog.info { "Received update status event from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
+                            val updateStatus = JsonTools.decode<UpdateStatus>(oCastData.params)
+                            eventListener?.onUpdateStatus(this, updateStatus)
+                        }
+                        Event.Device.VOLUME_CHANGED -> {
+                            OCastLog.info { "Received volume changed event from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
+                            val volumeChanged = JsonTools.decode<Volume>(oCastData.params)
+                            eventListener?.onVolumeChanged(this, volumeChanged)
+                        }
+                    }
+                }
+                else -> {
+                    // Custom event
+                    OCastLog.info { "Received custom event from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
+                    eventListener?.onCustomEvent(this, oCastData.name, oCastData.params)
+                }
             }
-            else -> {
-                // Custom event
-                OCastLog.info { "Received custom event from $friendlyName:\n${deviceLayer.message.data.trim().prependIndent()}" }
-                eventListener?.onCustomEvent(this, oCastData.name, oCastData.params)
-            }
+        } else {
+            OCastLog.info { "Received message with missing event data from $friendlyName:\n${data.trim().prependIndent()}" }
         }
     }
 
@@ -409,47 +492,47 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
     //region Media commands
 
     override fun playMedia(position: Double, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(PlayMediaCommandParams(position).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(PlayMediaCommandParams(position).build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun stopMedia(onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(StopMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(StopMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun pauseMedia(onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(PauseMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(PauseMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun resumeMedia(onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(ResumeMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(ResumeMediaCommandParams().build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun prepareMedia(params: PrepareMediaCommandParams, options: JSONObject?, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(params.options(options).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(params.options(options).build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun setMediaVolume(volume: Double, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(SetMediaVolumeCommandParams(volume).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(SetMediaVolumeCommandParams(volume).build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun setMediaTrack(params: SetMediaTrackCommandParams, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(params.build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(params.build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun seekMedia(position: Double, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(SeekMediaCommandParams(position).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(SeekMediaCommandParams(position).build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun muteMedia(mute: Boolean, onSuccess: Runnable, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(MuteMediaCommandParams(mute).build()), OCastDomain.BROWSER, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(MuteMediaCommandParams(mute).build()), OCastDomain.BROWSER, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun getMediaPlaybackStatus(onSuccess: Consumer<MediaPlaybackStatus>, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(GetMediaPlaybackStatusCommandParams().build()), OCastDomain.BROWSER, MediaPlaybackStatus::class.java, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(GetMediaPlaybackStatusCommandParams().build()), OCastDomain.BROWSER, MediaPlaybackStatus::class.java, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     override fun getMediaMetadata(onSuccess: Consumer<MediaMetadata>, onError: Consumer<OCastMediaError>) {
-        send(MediaMessage(GetMediaMetadataCommandParams().build()), OCastDomain.BROWSER, MediaMetadata::class.java, onSuccess, Consumer { onError.run(OCastMediaError(it)) })
+        send(MediaMessage(GetMediaMetadataCommandParams().build()), OCastDomain.BROWSER, MediaMetadata::class.java, onSuccess, { onError.run(OCastMediaError(it)) })
     }
 
     //endregion
@@ -457,7 +540,7 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
     //region Settings device commands
 
     override fun getUpdateStatus(onSuccess: Consumer<UpdateStatus>, onError: Consumer<OCastDeviceSettingsError>) {
-        send(DeviceMessage(GetUpdateStatusCommandParams().build()), OCastDomain.SETTINGS, UpdateStatus::class.java, onSuccess, Consumer { onError.run(OCastDeviceSettingsError(it)) })
+        send(DeviceMessage(GetUpdateStatusCommandParams().build()), OCastDomain.SETTINGS, UpdateStatus::class.java, onSuccess, { onError.run(OCastDeviceSettingsError(it)) })
     }
 
     override fun getDeviceID(onSuccess: Consumer<String>, onError: Consumer<OCastDeviceSettingsError>) {
@@ -465,7 +548,7 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
     }
 
     override fun setVolume(level: Int, mute: Boolean, onSuccess: Runnable, onError: Consumer<OCastDeviceSettingsError>) {
-        send(DeviceMessage(SetVolumeCommandParams(level, mute).build()), OCastDomain.SETTINGS, onSuccess, Consumer { onError.run(OCastDeviceSettingsError(it)) })
+        send(DeviceMessage(SetVolumeCommandParams(level, mute).build()), OCastDomain.SETTINGS, onSuccess, { onError.run(OCastDeviceSettingsError(it)) })
     }
 
     override fun getVolume(onSuccess: Consumer<Volume>, onError: Consumer<OCastDeviceSettingsError>) {
@@ -477,26 +560,26 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
     //region Settings input commands
 
     override fun sendKeyEvent(params: SendKeyEventCommandParams, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
-        send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
+        send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, { onError.run(OCastInputSettingsError(it)) })
     }
 
     override fun sendMouseEvent(params: SendMouseEventCommandParams, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
-        send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
+        send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, { onError.run(OCastInputSettingsError(it)) })
     }
 
     override fun sendGamepadEvent(params: SendGamepadEventCommandParams, onSuccess: Runnable, onError: Consumer<OCastInputSettingsError>) {
-        send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, Consumer { onError.run(OCastInputSettingsError(it)) })
+        send(InputMessage(params.build()), OCastDomain.SETTINGS, onSuccess, { onError.run(OCastInputSettingsError(it)) })
     }
 
     //endregion
 
     //region Custom commands
 
-    override fun <T : Any?> send(message: OCastApplicationLayer<T>, domain: OCastDomain, onSuccess: Runnable, onError: Consumer<OCastError>) {
-        send(message, domain, Unit::class.java, Consumer { onSuccess.run() }, onError)
+    override fun <T : Any> send(message: OCastApplicationLayer<T>, domain: OCastDomain, onSuccess: Runnable, onError: Consumer<OCastError>) {
+        send(message, domain, Unit::class.java, { onSuccess.run() }, onError)
     }
 
-    override fun <T : Any?, S : Any?> send(message: OCastApplicationLayer<T>, domain: OCastDomain, replyClass: Class<S>, onSuccess: Consumer<S>, onError: Consumer<OCastError>) {
+    override fun <T : Any, S : Any> send(message: OCastApplicationLayer<T>, domain: OCastDomain, replyClass: Class<S>, onSuccess: Consumer<S>, onError: Consumer<OCastError>) {
         val id = generateSequenceID()
         try {
             replyCallbacksBySequenceID[id] = ReplyCallback(replyClass, onSuccess, onError)
@@ -506,7 +589,7 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
             sendToWebSocket(id, deviceLayerString, domain == OCastDomain.BROWSER, onError)
         } catch (exception: Exception) {
             replyCallbacksBySequenceID.remove(id)
-            onError.wrapRun(OCastError("Failed to send command with params ${message.data.params} to $friendlyName, unable to encode device layer", exception).log())
+            onError.wrapRun(OCastError("Failed to send command with params ${message.data?.params} to $friendlyName, unable to encode device layer", exception).log())
         }
     }
 
@@ -533,11 +616,7 @@ open class ReferenceDevice internal constructor(upnpDevice: UpnpDevice, dialClie
         if (!startApplicationIfNeeded || isApplicationRunning.get()) {
             send()
         } else {
-            startApplication({
-                send()
-            }, { error ->
-                onError.wrapRun(error.log())
-            })
+            startApplication({ send() }, { onError.wrapRun(it.log()) })
         }
     }
 
