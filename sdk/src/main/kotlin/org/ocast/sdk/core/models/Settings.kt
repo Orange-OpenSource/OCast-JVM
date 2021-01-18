@@ -368,8 +368,8 @@ class DeviceID(
  * @constructor Creates an instance of [Volume].
  */
 class Volume(
-        @JsonProperty("level") val level: Int,
-        @JsonProperty("mute") val mute: Boolean
+    @JsonProperty("level") val level: Int,
+    @JsonProperty("mute") val mute: Boolean
 )
 
 //endregion

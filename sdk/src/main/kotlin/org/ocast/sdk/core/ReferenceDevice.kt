@@ -26,8 +26,8 @@ import org.ocast.sdk.core.models.Event
 import org.ocast.sdk.core.models.GetDeviceIDCommandParams
 import org.ocast.sdk.core.models.GetMediaMetadataCommandParams
 import org.ocast.sdk.core.models.GetMediaPlaybackStatusCommandParams
-import org.ocast.sdk.core.models.GetVolumeCommandParams
 import org.ocast.sdk.core.models.GetUpdateStatusCommandParams
+import org.ocast.sdk.core.models.GetVolumeCommandParams
 import org.ocast.sdk.core.models.InputMessage
 import org.ocast.sdk.core.models.MediaMessage
 import org.ocast.sdk.core.models.MediaMetadata
