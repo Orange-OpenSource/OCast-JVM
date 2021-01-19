@@ -16,6 +16,8 @@
 
 package org.ocast.sdk.core;
 
+import java.io.Serializable;
+import java.net.URL;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -40,8 +42,6 @@ import org.ocast.sdk.core.wrapper.CallbackWrapper;
 import org.ocast.sdk.core.wrapper.CallbackWrapperOwner;
 import org.ocast.sdk.core.wrapper.SimpleCallbackWrapper;
 import org.ocast.sdk.discovery.models.UpnpDevice;
-import java.io.Serializable;
-import java.net.URL;
 
 /**
  * Represents a remote OCast device.
