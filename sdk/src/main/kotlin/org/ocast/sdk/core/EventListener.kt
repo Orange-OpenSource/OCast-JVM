@@ -19,6 +19,7 @@ package org.ocast.sdk.core
 import org.ocast.sdk.core.models.MediaMetadata
 import org.ocast.sdk.core.models.MediaPlaybackStatus
 import org.ocast.sdk.core.models.UpdateStatus
+import org.ocast.sdk.core.models.Volume
 
 /**
  * Represents a listener of OCast protocol events.
@@ -57,6 +58,18 @@ interface EventListener {
      */
     @JvmDefault
     fun onUpdateStatus(device: Device, updateStatus: UpdateStatus) {
+    }
+
+    /**
+     * Tells the listener that a volume changed event was sent by a device.
+     *
+     * This event is sent each time a AudioVolumeUp, AudioVolumeDown or AudioVolumeMute key is pressed on OCast API keyPressed or via BLE RCU.
+     *
+     * @param device The device that sent the event.
+     * @param volume The system volume of the device.
+     */
+    @JvmDefault
+    fun onVolumeChanged(device: Device, volume: Volume) {
     }
 
     /**

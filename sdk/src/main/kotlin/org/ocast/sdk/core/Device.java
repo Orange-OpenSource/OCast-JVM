@@ -37,6 +37,7 @@ import org.ocast.sdk.core.models.SendKeyEventCommandParams;
 import org.ocast.sdk.core.models.SendMouseEventCommandParams;
 import org.ocast.sdk.core.models.SetMediaTrackCommandParams;
 import org.ocast.sdk.core.models.UpdateStatus;
+import org.ocast.sdk.core.models.Volume;
 import org.ocast.sdk.core.wrapper.CallbackWrapper;
 import org.ocast.sdk.core.wrapper.CallbackWrapperOwner;
 import org.ocast.sdk.core.wrapper.SimpleCallbackWrapper;
@@ -442,6 +443,24 @@ public abstract class Device implements CallbackWrapperOwner, Serializable {
      * @param onError The operation executed if there was an error while retrieving the device identifier.
      */
     public abstract void getDeviceID(@NotNull Consumer<String> onSuccess, @NotNull Consumer<OCastDeviceSettingsError> onError);
+
+    /**
+     * Retrieves the system volume.
+     *
+     * @param onSuccess The operation executed if the system volume was retrieved successfully.
+     * @param onError The operation executed if there was an error while retrieving the system volume.
+     */
+    public abstract void getVolume(@NotNull Consumer<Volume> onSuccess, @NotNull Consumer<OCastDeviceSettingsError> onError);
+
+    /**
+     * Set the system volume.
+     *
+     * @param level The parameters of the system volume between 0 to 100.
+     * @param mute The parameters of the mute state.
+     * @param onSuccess The operation executed if the system volume was sent successfully.
+     * @param onError The operation executed if there was an error while sending the system volume.
+     */
+    public abstract void setVolume(int level, boolean mute, @NotNull Runnable onSuccess, @NotNull Consumer<OCastDeviceSettingsError> onError);
 
     //endregion
 

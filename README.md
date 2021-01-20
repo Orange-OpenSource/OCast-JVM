@@ -201,6 +201,8 @@ public void onMediaPlaybackStatus(@NotNull Device device, @NotNull MediaPlayback
 public void onMediaMetadataChanged(@NotNull Device device, @NotNull MediaMetadata mediaMetadata) {}
 @Override
 public void onUpdateStatus(@NotNull Device device, @NotNull UpdateStatus updateStatus) {}
+@Override
+public void onVolumeChanged(@NotNull Device device, @NotNull Volume volume) {}
 ```
 
 :small_blue_diamond: Kotlin
@@ -211,6 +213,7 @@ deviceCenter.addEventListener(this)
 override fun onMediaPlaybackStatus(device: Device, mediaPlaybackStatus: MediaPlaybackStatus) {}
 override fun onMediaMetadataChanged(device: Device, mediaMetadata: MediaMetadata) {}
 override fun onUpdateStatus(device: Device, updateStatus: UpdateStatus) {}
+override fun onVolumeChanged(device: Device, volume: Volume) {}
 ```
 
 ### 6. Send custom commands

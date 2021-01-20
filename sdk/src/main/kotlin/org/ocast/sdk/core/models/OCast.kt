@@ -97,6 +97,9 @@ class Event {
 
             /** The name of the firmware update status event. */
             internal const val UPDATE_STATUS = "updateStatus"
+
+            /** The name of the firmware volume changed event. */
+            internal const val VOLUME_CHANGED = "volumeChanged"
         }
     }
 }
