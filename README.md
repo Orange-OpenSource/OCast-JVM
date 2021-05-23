@@ -12,11 +12,11 @@
 </tr>
 <tr>
 <td>OCast SDK</td>
-<td><a href="https://bintray.com/orange-opensource/maven/ocast-jvm-sdk/_latestVersion"><img src="https://api.bintray.com/packages/orange-opensource/maven/ocast-jvm-sdk/images/download.svg"></a></td>
+<td>TODO</td>
 </tr>
 <tr>
 <td>OCast media route module for Android</td>
-<td><a href="https://bintray.com/orange-opensource/maven/ocast-jvm-mediaroute/_latestVersion"><img src="https://api.bintray.com/packages/orange-opensource/maven/ocast-jvm-mediaroute/images/download.svg"></a></td>
+<td>TODO</td>
 </tr>
 <tr>
 <td>Documentation</td>
@@ -32,12 +32,12 @@ The sample project aims to demonstrate the basic instruction set of the Orange O
 
 ## Installation
 
-The Orange OCast SDK is available through [JFrog Bintray](https://bintray.com/orange-opensource/maven). To install it, simply add the following lines to your Gradle file:
+The Orange OCast SDK is available through [TODO](https://todo.com/orange-opensource/maven). To install it, simply add the following lines to your Gradle file:
 
 ```groovy
 repositories {
     maven {
-        url  "https://dl.bintray.com/orange-opensource/maven" 
+        url  "https://todo.com/orange-opensource/maven" 
     }
 }
 
