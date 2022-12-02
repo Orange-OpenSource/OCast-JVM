@@ -11,14 +11,6 @@
 <td><a href="https://github.com/Orange-OpenSource/OCast-JVM/actions?query=workflow%3Abuild"><img src="https://github.com/Orange-OpenSource/OCast-JVM/workflows/build/badge.svg"></a></td>
 </tr>
 <tr>
-<td>OCast SDK</td>
-<td>TODO</td>
-</tr>
-<tr>
-<td>OCast media route module for Android</td>
-<td>TODO</td>
-</tr>
-<tr>
 <td>Documentation</td>
 <td><a href="https://orange-opensource.github.io/OCast-JVM/"><img src="https://img.shields.io/badge/javadoc-2.0.3-brightgreen"></a></td>
 </tr>
@@ -32,24 +24,7 @@ The sample project aims to demonstrate the basic instruction set of the Orange O
 
 ## Installation
 
-The Orange OCast SDK is available through [TODO](https://todo.com/orange-opensource/maven). To install it, simply add the following lines to your Gradle file:
-
-```groovy
-repositories {
-    maven {
-        url  "https://todo.com/orange-opensource/maven" 
-    }
-}
-
-dependencies {
-    implementation "org.ocast:sdk:2.0.3"
-    // The following line is only needed if you are using OCast on Android
-    // and want to take advantage of the MediaRouter framework
-    implementation "org.ocast:mediaroute:2.0.3"
-}
-```
-
-You can also retrieve the source code to build the project by cloning the repository:
+Retrieve the source code to build the project by cloning the repository:
 
 ```
 git clone https://github.com/Orange-OpenSource/OCast-JVM.git
@@ -467,7 +442,7 @@ Please note that logs are not enabled on [JFrog Bintray](https://bintray.com/ora
 
 ## Author
 
-Orange
+Orange (Thierry Tassain (deuttai) and Florent Maitre)
 
 ## License
 
