@@ -4,7 +4,6 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'org.jetbrains.dokka-android'
 apply plugin: 'maven-publish'
 apply from: project.file('../ktlint.gradle')
-apply from: project.file('../bintray.gradle')
 
 buildscript {
     apply from: project.file('../dependencies.gradle')
@@ -16,17 +15,16 @@ buildscript {
     group = group_name
 
     repositories {
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
         classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:$dokka_version"
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$bintray_plugin_version"
     }
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 android {
